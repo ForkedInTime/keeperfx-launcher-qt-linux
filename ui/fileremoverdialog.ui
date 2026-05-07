@@ -95,7 +95,7 @@
    <item>
     <widget class="QCheckBox" name="checkBoxAutoRemoveLeftoverFiles">
      <property name="text">
-      <string>Always remove leftover files automatically</string>
+      <string comment="Checkbox Toggle">Always remove leftover files automatically</string>
      </property>
     </widget>
    </item>
