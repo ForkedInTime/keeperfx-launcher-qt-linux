@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-14 10:53+0200\n"
+"POT-Creation-Date: 2026-05-07 14:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -497,6 +497,10 @@ msgid ""
 "updated. These files might cause issues and should be removed."
 msgstr ""
 
+msgctxt "FileRemoverDialog|Checkbox Toggle"
+msgid "Always remove leftover files automatically"
+msgstr ""
+
 msgctxt "FileRemoverDialog|Button"
 msgid "Cancel"
 msgstr ""
@@ -692,6 +696,10 @@ msgid "Workshop"
 msgstr ""
 
 msgctxt "LauncherMainWindow|Button tooltip text"
+msgid "Check for updates"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Button tooltip text"
 msgid "Open log file"
 msgstr ""
 
@@ -705,6 +713,14 @@ msgstr ""
 
 msgctxt "LauncherMainWindow|Button"
 msgid "Play"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Version label tooltip text"
+msgid "Click to check for updates"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Fallback text label"
+msgid "Loading..."
 msgstr ""
 
 msgctxt "LauncherMainWindow|MessageBox Title"
@@ -813,6 +829,21 @@ msgctxt "LauncherMainWindow|MessageBox Text"
 msgid ""
 "The launcher has to restart to change its language. Do you want to do that "
 "now?"
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Title"
+msgid "KeeperFX Update"
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Text"
+msgid "You are already on the latest version!"
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Text"
+msgid ""
+"Unable to grab latest KeeperFX version from the website. Try again later.\n"
+"\n"
+"If the issue persists, check your internet connection and firewall settings."
 msgstr ""
 
 msgctxt "LauncherMainWindow|MessageBox Title"
@@ -1175,7 +1206,7 @@ msgid "Launcher"
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Check for KeeperFX updates"
+msgid "Automatically check for KeeperFX updates"
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
@@ -1183,7 +1214,7 @@ msgid "Enable crash reporting"
 msgstr ""
 
 msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Release"
+msgid "KeeperFX Release Channel"
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
@@ -1222,6 +1253,10 @@ msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Show directory name in window title"
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically remove leftover files"
 msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
@@ -1324,11 +1359,11 @@ msgctxt "SettingsDialog|Atmosphere Volume Dropdown"
 msgid "High"
 msgstr ""
 
-msgctxt "SettingsDialog|Game Release Build"
+msgctxt "SettingsDialog|Game Release Channel"
 msgid "Stable (Default)"
 msgstr ""
 
-msgctxt "SettingsDialog|Game Release Build"
+msgctxt "SettingsDialog|Game Release Channel"
 msgid "Alpha"
 msgstr ""
 

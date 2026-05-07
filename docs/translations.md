@@ -36,22 +36,22 @@ hold out on adding them until the game also supports the language.
 | Language              | Code     | Completed | Done/Total     | Translator(s)
 |-----------------------|----------|-----------|----------------|--------------
 | English               | EN       | 100%      | Base           | [Yani](https://github.com/yani)
-| Dutch                 | NL       | 100%      | 338/338        | [Yani](https://github.com/yani)
-| Italian               | IT       | 100%      | 338/338        | [kammerer](https://github.com/Kammerer001)
-| French                | FR       | 100%      | 338/338        | AncientWay, [Thorgal](https://github.com/Thorgal93)
-| Spanish               | ES       | 100%      | 338/338        | [Alniarez](https://github.com/alniarez)
-| German                | DE       | 89.6%     | 303/338        | Aqua, Dofi
-| Polish                | PL       | 95.9%     | 324/338        | [Rusty](https://github.com/rustyspoonz)
+| Dutch                 | NL       | 96.6%     | 337/349        | [Yani](https://github.com/yani)
+| Italian               | IT       | 94.3%     | 329/349        | [kammerer](https://github.com/Kammerer001)
+| French                | FR       | 96.6%     | 337/349        | AncientWay, [Thorgal](https://github.com/Thorgal93)
+| Spanish               | ES       | 94.3%     | 329/349        | [Alniarez](https://github.com/alniarez)
+| German                | DE       | 84.2%     | 294/349        | Aqua, Dofi
+| Polish                | PL       | 90.3%     | 315/349        | [Rusty](https://github.com/rustyspoonz)
 | Swedish               | SV       |           |                | 
-| Japanese              | JA       | 88%       | 300/341        | [AdamPlenty](https://github.com/AdamPlenty)
-| Russian               | RU       | 97.7%     | 333/341        | Quuz, [kammerer](https://github.com/Kammerer001)
-| Korean                | KO       | 97.7%     | 333/341        | Desert
-| Chinese (Simplified)  | ZH-HANS  | 83.6%     | 285/341        | [JieLeTian](https://github.com/jieletian)
+| Japanese              | JA       | 84.8%     | 296/349        | [AdamPlenty](https://github.com/AdamPlenty)
+| Russian               | RU       | 94.3%     | 329/349        | Quuz, [kammerer](https://github.com/Kammerer001)
+| Korean                | KO       | 94.3%     | 329/349        | Desert
+| Chinese (Simplified)  | ZH-HANS  | 80.5%     | 281/349        | [JieLeTian](https://github.com/jieletian)
 | Chinese (Traditional) | ZH-HANT  |           |                | 
-| Czech                 | CS       | 83.9%     | 286/341        | Gotrek
+| Czech                 | CS       | 80.8%     | 282/349        | Gotrek
 | Latin                 | LA       |           |                | 
-| Ukrainian             | UK       | 97.7%     | 333/341        | Mr.Negative, Renegade_Glitch
-| Portuguese (Brazil)   | PT       | 83.9%     | 286/341        | [altiereslima](https://github.com/altiereslima)
+| Ukrainian             | UK       | 94.3%     | 329/349        | Mr.Negative, Renegade_Glitch
+| Portuguese (Brazil)   | PT       | 80.8%     | 282/349        | [altiereslima](https://github.com/altiereslima)
 
 
 
