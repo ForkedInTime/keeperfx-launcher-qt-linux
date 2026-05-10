@@ -38,13 +38,13 @@ hold out on adding them until the game also supports the language.
 | English               | EN       | 100%      | Base           | [Yani](https://github.com/yani)
 | Dutch                 | NL       | 100%      | 349/349        | [Yani](https://github.com/yani)
 | Italian               | IT       | 94.3%     | 329/349        | [kammerer](https://github.com/Kammerer001)
-| French                | FR       | 96.6%     | 337/349        | AncientWay, [Thorgal](https://github.com/Thorgal93)
+| French                | FR       | 100%      | 349/349        | AncientWay, [Thorgal](https://github.com/Thorgal93)
 | Spanish               | ES       | 94.3%     | 329/349        | [Alniarez](https://github.com/alniarez)
 | German                | DE       | 84.2%     | 294/349        | Aqua, Dofi
 | Polish                | PL       | 90.3%     | 315/349        | [Rusty](https://github.com/rustyspoonz)
 | Swedish               | SV       |           |                | 
-| Japanese              | JA       | 84.8%     | 296/349        | [AdamPlenty](https://github.com/AdamPlenty)
-| Russian               | RU       | 94.3%     | 329/349        | Quuz, [kammerer](https://github.com/Kammerer001)
+| Japanese              | JA       | 100%      | 349/349        | [AdamPlenty](https://github.com/AdamPlenty)
+| Russian               | RU       | 99.7%     | 348/349        | Quuz, [kammerer](https://github.com/Kammerer001)
 | Korean                | KO       | 94.3%     | 329/349        | Desert
 | Chinese (Simplified)  | ZH-HANS  | 80.5%     | 281/349        | [JieLeTian](https://github.com/jieletian)
 | Chinese (Traditional) | ZH-HANT  |           |                | 
