@@ -1180,7 +1180,7 @@ msgstr "Beeldmodus"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Display monitor"
-msgstr "Beelscherm"
+msgstr "Beeldscherm"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
