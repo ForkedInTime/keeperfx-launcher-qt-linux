@@ -45,6 +45,7 @@ bool Translator::loadPoFile(const QString &poFilePath)
     // Variables
     QTextStream in(&file);
     QString line;
+    QString msgctxt;
     QString msgid;
     QString msgstr;
     bool inMsgid = false;
@@ -55,13 +56,19 @@ bool Translator::loadPoFile(const QString &poFilePath)
     while (!in.atEnd()) {
         line = in.readLine().trimmed();
 
-        if (line.startsWith("msgid")) {
+        if (line.startsWith("msgctxt")) {
             if (!msgid.isEmpty() && !msgstr.isEmpty()) {
+                if(msgctxt.isEmpty() == false){
+                    msgid.prepend(msgctxt + (msgctxt.endsWith('|') ? "" : "|"));
+                }
                 translations[msgid] = msgstr;
                 translationsLoaded++;
+                msgctxt.clear();
                 msgid.clear();
                 msgstr.clear();
             }
+            msgctxt = line.mid(9).chopped(1);
+        } else if (line.startsWith("msgid")) {
             msgid = line.mid(7).chopped(1);
             inMsgid = true;
             inMsgstr = false;
@@ -78,6 +85,13 @@ bool Translator::loadPoFile(const QString &poFilePath)
 
     // Close last open translation
     if (!msgid.isEmpty() && !msgstr.isEmpty()) {
+
+        // Add disambiguation
+        if(msgctxt.isEmpty() == false){
+            msgid.prepend(msgctxt + (msgctxt.endsWith('|') ? "" : "|"));
+        }
+
+        // Remember translation
         translations[msgid] = msgstr;
         translationsLoaded++;
     }
@@ -98,20 +112,32 @@ bool Translator::loadPoFile(const QString &poFilePath)
 }
 
 QString Translator::translate(const char *context, const char *sourceText, const char *disambiguation, int n) const {
-    // Get source as string
-    QString source(sourceText);
+
+    // Get strings from chars
+    QString contextString(context);
+    QString sourceString(sourceText);
+    QString disambiguationString(disambiguation);
+
+    // Get source ID
+    QString sourceId(sourceString);
+    if(disambiguationString.isEmpty() == false){
+        sourceId.prepend(disambiguationString + (disambiguationString.endsWith('|') ? "" : "|"));
+    }
+    if(contextString.isEmpty() == false){
+        sourceId.prepend(contextString + (contextString.endsWith('|') ? "" : "|"));
+    }
 
     // Check if this source has a translation
-    if (translations.contains(source)) {
-        QString output(translations.value(source));
+    if (translations.contains(sourceId)) {
+        QString output(translations.value(sourceId));
         if (output.isEmpty() == false) {
             return output;
         }
     }
 
     // Check if this source has a translation that is HTML escaped
-    if (translations.contains(source.toHtmlEscaped())) {
-        QString output(translations.value(source.toHtmlEscaped()));
+    if (translations.contains(sourceId.toHtmlEscaped())) {
+        QString output(translations.value(sourceId.toHtmlEscaped()));
         if (output.isEmpty() == false) {
             QTextDocument outputDoc;
             outputDoc.setHtml(output);
@@ -121,8 +147,8 @@ QString Translator::translate(const char *context, const char *sourceText, const
 
     // Log missing translation
     if (LauncherOptions::isSet("log-missing-translations") == true) {
-        qWarning() << "Translation not found:" << sourceText;
+        qWarning() << "Translation not found:" << sourceId;
     }
 
-    return source;
+    return sourceString;
 }
