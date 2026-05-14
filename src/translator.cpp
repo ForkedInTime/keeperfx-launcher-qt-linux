@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QMap>
+#include <QRegularExpression>
 #include <QString>
 #include <QTextDocument>
 
@@ -168,8 +169,17 @@ QString Translator::translate(const char *context, const char *sourceText, const
     }
 
     // Log missing translation
-    if (LauncherOptions::isSet("log-missing-translations") == true) {
+    if (LauncherOptions::isSet("log-missing-translations") &&
+        QRegularExpression("^Q[A-Z][a-zA-Z]*\\|").match(sourceId).hasMatch() == false
+    ) {
         qWarning() << "Translation not found:" << sourceId;
+    }
+
+    // Log missing Qt core translation
+    if (LauncherOptions::isSet("log-missing-qt-translations") &&
+        QRegularExpression("^Q[A-Z][a-zA-Z]*\\|").match(sourceId).hasMatch()
+    ) {
+        qWarning() << "Qt translation not found:" << sourceId;
     }
 
     return sourceString;
