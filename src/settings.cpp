@@ -34,6 +34,7 @@ QMap<QString, QVariant> Settings::defaultLauncherSettingsMap = {
     {"LAUNCHER_LANGUAGE", QLocale(QLocale::system().uiLanguages().value(0, QLocale::system().name())).name().left(2)}, // Get 2 letter language identifier
     {"SHOW_DIR_NAME_IN_WINDOW_TITLE", false},
     {"AUTO_REMOVE_LEFTOVER_FILES", false},
+    {"CDN_ENDPOINT", "keeperfx.net"},
 
     // Stuff to remember
     {"SUPPRESS_ORIGINAL_DK_FOUND_MESSAGEBOX", false},

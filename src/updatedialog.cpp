@@ -1,5 +1,6 @@
 #include "updatedialog.h"
 #include "archiver.h"
+#include "cdn.h"
 #include "downloader.h"
 #include "launcheroptions.h"
 #include "savefile.h"
@@ -20,7 +21,6 @@
 
 #include <zlib.h>
 
-#define GAME_FILE_BASE_URL "https://keeperfx.net/game-files"
 #define AUTO_UPDATE_MESSAGEBOX_TIMER 2500
 
 UpdateDialog::UpdateDialog(QWidget *parent, KfxVersion::VersionInfo versionInfo, bool autoUpdate)
@@ -347,8 +347,8 @@ void UpdateDialog::updateUsingFilemap(QMap<QString, QString> fileMap)
     }
 
     // Get download base URL
-    QString baseUrl = QString(GAME_FILE_BASE_URL) + "/" + typeString + "/"
-                      + currentUpdateVersionInfo.version;
+    QString baseUrl = CDN::getEndpoint() + "/game-files/download/" + typeString + "/" + currentUpdateVersionInfo.version;
+    emit appendLog("Download base URL: " + baseUrl);
 
     // Start downloading files
     downloadFiles(baseUrl);

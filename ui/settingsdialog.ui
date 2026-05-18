@@ -1301,6 +1301,29 @@ height: 35px;
         <string comment="Checkbox Toggle">Automatically remove leftover files</string>
        </property>
       </widget>
+      <widget class="QLabel" name="labelCDN">
+       <property name="geometry">
+        <rect>
+         <x>440</x>
+         <y>335</y>
+         <width>211</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Dropdown Title Label">Download Server</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBoxCDN">
+       <property name="geometry">
+        <rect>
+         <x>610</x>
+         <y>330</y>
+         <width>201</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab7_api">
       <attribute name="title">

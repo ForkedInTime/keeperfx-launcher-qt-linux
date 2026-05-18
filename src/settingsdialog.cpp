@@ -6,6 +6,7 @@
 #include "popupsignalcombobox.h"
 #include "settings.h"
 #include "launcheroptions.h"
+#include "cdn.h"
 
 #include <QDesktopServices>
 #include <QEvent>
@@ -174,6 +175,11 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     // Launcher play button theme dropdown
     ui->comboBoxPlayButtonTheme->addItem(tr("Qt Fusion Dark", "Play Button Theme Dropdown"), "qt-fusion-dark");
     ui->comboBoxPlayButtonTheme->addItem(tr("DK Orange (default)", "Play Button Theme Dropdown"), "dk-orange");
+
+    // Launcher Download server
+    for (auto [key, info] : CDN::endPointList) {
+        ui->comboBoxCDN->addItem(info.name, key);
+    }
 
     // Screenshot type dropdown
     ui->comboBoxScreenshots->addItem("PNG (Portable Network Graphics)", "PNG");
@@ -769,6 +775,8 @@ void SettingsDialog::loadSettings()
     ui->labelUpdateInterval->setDisabled(!isUpdateCheckEnabled);
 
     ui->checkBoxAutoRemoveLeftoverFiles->setChecked(Settings::getLauncherSetting("AUTO_REMOVE_LEFTOVER_FILES") == true);
+
+    ui->comboBoxCDN->setCurrentIndex(ui->comboBoxCDN->findData(Settings::getLauncherSetting("CDN_ENDPOINT").toString()));
 }
 
 void SettingsDialog::saveSettings()
@@ -999,6 +1007,8 @@ void SettingsDialog::saveSettings()
     Settings::setLauncherSetting("CHECK_FOR_UPDATES_INTERVAL_DAYS", ui->lineEditUpdateInterval->text());
 
     Settings::setLauncherSetting("AUTO_REMOVE_LEFTOVER_FILES", ui->checkBoxAutoRemoveLeftoverFiles->isChecked() == true);
+
+    Settings::setLauncherSetting("CDN_ENDPOINT", ui->comboBoxCDN->currentData().toString());
 
     // Close the settings screen
     this->close();
