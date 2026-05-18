@@ -177,7 +177,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->comboBoxPlayButtonTheme->addItem(tr("DK Orange (default)", "Play Button Theme Dropdown"), "dk-orange");
 
     // Launcher Download server
-    for (auto [key, info] : CDN::endPointList) {
+    for (auto [key, info] : CDN::getEndpointList()) {
         ui->comboBoxCDN->addItem(info.name, key);
     }
 

@@ -15,10 +15,11 @@ public:
         QString url;
     };
 
-    static const QList<std::pair<QString, EndpointInfo>> endPointList;
-
+    static QList<std::pair<QString, EndpointInfo>> getEndpointList();
     static QString getEndpoint();
 
 private:
+
     static QString endPoint;
+
 };

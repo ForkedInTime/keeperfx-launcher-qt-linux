@@ -6,12 +6,15 @@
 
 QString CDN::endPoint;
 
-// clang-format off
-const QList<std::pair<QString, CDN::EndpointInfo>> CDN::endPointList = {
-    {"keeperfx.net",    {tr("KeeperFX.net (Official, Germany)",     "Download Server"),         "https://keeperfx.net"}},
-    {"cloudflare",      {tr("Cloudflare CDN (Worldwide)",           "Download Server"),         "https://cdn-cf1.keeperfx.net"}},
-};
-// clang-format on
+QList<std::pair<QString, CDN::EndpointInfo>> CDN::getEndpointList()
+{
+    return {
+        // clang-format off
+        {"keeperfx.net",    {tr("KeeperFX.net (Official, Germany)",     "Download Server"),         "https://keeperfx.net"}},
+        {"cloudflare",      {tr("Cloudflare CDN (Worldwide)",           "Download Server"),         "https://cdn-cf1.keeperfx.net"}},
+        // clang-format on
+    };
+}
 
 QString CDN::getEndpoint()
 {
@@ -20,7 +23,7 @@ QString CDN::getEndpoint()
         CDN::endPoint = "https://keeperfx.net";
         QString savedKey = Settings::getLauncherSetting("CDN_ENDPOINT").toString();
 
-        for (const auto& [key, info] : CDN::endPointList) {
+        for (const auto& [key, info] : CDN::getEndpointList()) {
             if (key == savedKey) {
                 CDN::endPoint = info.url;
                 break;
