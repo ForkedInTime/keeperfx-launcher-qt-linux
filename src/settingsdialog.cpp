@@ -272,6 +272,11 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->comboBoxReleaseChannel->addItem(tr("Stable (Default)", "Game Release Channel"), "STABLE");
     ui->comboBoxReleaseChannel->addItem(tr("Alpha", "Game Release Channel"), "ALPHA");
 
+    // Check if we need to allow bigger mouse sensitivity
+    if (KfxVersion::hasFunctionality("mouse_sensitivity_no_multiplier") == true) {
+        ui->horizontalSliderMouseSens->setMaximum(1000);
+    }
+
     // Load the settings
     loadSettings();
 
