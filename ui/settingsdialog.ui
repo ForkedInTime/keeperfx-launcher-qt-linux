@@ -1078,6 +1078,29 @@ height: 35px;
         </rect>
        </property>
       </widget>
+      <widget class="QLabel" name="labelZoomToMouse">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>320</y>
+         <width>251</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Dropdown Title Label">Zoom towards cursor</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBoxZoomToMouse">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>316</y>
+         <width>161</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab5_mp">
       <attribute name="title">

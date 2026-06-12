@@ -30,6 +30,7 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"save_file_struct_lua", "1.2.0.4479"},
     {"save_file_struct_30_char_name", "1.3.1.4881"},
     {"mouse_sensitivity_no_multiplier", "1.3.2.5120"},
+    {"zoom_towards_mouse", "1.3.2.5134"},
 
     // Absolute Config path is temporary disabled because we still want support for multiple KFX installations
     {"absolute_config_path", "999.999.999"}, // '-config' absolute path was added in 1.2.0.4408
