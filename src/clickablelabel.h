@@ -28,7 +28,7 @@ signals:
 protected:
     void mousePressEvent(QMouseEvent* event) override
     {
-        if (event->button() == Qt::LeftButton) {
+        if (isEnabled() && event->button() == Qt::LeftButton) {
             emit clicked();
         }
 
@@ -37,7 +37,9 @@ protected:
 
     void enterEvent(QEnterEvent* event) override
     {
-        setStyleSheet(QString("color: %1;").arg(hoverColor.name()));
+        if (isEnabled()) {
+            setStyleSheet(QString("color: %1;").arg(hoverColor.name()));
+        }
         QLabel::enterEvent(event);
     }
 

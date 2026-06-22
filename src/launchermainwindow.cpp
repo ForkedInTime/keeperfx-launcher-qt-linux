@@ -1271,9 +1271,12 @@ void LauncherMainWindow::verifyBinaryCertificates()
 
 void LauncherMainWindow::startGame(Game::StartType startType, QVariant data1, QVariant data2, QVariant data3)
 {
-    // Disable the play buttons
+    // Disable buttons that should not be avilable when the game is running
     ui->playButton->setDisabled(true);
     ui->playExtraButton->setDisabled(true);
+    ui->settingsButton->setDisabled(true);
+    ui->checkForUpdatesButton->setDisabled(true);
+    ui->versionLabel->setDisabled(true);
 
     // Start the game
     bool startStatus = game->start(startType, data1, data2, data3);
@@ -1285,6 +1288,8 @@ void LauncherMainWindow::startGame(Game::StartType startType, QVariant data1, QV
         // Refresh the installation-aware and logfile buttons
         refreshInstallationAwareButtons();
         refreshLogfileButton();
+        ui->checkForUpdatesButton->setDisabled(false);
+        ui->versionLabel->setDisabled(false);
 
         // Get the error
         QString errorString = game->getErrorString();
@@ -1314,6 +1319,9 @@ void LauncherMainWindow::onGameEnded(int exitCode, QProcess::ExitStatus exitStat
     refreshInstallationAwareButtons();
     refreshLogfileButton();
     refreshSaveFilesMenu();
+
+    ui->checkForUpdatesButton->setDisabled(false);
+    ui->versionLabel->setDisabled(false);
 
     // Not really required but good to occasionally refresh
     refreshCampaignMenu();
