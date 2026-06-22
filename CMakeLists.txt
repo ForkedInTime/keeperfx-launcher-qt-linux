@@ -65,18 +65,19 @@ if (NOT LIEF_FOUND)
 
     # Download LIEF if it is not downloaded yet
     if(UNIX)
-        set(LIEF_INSTALL_DIR ${CMAKE_SOURCE_DIR}/deps/LIEF-0.17.0-Linux-x86_64)
+        set(LIEF_INSTALL_DIR ${CMAKE_SOURCE_DIR}/deps/LIEF-0.17.6-Linux-x86_64)
         if(NOT EXISTS LIEF_INSTALL_DIR)
-            download_and_extract("https://lief.s3-website.fr-par.scw.cloud/latest/sdk/LIEF-0.17.0-Linux-x86_64.tar.gz" ${CMAKE_SOURCE_DIR}/deps)
+            download_and_extract("https://github.com/lief-project/LIEF/releases/download/0.17.6/LIEF-0.17.6-Linux-x86_64.tar.gz" ${CMAKE_SOURCE_DIR}/deps)
         endif()
     elseif(WIN32)
-        set(LIEF_INSTALL_DIR ${CMAKE_SOURCE_DIR}/deps/LIEF-0.17.0-win64)
+        set(LIEF_INSTALL_DIR ${CMAKE_SOURCE_DIR}/deps/LIEF-0.17.6-win64)
         if(NOT EXISTS LIEF_INSTALL_DIR)
-            download_and_extract("https://lief.s3-website.fr-par.scw.cloud/latest/sdk/LIEF-0.17.0-win64.zip" ${CMAKE_SOURCE_DIR}/deps)
+            download_and_extract("https://github.com/lief-project/LIEF/releases/download/0.17.6/LIEF-0.17.6-win64.zip" ${CMAKE_SOURCE_DIR}/deps)
         endif()
     endif()
 
     # Load local LIEF
+    set(LIEF_DIR ${LIEF_INSTALL_DIR}/lib/cmake/LIEF)
     set(LIEF_INCLUDE_DIR ${LIEF_INSTALL_DIR}/include)
     set(LIEF_LIB_DIR ${LIEF_INSTALL_DIR}/lib)
     include_directories(${LIEF_INCLUDE_DIR})
