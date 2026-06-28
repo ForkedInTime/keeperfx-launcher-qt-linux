@@ -110,8 +110,22 @@ QJsonObject ApiClient::getLatestAlpha(){
     return jsonObj["alpha_build"].toObject();
 }
 
+// keeperfx-linux-alpha: the complete native-Linux package lives on our GitHub
+// releases, not keeperfx.net. GitHub's "latest release" download URL always
+// resolves to the newest release's asset, so no API call/parsing is needed.
+#ifndef Q_OS_WINDOWS
+static const char *KFX_LINUX_ALPHA_PACKAGE_URL =
+    "https://github.com/ForkedInTime/keeperfx-linux-alpha/releases/latest/download/"
+    "keeperfx-linux-alpha-x86_64-full.7z";
+#endif
+
 QUrl ApiClient::getDownloadUrlStable()
 {
+#ifndef Q_OS_WINDOWS
+    // Native Linux build always installs our complete alpha package.
+    qDebug() << "Linux alpha package URL:" << KFX_LINUX_ALPHA_PACKAGE_URL;
+    return QUrl(KFX_LINUX_ALPHA_PACKAGE_URL);
+#else
     // Get JSON object from API
     QJsonObject releaseObj = getLatestStable();
     if(releaseObj.isEmpty()){
@@ -124,10 +138,16 @@ QUrl ApiClient::getDownloadUrlStable()
 
     // Return
     return QUrl(downloadUrlString);
+#endif
 }
 
 QUrl ApiClient::getDownloadUrlAlpha()
 {
+#ifndef Q_OS_WINDOWS
+    // Native Linux build: one package for both channels.
+    qDebug() << "Linux alpha package URL:" << KFX_LINUX_ALPHA_PACKAGE_URL;
+    return QUrl(KFX_LINUX_ALPHA_PACKAGE_URL);
+#else
     // Get JSON object from API
     QJsonObject releaseObj = getLatestAlpha();
     if(releaseObj.isEmpty()){
@@ -140,6 +160,7 @@ QUrl ApiClient::getDownloadUrlAlpha()
 
     // Return
     return QUrl(downloadUrlString);
+#endif
 }
 
 QUrl ApiClient::getDownloadUrlMusic()

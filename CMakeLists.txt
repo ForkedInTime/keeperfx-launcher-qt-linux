@@ -16,8 +16,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # MinGW/GCC Release flags
+# NOTE: -static is WIN32-only. On Linux, statically linking the Qt6 .so libs
+# fails ("attempted static link of dynamic object libQt6Widgets.so"); the
+# native build links Qt dynamically like every other Linux Qt app.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static -Os -s")
+    if(WIN32)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static -Os -s")
+    else()
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -s")
+    endif()
 endif()
 
 if(MSVC)

@@ -112,7 +112,13 @@ bool Game::start(StartType startType, QVariant data1, QVariant data2, QVariant d
         qInfo() << "Starting game (Windows)";
         process->start(keeperfxBin, params);
     #else
-        if (qEnvironmentVariableIsSet("FLATPAK_ID")) {
+        // Native Linux build: prefer a native ELF binary (no .exe) if present.
+        // This is the keeperfx-alpha case — run the native engine directly, no Wine.
+        QString nativeBin = QApplication::applicationDirPath() + "/keeperfx";
+        if (QFileInfo::exists(nativeBin)) {
+            qInfo() << "Starting game (Linux: native)";
+            process->start(nativeBin, params);
+        } else if (qEnvironmentVariableIsSet("FLATPAK_ID")) {
             qInfo() << "Starting game (Linux: Flatpak -> Wine)";
             // Run Wine outside Flatpak
             params.prepend(keeperfxBin);

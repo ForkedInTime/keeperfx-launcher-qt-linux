@@ -24,7 +24,12 @@ public:
     {
         // Check for 'keeperfx.exe' file in app directory
         QFile keeperFxBin (QCoreApplication::applicationDirPath() + "/keeperfx.exe");
-        return (keeperFxBin.exists());
+        if (keeperFxBin.exists()) {
+            return true;
+        }
+        // Native Linux build: the engine is a native ELF named 'keeperfx' (no .exe).
+        QFile keeperFxNative (QCoreApplication::applicationDirPath() + "/keeperfx");
+        return (keeperFxNative.exists());
     }
 
     static void removeLeftoverNewLauncher()

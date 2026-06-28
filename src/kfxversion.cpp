@@ -119,9 +119,28 @@ QString KfxVersion::getVersionString(const QFile& binary){
 
 QString KfxVersion::getVersionStringFromAppDir()
 {
-    return KfxVersion::getVersionString(
-        QFile(QCoreApplication::applicationDirPath() + "/keeperfx.exe")
-    );
+    // Native Linux build (keeperfx-alpha): a native ELF has no Windows PE
+    // ProductVersion resource to read. The build/refresh writes the engine's real
+    // version (e.g. "1.3.2.5180 alpha") to version.txt next to the binary — read
+    // that so the launcher displays and version-gates on the true build number.
+    QString exePath = QCoreApplication::applicationDirPath() + "/keeperfx.exe";
+    if (QFile::exists(exePath) == false) {
+        QFile verFile(QCoreApplication::applicationDirPath() + "/version.txt");
+        if (verFile.exists() && verFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QString v = QString::fromUtf8(verFile.readAll()).trimmed();
+            verFile.close();
+            if (v.isEmpty() == false) {
+                return v;
+            }
+        }
+        // Native binary present but no version.txt: assume the current alpha line.
+        QString nativePath = QCoreApplication::applicationDirPath() + "/keeperfx";
+        if (QFile::exists(nativePath)) {
+            return QStringLiteral("1.3.2.5180 alpha");
+        }
+    }
+
+    return KfxVersion::getVersionString(QFile(exePath));
 }
 
 KfxVersion::VersionInfo KfxVersion::getVersionFromString(QString versionString)
