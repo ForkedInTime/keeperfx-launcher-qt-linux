@@ -130,6 +130,24 @@ jobs:
           fi
           cp -f "$HERE/usr/bin/keeperfx-launcher-qt" "$INSTALL/keeperfx-launcher-qt"
           cp -f "$HERE/usr/bin/7z.so" "$INSTALL/7z.so" 2>/dev/null || true
+          # Add an applications-menu entry so it's launchable like any installed game,
+          # not just by finding the AppImage file. $APPIMAGE is the AppImage's own path.
+          if [ -n "$APPIMAGE" ]; then
+            appdir="$HOME/.local/share/applications"; icondir="$HOME/.local/share/icons"
+            mkdir -p "$appdir" "$icondir"
+            cp -f "$HERE/usr/share/icons/hicolor/256x256/apps/keeperfx-launcher-qt.png" "$icondir/keeperfx-linux-alpha.png" 2>/dev/null || true
+            {
+              echo "[Desktop Entry]"
+              echo "Type=Application"
+              echo "Name=KeeperFX Linux Alpha"
+              echo "Comment=Dungeon Keeper, native on Linux"
+              echo "Exec=\"$APPIMAGE\""
+              echo "Icon=$icondir/keeperfx-linux-alpha.png"
+              echo "Terminal=false"
+              echo "Categories=Game;StrategyGame;"
+            } > "$appdir/keeperfx-linux-alpha.desktop"
+            update-desktop-database "$appdir" 2>/dev/null || true
+          fi
           cd "$INSTALL"
           exec "$INSTALL/keeperfx-launcher-qt" "$@"
           EOF
