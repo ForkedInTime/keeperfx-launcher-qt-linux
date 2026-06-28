@@ -111,9 +111,12 @@ jobs:
 
       - name: Install the custom AppRun (deploy payload to a writable install dir)
         run: |
+          # linuxdeploy leaves AppRun as a SYMLINK into usr/bin; writing through it would
+          # clobber the launcher binary, so remove it and write a real script at the root.
+          rm -f AppDir/AppRun
           cat > AppDir/AppRun <<'EOF'
           #!/bin/bash
-          HERE="$(dirname "$(readlink -f "$0")")"
+          HERE="${APPDIR:-$(dirname "$(readlink -f "$0")")}"
           export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
           export QT_PLUGIN_PATH="$HERE/usr/plugins"
           export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/usr/plugins/platforms"
