@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QOperatingSystemVersion>
 #include <QRegularExpression>
@@ -179,6 +180,67 @@ bool DkFiles::isValidDkDirPath(QString path)
     return (dir.exists() && isValidDkDir(dir));
 }
 
+// Bounded, depth-limited recursive scan for a folder whose data/sound files we
+// recognise as Dungeon Keeper. Cheaply pre-filters on the presence of a data/ (or
+// DATA/) subfolder, and obeys a time budget so it never hangs the launcher.
+static bool searchDkRecursive(const QString &path, int depth, QElapsedTimer &timer, QDir &out)
+{
+    if (depth < 0 || timer.elapsed() > 12000) { // 12s budget (runs on a worker thread)
+        return false;
+    }
+    QDir dir(path);
+    if (!dir.exists()) {
+        return false;
+    }
+    if (dir.exists("data") || dir.exists("DATA")) {
+        if (DkFiles::isValidDkDir(dir)) {
+            out = dir;
+            return true;
+        }
+    }
+    const QStringList subs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+    for (const QString &sub : subs) {
+        if (searchDkRecursive(path + "/" + sub, depth - 1, timer, out)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::optional<QDir> DkFiles::searchForDkInstallDir()
+{
+    const QString home = QDir::homePath();
+    const QString user = QString::fromLocal8Bit(qgetenv("USER"));
+
+    // Roots where a Wine / Lutris / Heroic / Bottles / Steam / GOG install can live.
+    const QStringList gameRoots = {
+        home + "/.wine", home + "/Games", home + "/.local/share/lutris",
+        home + "/.local/share/bottles", home + "/.var/app", home + "/.steam",
+        home + "/.local/share/Steam", home + "/GOG Games", "/opt",
+    };
+    // Big/unknown roots get a shallow pass only.
+    const QStringList shallowRoots = {
+        home, "/mnt", "/media", "/media/" + user, "/run/media/" + user,
+    };
+
+    QElapsedTimer timer;
+    timer.start();
+    QDir found;
+    for (const QString &root : gameRoots) {
+        if (QDir(root).exists() && searchDkRecursive(root, 8, timer, found)) {
+            return found;
+        }
+        if (timer.elapsed() > 12000) { return std::nullopt; }
+    }
+    for (const QString &root : shallowRoots) {
+        if (QDir(root).exists() && searchDkRecursive(root, 4, timer, found)) {
+            return found;
+        }
+        if (timer.elapsed() > 12000) { return std::nullopt; }
+    }
+    return std::nullopt;
+}
+
 std::optional<QDir> DkFiles::findExistingDkInstallDir()
 {
     // Search hardcoded paths
@@ -206,6 +268,12 @@ std::optional<QDir> DkFiles::findExistingDkInstallDir()
     std::optional<QDir> steamInstallDir = findSteamDkInstallDir();
     if (steamInstallDir) {
         return steamInstallDir;
+    }
+
+    // Last resort: actually scan the disk (Wine/Lutris/Heroic/GOG/mounts) for the files.
+    std::optional<QDir> searchedDir = searchForDkInstallDir();
+    if (searchedDir) {
+        return searchedDir;
     }
 
     return std::nullopt;
