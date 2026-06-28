@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QThread>
 
 #include "dkfiles.h"
 #include "downloadmusicdialog.h"
@@ -37,13 +38,26 @@ CopyDkFilesDialog::CopyDkFilesDialog(QWidget *parent)
     raise();
     activateWindow();
 
-    // Automatically check for a DK install directory
-    auto existingDkInstallDir = DkFiles::findExistingDkInstallDir();
-    if (existingDkInstallDir) {
-        qDebug() << "Automatically detected DK dir:" << existingDkInstallDir->absolutePath();
-        ui->autoFoundLabel->setText(tr("A suitable DK installation has been automatically detected.", "Label"));
-        ui->browseInput->setText(existingDkInstallDir->absolutePath());
-    }
+    // Automatically search for a DK install. The detection now scans the disk
+    // (Wine/Lutris/Heroic/GOG/mounts), so run it on a worker thread to keep the
+    // dialog responsive, and report progress + the result.
+    ui->autoFoundLabel->setText(tr("Searching for your Dungeon Keeper install…", "Label"));
+    QThread *detectThread = QThread::create([this]() {
+        std::optional<QDir> found = DkFiles::findExistingDkInstallDir();
+        const QString path = found ? found->absolutePath() : QString();
+        QMetaObject::invokeMethod(this, [this, path]() {
+            if (!path.isEmpty()) {
+                qDebug() << "Automatically detected DK dir:" << path;
+                ui->autoFoundLabel->setText(tr("✓ Found your Dungeon Keeper files — ready to copy.", "Label"));
+                ui->browseInput->setText(path);
+            } else {
+                ui->autoFoundLabel->setText(tr("Couldn't find Dungeon Keeper anywhere on this system. "
+                                               "Please point to your install below.", "Label"));
+            }
+        });
+    });
+    connect(detectThread, &QThread::finished, detectThread, &QObject::deleteLater);
+    detectThread->start();
 }
 
 CopyDkFilesDialog::~CopyDkFilesDialog()
