@@ -21,11 +21,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake ninja-build git pkg-config file wget desktop-file-utils \
-            qt6-base-dev qt6-base-dev-tools libgl1-mesa-dev zlib1g-dev libfuse2t64
+            python3-pip libgl1-mesa-dev zlib1g-dev libfuse2t64 \
+            libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
+            libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 \
+            libxcb-xkb1 libxcb-util1
+
+      - name: Install Qt 6.8 (the launcher needs Qt >=6.7; 24.04 only has 6.4)
+        run: |
+          pip install --break-system-packages aqtinstall
+          python3 -m aqt install-qt linux desktop 6.8.3 linux_gcc_64 -O "$RUNNER_TEMP/Qt"
+          QT="$RUNNER_TEMP/Qt/6.8.3/gcc_64"
+          echo "$QT/bin" >> "$GITHUB_PATH"
+          echo "CMAKE_PREFIX_PATH=$QT" >> "$GITHUB_ENV"
+          echo "QMAKE=$QT/bin/qmake" >> "$GITHUB_ENV"
+          echo "QT_ROOT=$QT" >> "$GITHUB_ENV"
 
       - name: Build the launcher (CPM fetches zlib/bit7z/LIEF)
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
           cmake --build build -j"$(nproc)"
 
       - name: Assemble the AppDir
@@ -50,8 +63,8 @@ jobs:
       - name: Bundle Qt into the AppDir
         env:
           APPIMAGE_EXTRACT_AND_RUN: 1     # GitHub runners have no FUSE
-          QMAKE: /usr/bin/qmake6
         run: |
+          # QMAKE is exported from the aqt step (points at Qt 6.8)
           ./linuxdeploy-x86_64.AppImage --appdir AppDir \
             -d packaging/keeperfx-launcher-qt.desktop \
             -i packaging/keeperfx-launcher-qt.png \
