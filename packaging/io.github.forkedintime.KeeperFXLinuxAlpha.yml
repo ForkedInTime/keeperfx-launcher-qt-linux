@@ -26,9 +26,15 @@ modules:
       - 'if [ -d AppDir/usr/plugins ]; then cp -a AppDir/usr/plugins/. /app/plugins/; fi'
       - cp -a AppDir/usr/bin/. /app/keeperfx-app/
       - cp -a AppDir/payload /app/share/keeperfx/payload
-      - install -Dm755 packaging/keeperfx-flatpak-wrapper /app/bin/keeperfx-flatpak-wrapper
-      - install -Dm644 packaging/io.github.forkedintime.KeeperFXLinuxAlpha.desktop /app/share/applications/io.github.forkedintime.KeeperFXLinuxAlpha.desktop
+      - install -Dm755 keeperfx-flatpak-wrapper /app/bin/keeperfx-flatpak-wrapper
+      - install -Dm644 io.github.forkedintime.KeeperFXLinuxAlpha.desktop /app/share/applications/io.github.forkedintime.KeeperFXLinuxAlpha.desktop
       - install -Dm644 AppDir/usr/share/icons/hicolor/256x256/apps/keeperfx-launcher-qt.png /app/share/icons/hicolor/256x256/apps/io.github.forkedintime.KeeperFXLinuxAlpha.png
     sources:
+      # flatpak-builder resolves these relative to THIS manifest's folder (packaging/)
       - type: dir
-        path: .
+        path: ../AppDir
+        dest: AppDir
+      - type: file
+        path: keeperfx-flatpak-wrapper
+      - type: file
+        path: io.github.forkedintime.KeeperFXLinuxAlpha.desktop
