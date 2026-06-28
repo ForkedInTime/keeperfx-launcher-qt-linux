@@ -1,6 +1,8 @@
-# Builds the KeeperFX Linux Alpha launcher as a portable AppImage on Ubuntu 24.04
-# (one file, runs on every current distro). Runs on GitHub's servers.
-name: Build Launcher AppImage
+# Builds the COMPLETE, self-contained KeeperFX Linux Alpha AppImage on Ubuntu 24.04:
+# launcher + engine + every library + the free game data, all in one file. The user
+# downloads it, runs it, and the only thing it ever needs is their own Dungeon Keeper
+# files. Runs on GitHub's servers.
+name: Build Self-Contained AppImage
 
 on:
   release:
@@ -14,17 +16,20 @@ jobs:
   appimage:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4    # the launcher repo
 
-      - name: Install build dependencies
+      - name: Install dependencies (launcher build + engine runtime libs + appimage tools)
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build git pkg-config file wget desktop-file-utils \
-            python3-pip libgl1-mesa-dev zlib1g-dev libfuse2t64 \
-            libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
-            libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 \
-            libxcb-xkb1 libxcb-util1
+            build-essential cmake ninja-build git pkg-config file wget desktop-file-utils python3 python3-pip p7zip-full \
+            libgl1-mesa-dev zlib1g-dev libfuse2t64 \
+            libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 libxcb-util1 \
+            libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-image-dev \
+            libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libswresample-dev \
+            libopenal-dev libluajit-5.1-dev libspng-dev libminizip-dev libepoxy-dev \
+            libminiupnpc-dev libnatpmp-dev libssl-dev libzstd-dev
 
       - name: Install Qt 6.8 (the launcher needs Qt >=6.7; 24.04 only has 6.4)
         run: |
@@ -34,23 +39,54 @@ jobs:
           echo "$QT/bin" >> "$GITHUB_PATH"
           echo "CMAKE_PREFIX_PATH=$QT" >> "$GITHUB_ENV"
           echo "QMAKE=$QT/bin/qmake" >> "$GITHUB_ENV"
-          echo "QT_ROOT=$QT" >> "$GITHUB_ENV"
 
-      - name: Build the launcher (CPM fetches zlib/bit7z/LIEF)
+      - name: Build the launcher
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
           cmake --build build -j"$(nproc)"
 
-      - name: Assemble the AppDir
+      - name: Build the engine on 24.04 (the released Arch engine won't run on Ubuntu)
+        run: |
+          git clone https://github.com/ForkedInTime/keeperfx-linux-alpha.git engine
+          cd engine
+          make -f linux.mk deps/centijson/include/json.h deps/astronomy/include/astronomy.h \
+                           deps/enet6/include/enet6/enet.h deps/libcurl/lib/libcurl.a
+          BN="$(git rev-list --count HEAD)"
+          rm -f src/ver_defs.h
+          make -f linux.mk BUILD_NUMBER="$BN" VER_SUFFIX=alpha -j"$(nproc)"
+          cd tools/fxfontmaker
+          python3 rescale_unifont_hex.py unifont-17.0.04.hex unifont12.hex
+          python3 bdf_to_hex.py wenquanyi_9pt.bdf wenquanyi.hex
+          python3 merge_hex.py unifont12.hex wenquanyi.hex merged12.hex
+          python3 unifont_hex_to_binary.py unifont-17.0.04.hex    font16.fxfont     16
+          python3 unifont_hex_to_binary.py unifont_jp-17.0.04.hex font16_JPN.fxfont 16
+          python3 unifont_hex_to_binary.py unifont_t-17.0.04.hex  font16_CHT.fxfont 16
+          python3 unifont_hex_to_binary.py merged12.hex           font12.fxfont     12
+
+      - name: Assemble the AppDir (launcher + engine + payload data)
         run: |
           APPDIR="$PWD/AppDir"
           mkdir -p "$APPDIR/usr/bin"
+          # launcher + bit7z runtime + icon + desktop
           cp build/keeperfx-launcher-qt "$APPDIR/usr/bin/"
-          cp ext/7z.so "$APPDIR/usr/bin/"          # bit7z runtime, loaded from the launcher's dir
+          cp ext/7z.so "$APPDIR/usr/bin/"
           install -Dm644 packaging/keeperfx-launcher-qt.png \
             "$APPDIR/usr/share/icons/hicolor/256x256/apps/keeperfx-launcher-qt.png"
           install -Dm644 packaging/keeperfx-launcher-qt.desktop \
             "$APPDIR/usr/share/applications/keeperfx-launcher-qt.desktop"
+          # payload = free game data from the published package (everything EXCEPT its Arch engine)
+          wget -q https://github.com/ForkedInTime/keeperfx-linux-alpha/releases/latest/download/keeperfx-linux-alpha-x86_64-full.7z
+          7z x -bso0 keeperfx-linux-alpha-x86_64-full.7z -opkg
+          P="$APPDIR/payload"
+          mkdir -p "$P"
+          cp -rf pkg/keeperfx-linux-alpha/. "$P/"
+          # overwrite with the 24.04-built engine + fonts + version
+          cp -f engine/bin/keeperfx "$P/keeperfx"
+          cp -f engine/tools/fxfontmaker/*.fxfont "$P/fxdata/"
+          sed -n 's/.*VER_STRING  "\(.*\)".*/\1/p' engine/src/ver_defs.h > "$P/version.txt"
+          # also put the engine in usr/bin so linuxdeploy bundles ITS libraries (removed after)
+          cp -f engine/bin/keeperfx "$APPDIR/usr/bin/keeperfx"
+          echo "payload size: $(du -sh "$P" | cut -f1)"
 
       - name: Get linuxdeploy + Qt plugin + appimagetool
         run: |
@@ -60,22 +96,21 @@ jobs:
           wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage appimagetool-x86_64.AppImage
 
-      - name: Bundle Qt into the AppDir
+      - name: Bundle ALL libraries (launcher Qt + engine SDL2/ffmpeg/OpenAL/…)
         env:
-          APPIMAGE_EXTRACT_AND_RUN: 1     # GitHub runners have no FUSE
+          APPIMAGE_EXTRACT_AND_RUN: 1
         run: |
-          # QMAKE is exported from the aqt step (points at Qt 6.8)
+          # linuxdeploy scans usr/bin (launcher + keeperfx) and bundles every library both need.
           ./linuxdeploy-x86_64.AppImage --appdir AppDir \
             -d packaging/keeperfx-launcher-qt.desktop \
             -i packaging/keeperfx-launcher-qt.png \
             --plugin qt
+          # the engine's libs are now in usr/lib; remove the duplicate engine binary from usr/bin
+          # (the real one runs from the payload, deployed to the writable install dir)
+          rm -f AppDir/usr/bin/keeperfx
 
-      - name: Install a custom AppRun (run from a writable install dir)
+      - name: Install the custom AppRun (deploy payload to a writable install dir)
         run: |
-          # The launcher assumes it lives inside the game folder (reads/writes config there,
-          # downloads the engine there). An AppImage mount is read-only, so on launch we copy
-          # the launcher into a writable install dir and run it from there, loading the bundled
-          # Qt libraries from the (read-only) mount.
           cat > AppDir/AppRun <<'EOF'
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "$0")")"
@@ -84,6 +119,12 @@ jobs:
           export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/usr/plugins/platforms"
           INSTALL="${KFX_ALPHA_PREFIX:-$HOME/.local/share/keeperfx-alpha}"
           mkdir -p "$INSTALL"
+          # deploy the bundled game once (or when the version changes)
+          NEWVER="$(cat "$HERE/payload/version.txt" 2>/dev/null)"
+          if [ "$(cat "$INSTALL/.bundled-version" 2>/dev/null)" != "$NEWVER" ]; then
+            cp -rf "$HERE/payload/." "$INSTALL/"
+            echo "$NEWVER" > "$INSTALL/.bundled-version"
+          fi
           cp -f "$HERE/usr/bin/keeperfx-launcher-qt" "$INSTALL/keeperfx-launcher-qt"
           cp -f "$HERE/usr/bin/7z.so" "$INSTALL/7z.so" 2>/dev/null || true
           cd "$INSTALL"
