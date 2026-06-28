@@ -120,8 +120,16 @@ jobs:
           export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
           export QT_PLUGIN_PATH="$HERE/usr/plugins"
           export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/usr/plugins/platforms"
+          # We only bundle the xcb platform plugin; use it (via XWayland on Wayland) to
+          # avoid the "Could not find the Qt platform plugin wayland" warning.
+          export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
           INSTALL="${KFX_ALPHA_PREFIX:-$HOME/.local/share/keeperfx-alpha}"
           mkdir -p "$INSTALL"
+          # Don't let our bundled glib load the SYSTEM gvfs/gio modules (symbol mismatch
+          # on newer distros: 'g_variant_builder_init_static' undefined). Point GIO at an
+          # empty dir so it loads none — Qt's own file dialogs are unaffected.
+          mkdir -p "$INSTALL/.gio-modules"
+          export GIO_MODULE_DIR="$INSTALL/.gio-modules"
           # deploy the bundled game once (or when the version changes)
           NEWVER="$(cat "$HERE/payload/version.txt" 2>/dev/null)"
           if [ "$(cat "$INSTALL/.bundled-version" 2>/dev/null)" != "$NEWVER" ]; then
