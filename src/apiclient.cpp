@@ -11,8 +11,62 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequestFactory>
+#include <QRegularExpression>
 
 #define API_ENDPOINT "https://keeperfx.net/api"
+
+#ifndef Q_OS_WINDOWS
+// keeperfx-linux-alpha: the launcher's "is there a newer version?" check should look at
+// OUR GitHub releases, not keeperfx.net. This returns the latest release shaped like the
+// keeperfx.net response the updater expects: { "version": "1.3.2.5200", "download_url": ... }.
+static QJsonObject getLatestLinuxAlphaRelease()
+{
+    QNetworkAccessManager manager;
+    QNetworkRequest req(QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-linux-alpha/releases/latest"));
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
+    req.setRawHeader("Accept", "application/vnd.github+json");
+
+    QNetworkReply *reply = manager.get(req);
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Linux alpha update check failed:" << reply->errorString();
+        reply->deleteLater();
+        return QJsonObject();
+    }
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    reply->deleteLater();
+    if (doc.isObject() == false) {
+        return QJsonObject();
+    }
+    QJsonObject root = doc.object();
+
+    // tag like "v1.3.2.5200-alpha" -> numeric version "1.3.2.5200"
+    QRegularExpression re(QStringLiteral("([0-9]+\\.[0-9]+\\.[0-9]+(?:\\.[0-9]+)?)"));
+    QRegularExpressionMatch m = re.match(root["tag_name"].toString());
+    if (m.hasMatch() == false) {
+        return QJsonObject();
+    }
+
+    // find the complete game package asset for the in-launcher updater
+    QString downloadUrl;
+    const QJsonArray assets = root["assets"].toArray();
+    for (const QJsonValue &a : assets) {
+        const QString name = a.toObject()["name"].toString();
+        if (name.endsWith("-full.7z")) {
+            downloadUrl = a.toObject()["browser_download_url"].toString();
+            break;
+        }
+    }
+
+    QJsonObject out;
+    out["version"] = m.captured(1);
+    out["download_url"] = downloadUrl;
+    return out;
+}
+#endif
 
 QString ApiClient::getApiEndpoint()
 {
@@ -77,7 +131,10 @@ QJsonDocument ApiClient::getJsonResponse(QUrl endpointPath, HttpMethod method, Q
 }
 
 QJsonObject ApiClient::getLatestStable(){
-
+#ifndef Q_OS_WINDOWS
+    // Native Linux build: check OUR GitHub releases, not keeperfx.net.
+    return getLatestLinuxAlphaRelease();
+#else
     // URL of the API endpoint
     // API endpoints can be found at: https://github.com/dkfans/keeperfx-website
     QUrl url("v1/release/stable/latest");
@@ -91,10 +148,14 @@ QJsonObject ApiClient::getLatestStable(){
     // Convert response and return
     QJsonObject jsonObj = jsonDoc.object();
     return jsonObj["release"].toObject();
+#endif
 }
 
 QJsonObject ApiClient::getLatestAlpha(){
-
+#ifndef Q_OS_WINDOWS
+    // Native Linux build: check OUR GitHub releases, not keeperfx.net.
+    return getLatestLinuxAlphaRelease();
+#else
     // URL of the API endpoint
     // API endpoints can be found at: https://github.com/dkfans/keeperfx-website
     QUrl url("v1/release/alpha/latest");
@@ -108,6 +169,7 @@ QJsonObject ApiClient::getLatestAlpha(){
     // Convert response and return
     QJsonObject jsonObj = jsonDoc.object();
     return jsonObj["alpha_build"].toObject();
+#endif
 }
 
 // keeperfx-linux-alpha: the complete native-Linux package lives on our GitHub
