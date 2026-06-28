@@ -1,5 +1,7 @@
 # KeeperFX Launcher — Linux-native fork
 
+![KeeperFX Linux Alpha](docs/img/linux-alpha-banner.png)
+
 This is a **Linux-native fork** of the KeeperFX team's settings launcher
 ([dkfans/keeperfx-launcher-qt](https://github.com/dkfans/keeperfx-launcher-qt)), patched to drive the
 **native Linux engine** (no Wine) and install the
