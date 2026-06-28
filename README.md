@@ -1,60 +1,65 @@
-# KeeperFX Launcher
+# KeeperFX Launcher — Linux-native fork
 
-Modern cross platform KeeperFX launcher made using C++ and the Qt6 framework. Based on [ImpLauncher](https://keeperfx.net/workshop/item/410/implauncher-beta).
+This is a **Linux-native fork** of the KeeperFX team's settings launcher
+([dkfans/keeperfx-launcher-qt](https://github.com/dkfans/keeperfx-launcher-qt)), patched to drive the
+**native Linux engine** (no Wine) and install the
+[KeeperFX Linux Alpha](https://github.com/ForkedInTime/keeperfx-linux-alpha).
 
-Codename: **CutieLauncher**
+> ⚠️ **Unofficial — not affiliated with the KeeperFX team.** The launcher is *their* work; this fork only adds
+> the Linux-native changes below. The official launcher (and the official game) live at
+> [dkfans/keeperfx-launcher-qt](https://github.com/dkfans/keeperfx-launcher-qt) and
+> [dkfans/keeperfx](https://github.com/dkfans/keeperfx).
 
 ![KeeperFX Launcher Screenshot](./docs/img/launcher_screenshot.png)
 
-## Download
+---
 
-You can download it from the KeeperFX workshop: https://keeperfx.net/workshop/item/739/cutielauncher-alpha
+## 🎮 Players: you don't need this repo
 
-## Building
+**Just want to play?** Don't build anything here. Grab the single self-contained **AppImage** from the alpha:
 
-- Get QT Creator
-- Setup a local build kit (Qt6+)
-- Load the project (by opening CMakeLists.txt)
-- Build it
+→ **[github.com/ForkedInTime/keeperfx-linux-alpha → Releases](https://github.com/ForkedInTime/keeperfx-linux-alpha/releases)**
 
-The CMake files still need to be fixed for Windows building.
+Download one file, run it, and the only thing it ever asks for is your own *Dungeon Keeper* files. The
+launcher (this project) is bundled inside it — engine, libraries, game data and all. No `apt install`, nothing
+to set up. It works on any current 64-bit Linux distro (Ubuntu 24.04+/26.x, Fedora, Arch, Steam Deck).
 
-## Building a Release version
+---
 
-There is currently a script that uses docker to create a build environment and then uses it to build and package the launcher for Windows.
+## What this fork changes
 
-This script is currently Linux only and should probably only be used for building the actual release versions.
+The team's launcher compiles cross-platform, but it was written Windows-first — it launched the game through
+**Wine** and read the version from a Windows `.exe`. This fork makes it drive the **native** engine:
 
+- **`game.cpp`** — launch the native `keeperfx` ELF directly (no Wine) when present
+- **`helper.h`** — detect the native binary (not just `keeperfx.exe`) as "installed"
+- **`kfxversion.cpp`** — read the engine version from `version.txt` (a native ELF has no PE resources)
+- **`apiclient.cpp`** — install the complete Linux package from the alpha's GitHub release
+- **`CMakeLists.txt`** — the `-static` link flag is Windows-only (Linux links Qt dynamically)
+
+A GitHub Actions workflow ([`build-appimage.yml`](.github/workflows/build-appimage.yml)) builds the whole
+self-contained AppImage on Ubuntu 24.04 — bundling Qt **and** the engine + its libraries + the free game data.
+
+## 🛠️ Advanced: build from source
+
+You need a C++17 toolchain, CMake, Ninja, and **Qt 6.7+** (the launcher uses `QNetworkRequestFactory`).
+Ubuntu 24.04 ships Qt 6.4, so install a newer Qt (e.g. via [aqtinstall](https://github.com/miurahr/aqtinstall))
+— the CI workflow shows the exact steps. CPM fetches zlib/bit7z/LIEF automatically.
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j"$(nproc)"
 ```
-./compile-win64s.sh
-```
 
-Build a static Windows release and package it with InnoSetup:
+This produces `build/keeperfx-launcher-qt`. The launcher expects to live in the game's install directory
+(it reads/writes config and finds the engine there); the AppImage's `AppRun` handles that by running it from a
+writable install dir.
 
-```
-./compile-wind64s.sh release --installer
-```
+## Credits & License
 
-## Linux
+The launcher is the work of the **KeeperFX team and the Keeper Klan community**
+([dkfans/keeperfx-launcher-qt](https://github.com/dkfans/keeperfx-launcher-qt)), based on
+[ImpLauncher](https://keeperfx.net/workshop/item/410/implauncher-beta). This fork only adds the Linux-native
+patches above.
 
-A Linux version of the launcher will be released when KeeperFX itself works natively on Linux. All of the functionality should already work on Linux but 
-before we know exactly how KeeperFX will be shipped, there's not much reason to already be releasing these builds. 
-
-If you really want a Linux binary you can already build it and it should work out of the box.
-It uses **Wine** to start `keeperfx.exe` and if it's running in a Flatpak it will use Wine on the host machine.
-
-## Discord
-
-Discord thread: https://discord.com/channels/480505152806191114/1285667371272376430  
-You need to have access to the KeeperFX development channel on the Keeper Klan Discord to access it.
-Just ask if you need it. We're always glad to have more developers helping us out.
-
-## Translations
-
-The launcher uses translations and should match the languages that are also available in the game.
-
-If you wish to help out with translations or want more information, you can read the following: [Translating the KeeperFX Launcher](./docs/translations.md).
-
-## License
-
-This project is licensed under the GNU General Public License v2.0. Feel free to use, modify, and distribute it according to the terms of this license.
+GNU General Public License v2.0 — same as upstream.
