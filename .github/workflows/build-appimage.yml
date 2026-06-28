@@ -1,0 +1,99 @@
+# Builds the KeeperFX Linux Alpha launcher as a portable AppImage on Ubuntu 24.04
+# (one file, runs on every current distro). Runs on GitHub's servers.
+name: Build Launcher AppImage
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  appimage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build git pkg-config file wget desktop-file-utils \
+            qt6-base-dev qt6-base-dev-tools libgl1-mesa-dev zlib1g-dev libfuse2t64
+
+      - name: Build the launcher (CPM fetches zlib/bit7z/LIEF)
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j"$(nproc)"
+
+      - name: Assemble the AppDir
+        run: |
+          APPDIR="$PWD/AppDir"
+          mkdir -p "$APPDIR/usr/bin"
+          cp build/keeperfx-launcher-qt "$APPDIR/usr/bin/"
+          cp ext/7z.so "$APPDIR/usr/bin/"          # bit7z runtime, loaded from the launcher's dir
+          install -Dm644 packaging/keeperfx-launcher-qt.png \
+            "$APPDIR/usr/share/icons/hicolor/256x256/apps/keeperfx-launcher-qt.png"
+          install -Dm644 packaging/keeperfx-launcher-qt.desktop \
+            "$APPDIR/usr/share/applications/keeperfx-launcher-qt.desktop"
+
+      - name: Get linuxdeploy + Qt plugin + appimagetool
+        run: |
+          base=https://github.com/linuxdeploy
+          wget -q "$base/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+          wget -q "$base/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+          wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage appimagetool-x86_64.AppImage
+
+      - name: Bundle Qt into the AppDir
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: 1     # GitHub runners have no FUSE
+          QMAKE: /usr/bin/qmake6
+        run: |
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir \
+            -d packaging/keeperfx-launcher-qt.desktop \
+            -i packaging/keeperfx-launcher-qt.png \
+            --plugin qt
+
+      - name: Install a custom AppRun (run from a writable install dir)
+        run: |
+          # The launcher assumes it lives inside the game folder (reads/writes config there,
+          # downloads the engine there). An AppImage mount is read-only, so on launch we copy
+          # the launcher into a writable install dir and run it from there, loading the bundled
+          # Qt libraries from the (read-only) mount.
+          cat > AppDir/AppRun <<'EOF'
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "$0")")"
+          export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
+          export QT_PLUGIN_PATH="$HERE/usr/plugins"
+          export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/usr/plugins/platforms"
+          INSTALL="${KFX_ALPHA_PREFIX:-$HOME/.local/share/keeperfx-alpha}"
+          mkdir -p "$INSTALL"
+          cp -f "$HERE/usr/bin/keeperfx-launcher-qt" "$INSTALL/keeperfx-launcher-qt"
+          cp -f "$HERE/usr/bin/7z.so" "$INSTALL/7z.so" 2>/dev/null || true
+          cd "$INSTALL"
+          exec "$INSTALL/keeperfx-launcher-qt" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+
+      - name: Package the AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: 1
+          ARCH: x86_64
+        run: |
+          ./appimagetool-x86_64.AppImage AppDir KeeperFX-Linux-Alpha-x86_64.AppImage
+          ls -la KeeperFX-Linux-Alpha-x86_64.AppImage
+
+      - name: Upload the AppImage (downloadable from this CI run)
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeeperFX-Linux-Alpha-AppImage
+          path: KeeperFX-Linux-Alpha-x86_64.AppImage
+
+      - name: Attach to the release (only when triggered by a release)
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: KeeperFX-Linux-Alpha-x86_64.AppImage

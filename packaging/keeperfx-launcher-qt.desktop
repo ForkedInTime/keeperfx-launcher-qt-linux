@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=KeeperFX Linux Alpha
+Comment=Install, configure and play KeeperFX (Dungeon Keeper) on Linux
+Exec=keeperfx-launcher-qt
+Icon=keeperfx-launcher-qt
+Terminal=false
+Categories=Game;StrategyGame;
+Keywords=dungeon;keeper;keeperfx;
