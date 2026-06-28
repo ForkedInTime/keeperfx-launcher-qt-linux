@@ -1191,13 +1191,13 @@ void LauncherMainWindow::checkForKfxUpdate(bool ignoreInterval, bool showMessage
             } else {
                 qDebug() << "No updates found";
 
-                if(showMessageBox && latestVersionInfo->version == KfxVersion::currentVersion.version){
+                if(showMessageBox){
                     // Invoke so we can show the messagebox on the main GUI thread
                     QMetaObject::invokeMethod(this, [this]() {
                         QMessageBox::information(
                             this, // or a valid parent widget if available
                             tr("KeeperFX Update", "MessageBox Title"),
-                            tr("You are already on the latest version!", "MessageBox Text")
+                            tr("No updates at this time — you're on the latest version!", "MessageBox Text")
                         );
                     }, Qt::QueuedConnection);
                 }
