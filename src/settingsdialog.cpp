@@ -194,6 +194,12 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     for (auto [key, info] : CDN::getEndpointList()) {
         ui->comboBoxCDN->addItem(info.name, key);
     }
+#ifndef Q_OS_WINDOWS
+    // The Linux alpha downloads from our GitHub releases (served by GitHub's own
+    // worldwide CDN), so the keeperfx.net/Cloudflare picker does nothing here — hide it.
+    ui->comboBoxCDN->setVisible(false);
+    ui->labelCDN->setVisible(false);
+#endif
 
     // Screenshot type dropdown
     ui->comboBoxScreenshots->addItem("PNG (Portable Network Graphics)", "PNG");
