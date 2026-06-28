@@ -1,0 +1,34 @@
+# Flatpak that reuses the same fully-bundled tree as the AppImage (AppDir/), so one
+# CI run produces both formats. Unconventional (we bundle our own libraries rather
+# than building against the runtime) but it lets us self-distribute a single .flatpak
+# without re-solving the whole dependency tree. Not intended for Flathub.
+app-id: io.github.forkedintime.KeeperFXLinuxAlpha
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: keeperfx-flatpak-wrapper
+
+finish-args:
+  - --share=network                 # the launcher downloads game updates
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --device=dri                    # GPU access (OpenGL)
+  - --filesystem=home               # so the launcher can find your Dungeon Keeper install
+
+modules:
+  - name: keeperfx
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/lib /app/plugins /app/keeperfx-app /app/share/keeperfx /app/bin
+      - cp -a AppDir/usr/lib/. /app/lib/
+      - 'if [ -d AppDir/usr/plugins ]; then cp -a AppDir/usr/plugins/. /app/plugins/; fi'
+      - cp -a AppDir/usr/bin/. /app/keeperfx-app/
+      - cp -a AppDir/payload /app/share/keeperfx/payload
+      - install -Dm755 packaging/keeperfx-flatpak-wrapper /app/bin/keeperfx-flatpak-wrapper
+      - install -Dm644 packaging/io.github.forkedintime.KeeperFXLinuxAlpha.desktop /app/share/applications/io.github.forkedintime.KeeperFXLinuxAlpha.desktop
+      - install -Dm644 AppDir/usr/share/icons/hicolor/256x256/apps/keeperfx-launcher-qt.png /app/share/icons/hicolor/256x256/apps/io.github.forkedintime.KeeperFXLinuxAlpha.png
+    sources:
+      - type: dir
+        path: .

@@ -1,0 +1,24 @@
+#!/bin/bash
+# Flatpak entry point. The launcher assumes it lives in the game's install folder
+# (it reads/writes config and finds the engine in its own directory), so we deploy
+# the bundled game into a writable per-app data dir and run the launcher from there.
+# Bundled libraries live read-only in /app/lib.
+export LD_LIBRARY_PATH="/app/lib:${LD_LIBRARY_PATH}"
+export QT_PLUGIN_PATH="/app/plugins"
+export QT_QPA_PLATFORM_PLUGIN_PATH="/app/plugins/platforms"
+
+INSTALL="${XDG_DATA_HOME:-$HOME/.local/share}/keeperfx-alpha"
+mkdir -p "$INSTALL"
+
+# Deploy the bundled game payload once (or when the version changes).
+NEWVER="$(cat /app/share/keeperfx/payload/version.txt 2>/dev/null)"
+if [ "$(cat "$INSTALL/.bundled-version" 2>/dev/null)" != "$NEWVER" ]; then
+    cp -rf /app/share/keeperfx/payload/. "$INSTALL/"
+    echo "$NEWVER" > "$INSTALL/.bundled-version"
+fi
+cp -f /app/keeperfx-app/keeperfx-launcher-qt "$INSTALL/keeperfx-launcher-qt"
+cp -f /app/keeperfx-app/7z.so "$INSTALL/7z.so" 2>/dev/null || true
+chmod +x "$INSTALL/keeperfx-launcher-qt" "$INSTALL/keeperfx" 2>/dev/null || true
+
+cd "$INSTALL"
+exec "$INSTALL/keeperfx-launcher-qt" "$@"

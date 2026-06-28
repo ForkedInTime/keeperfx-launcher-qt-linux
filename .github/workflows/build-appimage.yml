@@ -2,7 +2,7 @@
 # launcher + engine + every library + the free game data, all in one file. The user
 # downloads it, runs it, and the only thing it ever needs is their own Dungeon Keeper
 # files. Runs on GitHub's servers.
-name: Build Self-Contained AppImage
+name: Build Self-Contained AppImage + Flatpak
 
 on:
   release:
@@ -146,8 +146,36 @@ jobs:
           name: KeeperFX-Linux-Alpha-AppImage
           path: KeeperFX-Linux-Alpha-x86_64.AppImage
 
-      - name: Attach to the release (only when triggered by a release)
+      - name: Attach the AppImage to the release (only when triggered by a release)
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: KeeperFX-Linux-Alpha-x86_64.AppImage
+
+      # ---- Flatpak: reuse the same bundled AppDir, wrap it as a .flatpak ----
+      - name: Install Flatpak + builder + runtime
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+
+      - name: Build the Flatpak bundle
+        run: |
+          flatpak-builder --user --force-clean --repo=fp-repo fp-build \
+            packaging/io.github.forkedintime.KeeperFXLinuxAlpha.yml
+          flatpak build-bundle fp-repo KeeperFX-Linux-Alpha-x86_64.flatpak \
+            io.github.forkedintime.KeeperFXLinuxAlpha \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+          ls -la KeeperFX-Linux-Alpha-x86_64.flatpak
+
+      - name: Upload the Flatpak (downloadable from this CI run)
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeeperFX-Linux-Alpha-Flatpak
+          path: KeeperFX-Linux-Alpha-x86_64.flatpak
+
+      - name: Attach the Flatpak to the release (only when triggered by a release)
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: KeeperFX-Linux-Alpha-x86_64.flatpak
