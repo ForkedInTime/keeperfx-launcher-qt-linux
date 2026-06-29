@@ -275,6 +275,56 @@ QUrl ApiClient::getDownloadUrlMusic()
     return QUrl(fileDownloadString);
 }
 
+QUrl ApiClient::getDownloadUrlMapEditor()
+{
+    // The Unearth map editor is hosted on its own GitHub repo, NOT keeperfx.net.
+    // Query the latest release directly via the raw GitHub API.
+    QNetworkAccessManager manager;
+    QNetworkRequest req(QUrl("https://api.github.com/repos/rainlizard/Unearth/releases/latest"));
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
+    req.setRawHeader("Accept", "application/vnd.github+json");
+
+    QNetworkReply *reply = manager.get(req);
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Map editor download URL: request failed:" << reply->errorString();
+        reply->deleteLater();
+        return QUrl();
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    reply->deleteLater();
+    if (doc.isObject() == false) {
+        qWarning() << "Map editor download URL: invalid response";
+        return QUrl();
+    }
+
+    // Platform-specific asset name token
+#ifdef Q_OS_WINDOWS
+    const QString platformToken = "windows";
+#else
+    const QString platformToken = "linux";
+#endif
+
+    // Find the matching asset: name contains the platform token and ends with ".zip"
+    const QJsonArray assets = doc.object()["assets"].toArray();
+    for (const QJsonValue &a : assets) {
+        const QString name = a.toObject()["name"].toString();
+        if (name.contains(platformToken, Qt::CaseInsensitive)
+            && name.endsWith(".zip", Qt::CaseInsensitive)) {
+            const QString downloadUrl = a.toObject()["browser_download_url"].toString();
+            qDebug() << "Map editor download URL:" << downloadUrl;
+            return QUrl(downloadUrl);
+        }
+    }
+
+    qWarning() << "Map editor download URL: no matching asset found";
+    return QUrl();
+}
+
 std::optional<QMap<QString, QString>> ApiClient::getGameFileList(KfxVersion::ReleaseType type,
                                                                  QString version)
 {

@@ -57,8 +57,19 @@ bit7z::BitArchiveReader Archiver::getReader(std::string filePath)
     // Make sure library is loaded
     Archiver::loadBit7zLib();
 
-    // Create the reader
-    // For now only 7z because we use .tmp file extension
+    // Pick the archive format based on the real file extension.
+    // Downloads are saved as "<original-name>.tmp" (e.g. "foo.zip.tmp"),
+    // so strip a trailing ".tmp" before inspecting the extension.
+    QString path = QString::fromStdString(filePath);
+    if (path.endsWith(".tmp", Qt::CaseInsensitive)) {
+        path.chop(4);
+    }
+
+    if (path.endsWith(".zip", Qt::CaseInsensitive)) {
+        return bit7z::BitArchiveReader{*lib, filePath, bit7z::BitFormat::Zip};
+    }
+
+    // Default: 7zip archive
     return bit7z::BitArchiveReader{*lib, filePath, bit7z::BitFormat::SevenZip};
 }
 

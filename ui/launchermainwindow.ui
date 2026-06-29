@@ -342,7 +342,10 @@
           <font/>
          </property>
          <property name="text">
-          <string notr="true" comment="Button">Unearth</string>
+          <string comment="Button">Map Editor</string>
+         </property>
+         <property name="toolTip">
+          <string comment="Tooltip">Create and edit maps with Unearth</string>
          </property>
         </widget>
        </item>

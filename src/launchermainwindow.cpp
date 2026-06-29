@@ -23,6 +23,7 @@
 #include "copydkfilesdialog.h"
 #include "directconnectdialog.h"
 #include "dkfiles.h"
+#include "downloadmapeditordialog.h"
 #include "downloadmusicdialog.h"
 #include "enetservertestdialog.h"
 #include "fileremover.h"
@@ -537,9 +538,16 @@ void LauncherMainWindow::refreshInstallationAwareButtons() {
         }
     }
 
-    // Unearth button visibility
+    // Unearth (Map Editor) button visibility
+#ifdef Q_OS_WINDOWS
+    // On Windows only show the button if the editor is already present.
     QFile unearthBinary = Helper::getUnearthBinary();
     ui->unearthButton->setVisible(unearthBinary.exists());
+#else
+    // On Linux the button is always shown; clicking it offers to download
+    // and install the Unearth map editor when it is not yet present.
+    ui->unearthButton->setVisible(true);
+#endif
 
     // Mods button visibility
     //ui->modsButton->setVisible(ModManager::isModsFunctionalityAvailable());
@@ -1350,19 +1358,41 @@ void LauncherMainWindow::on_openFolderButton_clicked()
 
 void LauncherMainWindow::on_unearthButton_clicked()
 {
-    // Get file
-    QFile unearthBinary = Helper::getUnearthBinary();
+    // Get file (QFile is non-copyable, so work with the resolved path string)
+    QString unearthPath = Helper::getUnearthBinary().fileName();
 
-    // Make sure it is accessible
-    if (unearthBinary.exists() == false) {
-        qWarning() << "Unearth Binary can not be started because it does not exist or is not accessible:" << unearthBinary.fileName();
+    // If the editor is not installed, offer to download and install it.
+    if (unearthPath.isEmpty()) {
+#ifdef Q_OS_WINDOWS
+        qWarning() << "Unearth Binary can not be started because it does not exist or is not accessible";
         return;
+#else
+        qDebug() << "Unearth not found. Offering to download the map editor.";
+
+        DownloadMapEditorDialog downloadMapEditorDialog(this);
+        downloadMapEditorDialog.exec();
+
+        // Re-check for the binary after the dialog returns.
+        unearthPath = Helper::getUnearthBinary().fileName();
+        if (unearthPath.isEmpty()) {
+            qDebug() << "Unearth still not found after download dialog. Not launching.";
+            return;
+        }
+#endif
     }
 
-    qDebug() << "Starting Unearth:" << unearthBinary.fileName();
+    qDebug() << "Starting Unearth:" << unearthPath;
+
+    // On Linux/Wayland, Unearth's engine (Godot 3.5) renders a black window through
+    // XWayland with the GLES3 driver on NVIDIA. GLES2 is more than enough for a 2D
+    // map editor and avoids that broken path. (No extra args on Windows.)
+    QStringList unearthArgs;
+#ifndef Q_OS_WINDOWS
+    unearthArgs << "--video-driver" << "GLES2";
+#endif
 
     // Start the process
-    if(QProcess::startDetached(unearthBinary.fileName()) == true){
+    if(QProcess::startDetached(unearthPath, unearthArgs) == true){
         qDebug() << "Unearth process started";
         return;
     }
@@ -1373,14 +1403,14 @@ void LauncherMainWindow::on_unearthButton_clicked()
 #ifdef Q_OS_UNIX
         qDebug() << "Unearth binary might not be executable. Trying to set permission (UNIX)";
 
-        if(Helper::makeBinaryExecutable(unearthBinary.fileName()) == false){
+        if(Helper::makeBinaryExecutable(unearthPath) == false){
             qWarning() << "Failed to update Unearth binary file permissions";
             return;
         }
 
         qDebug() << "Unearth binary file permissions updated";
 
-        if(QProcess::startDetached(unearthBinary.fileName()) == false){
+        if(QProcess::startDetached(unearthPath, unearthArgs) == false){
             qWarning() << "Failed to start Unearth binary even after updating file permissions";
             return;
         }
