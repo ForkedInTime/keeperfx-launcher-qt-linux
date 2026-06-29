@@ -165,23 +165,12 @@ void DownloadMapEditorDialog::onExtractComplete()
         archiveFile->remove();
     }
 
-    // On Linux, Unearth's "Save & Play" asks for a Windows-style game executable
-    // (keeperfx.exe). Create a symlink to the native binary so it can find and run
-    // the game — Linux executes by file content, not by the .exe name.
-#ifndef Q_OS_WINDOWS
-    {
-        const QString appDir = QCoreApplication::applicationDirPath();
-        const QString nativeBin = appDir + "/keeperfx";
-        const QString exeLink = appDir + "/keeperfx.exe";
-        if (QFile::exists(nativeBin) && !QFile::exists(exeLink)) {
-            if (QFile::link(nativeBin, exeLink)) {
-                emit appendLog("Created keeperfx.exe symlink for the map editor's Save & Play");
-            } else {
-                emit appendLog("Could not create keeperfx.exe symlink (Save & Play may need it set manually)");
-            }
-        }
-    }
-#endif
+    // NOTE: we deliberately do NOT create a keeperfx.exe symlink here. Unearth's
+    // "Save & Play" would only run it through Wine (it assumes a Windows binary),
+    // which fails against the native Linux build — and a keeperfx.exe in the install
+    // dir confuses the launcher's own version detection. Map editing/saving works
+    // fine without it; maps are tested via KeeperFX's own Play. (Deferred: native
+    // Save & Play integration.)
 
     // Done!
     emit appendLog("Done!");
