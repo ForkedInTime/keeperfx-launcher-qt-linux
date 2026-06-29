@@ -25,6 +25,7 @@ public:
     static QUrl getDownloadUrlStable();
     static QUrl getDownloadUrlAlpha();
     static QUrl getDownloadUrlMusic();
+    static QUrl getDownloadUrlMapEditor();
 
     static std::optional<QMap<QString, QString>> getGameFileList(KfxVersion::ReleaseType type, QString version);
 };
