@@ -95,6 +95,14 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
     sortLanguageComboBox(ui->comboBoxLanguage);
 
+    // Launcher size (accessibility): scale the whole launcher UI. Applied at
+    // startup via QT_SCALE_FACTOR (see applySavedUiScale() in main.cpp).
+    ui->comboBoxUiScale->addItem(tr("Normal (100%)", "Launcher Size Dropdown"), "1.0");
+    ui->comboBoxUiScale->addItem(tr("Large (125%)", "Launcher Size Dropdown"), "1.25");
+    ui->comboBoxUiScale->addItem(tr("Larger (150%)", "Launcher Size Dropdown"), "1.5");
+    ui->comboBoxUiScale->addItem(tr("Huge (175%)", "Launcher Size Dropdown"), "1.75");
+    ui->comboBoxUiScale->addItem(tr("Largest (200%)", "Launcher Size Dropdown"), "2.0");
+
     // Exit on LUA error
     if (KfxVersion::hasFunctionality("exit_on_lua_error") == false) {
         ui->checkBoxExitOnLuaError->setDisabled(true);
@@ -806,6 +814,9 @@ void SettingsDialog::loadSettings()
     ui->checkBoxAutoRemoveLeftoverFiles->setChecked(Settings::getLauncherSetting("AUTO_REMOVE_LEFTOVER_FILES") == true);
 
     ui->comboBoxCDN->setCurrentIndex(ui->comboBoxCDN->findData(Settings::getLauncherSetting("CDN_ENDPOINT").toString()));
+
+    int uiScaleIndex = ui->comboBoxUiScale->findData(Settings::getLauncherSetting("LAUNCHER_UI_SCALE").toString());
+    ui->comboBoxUiScale->setCurrentIndex(uiScaleIndex >= 0 ? uiScaleIndex : 0);
 }
 
 void SettingsDialog::saveSettings()
@@ -1042,8 +1053,21 @@ void SettingsDialog::saveSettings()
 
     Settings::setLauncherSetting("CDN_ENDPOINT", ui->comboBoxCDN->currentData().toString());
 
+    // Launcher size (accessibility). QT_SCALE_FACTOR must be set before the
+    // application starts, so a change only takes effect on the next launch.
+    const QString oldUiScale = Settings::getLauncherSetting("LAUNCHER_UI_SCALE").toString();
+    const QString newUiScale = ui->comboBoxUiScale->currentData().toString();
+    Settings::setLauncherSetting("LAUNCHER_UI_SCALE", newUiScale);
+    bool uiScaleChanged = (newUiScale != oldUiScale);
+
     // Close the settings screen
     this->close();
+
+    if (uiScaleChanged) {
+        QMessageBox::information(this,
+            tr("KeeperFX Settings", "MessageBox Title"),
+            tr("The new launcher size will take effect the next time you open the launcher.", "MessageBox Text"));
+    }
 }
 
 void SettingsDialog::restoreSettings()

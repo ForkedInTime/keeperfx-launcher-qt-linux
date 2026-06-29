@@ -35,6 +35,7 @@ QMap<QString, QVariant> Settings::defaultLauncherSettingsMap = {
     {"SHOW_DIR_NAME_IN_WINDOW_TITLE", false},
     {"AUTO_REMOVE_LEFTOVER_FILES", false},
     {"CDN_ENDPOINT", "keeperfx.net"},
+    {"LAUNCHER_UI_SCALE", "1.0"}, // whole-launcher UI scale (accessibility); applied via QT_SCALE_FACTOR at startup
     {"EXTRA_GAME_LAUNCH_OPTIONS", ""},
 
     // Stuff to remember

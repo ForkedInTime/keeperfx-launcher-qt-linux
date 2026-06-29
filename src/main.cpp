@@ -55,8 +55,58 @@ void setDarkTheme()
     )");
 }
 
+#ifndef Q_OS_WINDOWS
+#include <unistd.h> // readlink
+// Apply the user's saved "Launcher size" BEFORE QApplication is constructed —
+// Qt only reads QT_SCALE_FACTOR during application init. This is what lets a
+// player enlarge the whole launcher for readability (Settings > Launcher).
+static void applySavedUiScale()
+{
+    // Respect an explicit environment override (e.g. power users / debugging)
+    if (qEnvironmentVariableIsSet("QT_SCALE_FACTOR")) {
+        return;
+    }
+
+    // QCoreApplication isn't up yet, so resolve our own binary's directory
+    // directly to find the launcher config that sits next to it.
+    char buf[4096];
+    ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (n <= 0) {
+        return;
+    }
+    const QString cfgPath =
+        QFileInfo(QString::fromLocal8Bit(buf, static_cast<int>(n))).absolutePath()
+        + "/keeperfx-launcher-qt.cfg";
+
+    QFile cfgFile(cfgPath);
+    if (!cfgFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
+    const QByteArray needle = "LAUNCHER_UI_SCALE=";
+    while (!cfgFile.atEnd()) {
+        const QByteArray line = cfgFile.readLine().trimmed();
+        if (!line.startsWith(needle)) {
+            continue;
+        }
+        const QString value = QString::fromLatin1(line.mid(needle.size())).trimmed();
+        bool ok = false;
+        const double scale = value.toDouble(&ok);
+        if (ok && scale > 1.0 && scale <= 3.0) {
+            qputenv("QT_SCALE_FACTOR", value.toLatin1());
+        }
+        break;
+    }
+}
+#endif
+
 int main(int argc, char *argv[])
 {
+#ifndef Q_OS_WINDOWS
+    // Must run before QApplication is created.
+    applySavedUiScale();
+#endif
+
     // Create the App
     QApplication app(argc, argv);
     QApplication::setApplicationName("KeeperFX Launcher");
