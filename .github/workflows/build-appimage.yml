@@ -79,11 +79,15 @@ jobs:
           7z x -bso0 keeperfx-linux-alpha-x86_64-full.7z -opkg
           P="$APPDIR/payload"
           mkdir -p "$P"
-          cp -rf pkg/keeperfx-linux-alpha/. "$P/"
+          cp -rf pkg/. "$P/"                                # the full.7z is FLAT (files at root)
           # overwrite with the 24.04-built engine + fonts + version
           cp -f engine/bin/keeperfx "$P/keeperfx"
           cp -f engine/tools/fxfontmaker/*.fxfont "$P/fxdata/"
           sed -n 's/.*VER_STRING  "\(.*\)".*/\1/p' engine/src/ver_defs.h > "$P/version.txt"
+          # include the launcher + 7z.so IN the payload, so an in-launcher update (which
+          # downloads this same package) updates the LAUNCHER too — not just the engine.
+          cp -f build/keeperfx-launcher-qt "$P/keeperfx-launcher-qt"
+          cp -f ext/7z.so "$P/7z.so"
           # also put the engine in usr/bin so linuxdeploy bundles ITS libraries (removed after)
           cp -f engine/bin/keeperfx "$APPDIR/usr/bin/keeperfx"
           echo "payload size: $(du -sh "$P" | cut -f1)"
@@ -136,8 +140,11 @@ jobs:
             cp -rf "$HERE/payload/." "$INSTALL/"
             echo "$NEWVER" > "$INSTALL/.bundled-version"
           fi
-          cp -f "$HERE/usr/bin/keeperfx-launcher-qt" "$INSTALL/keeperfx-launcher-qt"
-          cp -f "$HERE/usr/bin/7z.so" "$INSTALL/7z.so" 2>/dev/null || true
+          # The launcher + 7z.so live in the payload (deployed above), so an in-launcher
+          # update can replace them. Only place them if MISSING — never clobber, or we'd
+          # revert a launcher that the in-launcher update just upgraded.
+          [ -x "$INSTALL/keeperfx-launcher-qt" ] || cp -f "$HERE/payload/keeperfx-launcher-qt" "$INSTALL/keeperfx-launcher-qt"
+          [ -f "$INSTALL/7z.so" ] || cp -f "$HERE/payload/7z.so" "$INSTALL/7z.so" 2>/dev/null || true
           # Add an applications-menu entry so it's launchable like any installed game,
           # not just by finding the AppImage file. $APPIMAGE is the AppImage's own path.
           if [ -n "$APPIMAGE" ]; then
