@@ -10,6 +10,7 @@ class ModManager
 {
 public:
     ModManager();
+    ~ModManager();
 
     static bool isModsFunctionalityAvailable()
     {
