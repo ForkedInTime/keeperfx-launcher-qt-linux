@@ -260,16 +260,12 @@ public:
 #endif
     }
 
-    // Open a URL (or local file) in the user's default browser/app.
-    //
-    // Under the AppImage we run with LD_LIBRARY_PATH / QT_* / GIO_* pointing at our
-    // bundled libraries. If those leak into the spawned handler (xdg-open -> browser or
-    // text editor) it fails to start, so nothing happens when the user clicks "Workshop",
-    // "Open log", etc. On Linux we launch xdg-open with a cleaned environment first, and
-    // only fall back to Qt's handler if that can't start.
-    static void openUrl(const QUrl &url)
+    // A process environment with our bundled-AppImage vars stripped. Under the AppImage we
+    // run with LD_LIBRARY_PATH / QT_* / GIO_* pointing at our bundled libraries; if those
+    // leak into a spawned SYSTEM tool (browser, file manager, the Unearth editor, ...) it
+    // fails to start. Removing a var that isn't set is a no-op, so this is safe everywhere.
+    static QProcessEnvironment cleanedEnvironment()
     {
-#ifdef Q_OS_UNIX
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
         const QStringList bundledVars = {
             QStringLiteral("LD_LIBRARY_PATH"), QStringLiteral("LD_PRELOAD"),
@@ -280,11 +276,27 @@ public:
         for (const QString &var : bundledVars) {
             env.remove(var);
         }
+        return env;
+    }
+
+    // startDetached() for launching an EXTERNAL/system binary with the cleaned environment.
+    static bool startDetachedClean(const QString &program, const QStringList &args)
+    {
         QProcess proc;
-        proc.setProgram(QStringLiteral("xdg-open"));
-        proc.setArguments({url.isLocalFile() ? url.toLocalFile() : url.toString()});
-        proc.setProcessEnvironment(env);
-        if (proc.startDetached()) {
+        proc.setProgram(program);
+        proc.setArguments(args);
+        proc.setProcessEnvironment(cleanedEnvironment());
+        return proc.startDetached();
+    }
+
+    // Open a URL (or local file) in the user's default browser/app. On Linux we launch
+    // xdg-open with the cleaned environment first (see cleanedEnvironment), falling back to
+    // Qt's handler only if that can't start.
+    static void openUrl(const QUrl &url)
+    {
+#ifdef Q_OS_UNIX
+        if (startDetachedClean(QStringLiteral("xdg-open"),
+                               {url.isLocalFile() ? url.toLocalFile() : url.toString()})) {
             return;
         }
         qWarning() << "Helper::openUrl: xdg-open failed; falling back to QDesktopServices";

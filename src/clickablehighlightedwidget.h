@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 #include <QEnterEvent>
 #include <QResizeEvent>
-#include <QDesktopServices>
+#include "helper.h"
 
 class ClickableHighlightedWidget : public QWidget
 {
@@ -24,7 +24,7 @@ protected:
     // Handle mouse press event
     void mousePressEvent(QMouseEvent *event) override {
         QWidget::mousePressEvent(event);  // Call base class event
-        QDesktopServices::openUrl(targetUrl);
+        Helper::openUrl(targetUrl);       // cleaned-env open (see Helper::openUrl)
     }
 
     // Handle hover enter event
