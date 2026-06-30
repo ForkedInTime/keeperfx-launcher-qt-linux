@@ -58,6 +58,30 @@ bool copyRecursively(const QString &src, const QString &dst)
     return QFile::copy(src, dst);
 }
 
+// Like copyRecursively, but NEVER overwrites an existing destination file. Used for the
+// container merge (campgns/levels/mods/multiplayer) so a careless or crafted archive can't
+// clobber stock campaigns/maps or another add-on's files. Returns how many files were
+// skipped because they already existed.
+int copyRecursivelyNoClobber(const QString &src, const QString &dst)
+{
+    QFileInfo info(src);
+    if (info.isDir()) {
+        QDir().mkpath(dst);
+        int skipped = 0;
+        const QStringList entries = QDir(src).entryList(
+            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden);
+        for (const QString &entry : entries) {
+            skipped += copyRecursivelyNoClobber(src + "/" + entry, dst + "/" + entry);
+        }
+        return skipped;
+    }
+    if (QFileInfo::exists(dst)) {
+        return 1; // already present — keep it, don't overwrite
+    }
+    QFile::copy(src, dst);
+    return 0;
+}
+
 // Workshop mods don't always ship a mod.cfg; without one the manager can't list
 // them. Write a minimal one so the mod shows up and is toggleable.
 void writeStubModCfg(const QString &dir, const QString &modName, const QString &archiveName)
@@ -234,9 +258,10 @@ void ModManagerDialog::on_installButton_clicked()
             installed << tr("Multiplayer maps");
         }
 
-        if (!copyRecursively(src, dst)) {
-            QMessageBox::warning(this, tr("Install failed"),
-                                 tr("Could not copy the '%1' folder into the game directory.").arg(kind));
+        // No-clobber merge: keep existing files (stock campaigns/maps, other add-ons)
+        const int kept = copyRecursivelyNoClobber(src, dst);
+        if (kept > 0) {
+            installed << tr("(kept %1 existing file(s) in '%2', not overwritten)").arg(kept).arg(kind);
         }
 
         // Mods shipped without a mod.cfg still need one to list in the manager
