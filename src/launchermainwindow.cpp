@@ -550,8 +550,7 @@ void LauncherMainWindow::refreshInstallationAwareButtons() {
 #endif
 
     // Mods button visibility
-    //ui->modsButton->setVisible(ModManager::isModsFunctionalityAvailable());
-    ui->modsButton->setVisible(false);
+    ui->modsButton->setVisible(ModManager::isModsFunctionalityAvailable());
 }
 
 void LauncherMainWindow::refreshLogfileButton() {

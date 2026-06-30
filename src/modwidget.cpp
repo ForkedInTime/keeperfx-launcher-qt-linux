@@ -6,8 +6,12 @@
 ModWidget::ModWidget(Mod *mod, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ModWidget)
+    , mod(mod)
 {
     ui->setupUi(this);
+
+    // Set the enabled checkbox state from the mod
+    ui->enabledCheckBox->setChecked(mod->enabled);
 
     // Load name
     if (mod->nameTranslated.isEmpty() == false) {
@@ -58,4 +62,10 @@ ModWidget::ModWidget(Mod *mod, QWidget *parent)
 ModWidget::~ModWidget()
 {
     delete ui;
+}
+
+void ModWidget::on_enabledCheckBox_toggled(bool checked)
+{
+    mod->enabled = checked;
+    emit enabledChanged();
 }

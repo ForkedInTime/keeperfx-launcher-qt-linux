@@ -12,6 +12,13 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
+    <widget class="QCheckBox" name="enabledCheckBox">
+     <property name="text">
+      <string>Enabled</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

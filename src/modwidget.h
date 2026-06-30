@@ -14,6 +14,12 @@ public:
     explicit ModWidget(Mod *mod, QWidget *parent = nullptr);
     ~ModWidget();
 
+signals:
+    void enabledChanged();
+
+private slots:
+    void on_enabledCheckBox_toggled(bool checked);
+
 private:
     Ui::ModWidget *ui;
 
