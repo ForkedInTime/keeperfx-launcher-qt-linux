@@ -27,6 +27,10 @@ public:
     QList<Mod *> modsAfterCampaign;
     QList<Mod *> modsAfterMap;
 
+    QList<Mod *> allMods() const { return mods; }
+
+    static bool writeLoadOrder(const QList<Mod *> &mods);
+
 private:
 
     QList<Mod *> mods;

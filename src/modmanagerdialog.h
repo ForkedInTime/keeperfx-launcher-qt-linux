@@ -4,6 +4,8 @@
 
 namespace Ui { class ModManagerDialog; }
 
+class ModManager;
+
 class ModManagerDialog : public QDialog
 {
     Q_OBJECT
@@ -14,7 +16,10 @@ public:
 
 private slots:
     void on_closeButton_clicked();
+    void saveLoadOrder();
 
 private:
     Ui::ModManagerDialog *ui;
+
+    ModManager *manager;
 };

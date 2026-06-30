@@ -17,6 +17,10 @@ public:
     QString identifier;
     QDir directory;
 
+    // Load order state
+    bool enabled = false;
+    QString loadOrderSection = "after_base";
+
     // Info
     QString name;
     QString author;
