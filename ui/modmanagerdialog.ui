@@ -143,10 +143,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Install a mod from a .7z or .zip archive (e.g. a keeperfx.net workshop download)</string>
+           <string>Install a mod, campaign, or map pack from a .7z or .zip archive (e.g. a keeperfx.net workshop download)</string>
           </property>
           <property name="text">
-           <string>Install mod…</string>
+           <string>Install…</string>
           </property>
          </widget>
         </item>

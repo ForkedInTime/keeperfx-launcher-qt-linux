@@ -75,6 +75,33 @@ void writeStubModCfg(const QString &dir, const QString &modName, const QString &
     file.close();
 }
 
+// Read a campaign's display name from its .cfg (the "NAME = ..." line), so the
+// install summary shows "Another Dungeon" rather than "anthrdunj".
+QString campaignDisplayName(const QString &cfgPath)
+{
+    QFile file(cfgPath);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            const QString line = in.readLine().trimmed();
+            if (line.isEmpty() || line.startsWith(';') || line.startsWith('#')) {
+                continue;
+            }
+            const int eq = line.indexOf('=');
+            if (eq <= 0) {
+                continue;
+            }
+            if (line.left(eq).trimmed().compare("NAME", Qt::CaseInsensitive) == 0) {
+                const QString value = line.mid(eq + 1).trimmed();
+                if (!value.isEmpty()) {
+                    return value;
+                }
+            }
+        }
+    }
+    return QFileInfo(cfgPath).completeBaseName();
+}
+
 } // namespace
 
 ModManagerDialog::ModManagerDialog(QWidget *parent)
@@ -119,7 +146,7 @@ void ModManagerDialog::reloadMods()
         }
     } else {
         QLabel *emptyLabel = new QLabel(
-            tr("No mods installed. Use “Install mod…”, or drop a mod folder into the 'mods' folder."),
+            tr("No mods installed. Use “Install…”, or drop a mod folder into the 'mods' folder."),
             this);
         emptyLabel->setWordWrap(true);
         layout->addWidget(emptyLabel);
@@ -131,26 +158,22 @@ void ModManagerDialog::reloadMods()
 
 void ModManagerDialog::on_installButton_clicked()
 {
-    // Pick the archive
+    // Pick the archive (a keeperfx.net workshop download: mod, campaign or map pack)
     const QString archivePath = QFileDialog::getOpenFileName(
         this,
-        tr("Select a mod archive"),
+        tr("Install add-on (mod, campaign, or map pack)"),
         QDir::homePath(),
-        tr("Mod archives (*.7z *.zip)"));
+        tr("KeeperFX add-ons (*.7z *.zip)"));
     if (archivePath.isEmpty()) {
         return;
     }
 
     const QString archiveName = QFileInfo(archivePath).fileName();
-    const QString modsRoot = QCoreApplication::applicationDirPath() + "/mods";
-    QDir modsDir(modsRoot);
-    if (!modsDir.exists()) {
-        QDir().mkpath(modsRoot);
-    }
+    const QString gameRoot = QCoreApplication::applicationDirPath();
 
-    // Extract into a temp dir on the SAME filesystem as the mods folder, so the
-    // installed files can be moved/copied into place without a cross-device issue.
-    const QString tmpPath = modsDir.absoluteFilePath(".kfx-install-tmp");
+    // Extract into a temp dir on the SAME filesystem as the install, so files can be
+    // merged into place without a cross-device copy.
+    const QString tmpPath = gameRoot + "/.kfx-install-tmp";
     QDir tmpDir(tmpPath);
     if (tmpDir.exists()) {
         tmpDir.removeRecursively();
@@ -165,81 +188,133 @@ void ModManagerDialog::on_installButton_clicked()
         bit7z::BitArchiveReader reader = Archiver::getReader(archivePath.toStdString());
         reader.extractTo(tmpPath.toStdString());
     } catch (const bit7z::BitException &ex) {
-        qWarning() << "Mod install: extract failed:" << ex.what();
+        qWarning() << "Add-on install: extract failed:" << ex.what();
         QMessageBox::warning(this, tr("Install failed"),
                              tr("Could not extract the archive:\n%1").arg(ex.what()));
         tmpDir.removeRecursively();
         return;
     }
 
-    // Find the mods inside the extracted tree. Workshop archives wrap everything in
-    // a top-level "mods/" folder; others ship the mod folder (or its bare contents)
-    // at the root.
-    QString base = tmpPath;
-    if (QFileInfo(tmpPath + "/mods").isDir()) {
-        base = tmpPath + "/mods";
-    }
+    QStringList installed;     // human-readable summary lines
+    bool installedMod = false; // whether a mod (vs only campaign/map pack) was added
 
-    QList<QPair<QString, QString>> found; // (name, sourcePath)
-    if (looksLikeMod(base)) {
-        // A single bare mod (content at the root) -> name it after the archive
-        found.append({QFileInfo(archivePath).completeBaseName(), base});
-    } else {
-        const QStringList subDirs = QDir(base).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-        for (const QString &subDir : subDirs) {
-            found.append({subDir, base + "/" + subDir});
-        }
-    }
+    // Case 1 — "extract into the game directory": the archive has one or more known
+    // container folders at its root (campgns/, mods/, levels/, multiplayer/). This is
+    // how workshop campaigns, mods and map packs ship. Merge each into the install,
+    // leaving other add-ons' files untouched. We only ever touch these known folders,
+    // so a stray root file can't overwrite core game config.
+    static const QStringList kContainers = {"campgns", "mods", "levels", "multiplayer"};
+    const QStringList topDirs = QDir(tmpPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    bool handledAsContainer = false;
 
-    if (found.isEmpty()) {
-        QMessageBox::warning(this, tr("Nothing to install"),
-                             tr("No mod was found inside %1.").arg(archiveName));
-        tmpDir.removeRecursively();
-        return;
-    }
-
-    // Install each mod folder
-    QStringList installed;
-    for (const auto &entry : std::as_const(found)) {
-        QString name = entry.first;
-        name.replace('/', '_').replace('\\', '_'); // never let a name escape mods/
-        const QString dest = modsDir.absoluteFilePath(name);
-
-        if (QFileInfo::exists(dest)) {
-            const auto answer = QMessageBox::question(
-                this, tr("Replace mod?"),
-                tr("“%1” is already installed. Replace it?").arg(name));
-            if (answer != QMessageBox::Yes) {
-                continue;
-            }
-            QDir(dest).removeRecursively();
-        }
-
-        if (!copyRecursively(entry.second, dest)) {
-            QMessageBox::warning(this, tr("Install failed"),
-                                 tr("Could not copy “%1” into the mods folder.").arg(name));
+    for (const QString &dirName : topDirs) {
+        const QString kind = dirName.toLower();
+        if (!kContainers.contains(kind)) {
             continue;
         }
+        handledAsContainer = true;
+        const QString src = tmpPath + "/" + dirName;
+        const QString dst = gameRoot + "/" + kind; // canonical lowercase install folder
 
-        // Give metadata-less mods a mod.cfg so they list nicely in the manager
-        if (!QFileInfo::exists(dest + "/mod.cfg")) {
-            writeStubModCfg(dest, name, archiveName);
+        // Summarise what's being added (before the merge)
+        if (kind == "campgns") {
+            const QStringList cfgs = QDir(src).entryList(QStringList{"*.cfg"}, QDir::Files);
+            for (const QString &cfg : cfgs) {
+                installed << tr("Campaign: %1").arg(campaignDisplayName(src + "/" + cfg));
+            }
+        } else if (kind == "mods") {
+            const QStringList modDirs = QDir(src).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &m : modDirs) {
+                installed << tr("Mod: %1").arg(m);
+            }
+            installedMod = installedMod || !modDirs.isEmpty();
+        } else if (kind == "levels") {
+            installed << tr("Map pack (added to 'levels')");
+        } else if (kind == "multiplayer") {
+            installed << tr("Multiplayer maps");
         }
 
-        installed << name;
+        if (!copyRecursively(src, dst)) {
+            QMessageBox::warning(this, tr("Install failed"),
+                                 tr("Could not copy the '%1' folder into the game directory.").arg(kind));
+        }
+
+        // Mods shipped without a mod.cfg still need one to list in the manager
+        if (kind == "mods") {
+            const QStringList modDirs = QDir(src).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &m : modDirs) {
+                const QString modDest = dst + "/" + m;
+                if (!QFileInfo::exists(modDest + "/mod.cfg")) {
+                    writeStubModCfg(modDest, m, archiveName);
+                }
+            }
+        }
+    }
+
+    // Case 2 — a bare mod: no container folder, just a mod folder (or its contents) at
+    // the archive root. Install it into mods/.
+    if (!handledAsContainer) {
+        const QString modsRoot = gameRoot + "/mods";
+        QDir modsDir(modsRoot);
+        if (!modsDir.exists()) {
+            QDir().mkpath(modsRoot);
+        }
+
+        QList<QPair<QString, QString>> found; // (name, sourcePath)
+        if (looksLikeMod(tmpPath)) {
+            found.append({QFileInfo(archivePath).completeBaseName(), tmpPath});
+        } else {
+            const QStringList subDirs = QDir(tmpPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &subDir : subDirs) {
+                found.append({subDir, tmpPath + "/" + subDir});
+            }
+        }
+
+        for (const auto &entry : std::as_const(found)) {
+            QString name = entry.first;
+            name.replace('/', '_').replace('\\', '_'); // never let a name escape mods/
+            const QString dest = modsDir.absoluteFilePath(name);
+
+            if (QFileInfo::exists(dest)) {
+                const auto answer = QMessageBox::question(
+                    this, tr("Replace mod?"),
+                    tr("“%1” is already installed. Replace it?").arg(name));
+                if (answer != QMessageBox::Yes) {
+                    continue;
+                }
+                QDir(dest).removeRecursively();
+            }
+            if (!copyRecursively(entry.second, dest)) {
+                QMessageBox::warning(this, tr("Install failed"),
+                                     tr("Could not copy “%1” into the mods folder.").arg(name));
+                continue;
+            }
+            if (!QFileInfo::exists(dest + "/mod.cfg")) {
+                writeStubModCfg(dest, name, archiveName);
+            }
+            installed << tr("Mod: %1").arg(name);
+            installedMod = true;
+        }
     }
 
     tmpDir.removeRecursively();
 
-    // Refresh the list so the newly installed mod(s) appear
+    // Refresh the mod list (campaigns/map packs show up in-game, not in this list)
     reloadMods();
 
     if (installed.isEmpty()) {
+        QMessageBox::warning(this, tr("Nothing to install"),
+                             tr("No mod, campaign or map pack was found inside %1.").arg(archiveName));
         return;
     }
-    QMessageBox::information(
-        this, tr("Mod installed"),
-        tr("Installed: %1\n\nTick “Enabled” to turn it on.").arg(installed.join(", ")));
+
+    QString body = tr("Installed from %1:").arg(archiveName) + "\n\n• " + installed.join("\n• ") + "\n\n";
+    if (installedMod) {
+        body += tr("Mods appear in this list — tick “Enabled” to turn them on. ");
+    }
+    body += tr("Campaigns and map packs appear in the game itself (Land selection / free play) "
+               "the next time you launch it.");
+    QMessageBox::information(this, tr("Add-on installed"), body);
 }
 
 void ModManagerDialog::saveLoadOrder()

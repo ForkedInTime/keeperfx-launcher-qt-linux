@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "launcheroptions.h"
 #include "cdn.h"
+#include "helper.h"
 
 #include <QDesktopServices>
 #include <QEvent>
@@ -1322,7 +1323,7 @@ void SettingsDialog::onOpenConfigButtonClicked()
     qDebug() << "Trying to open KeeperFX settings config file:" << configFilePath;
 
     // Open file using OS functionality
-    QDesktopServices::openUrl(QUrl::fromLocalFile(configFilePath));
+    Helper::openUrl(QUrl::fromLocalFile(configFilePath));
 }
 
 void SettingsDialog::on_pushButtonShowLauncherParams_clicked()
