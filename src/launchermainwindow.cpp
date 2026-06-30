@@ -1390,8 +1390,9 @@ void LauncherMainWindow::on_unearthButton_clicked()
     unearthArgs << "--video-driver" << "GLES2";
 #endif
 
-    // Start the process
-    if(QProcess::startDetached(unearthPath, unearthArgs) == true){
+    // Start the process with a cleaned environment, so our bundled AppImage libraries
+    // (LD_LIBRARY_PATH/Qt/GIO) don't leak into Unearth and stop it launching.
+    if(Helper::startDetachedClean(unearthPath, unearthArgs) == true){
         qDebug() << "Unearth process started";
         return;
     }
