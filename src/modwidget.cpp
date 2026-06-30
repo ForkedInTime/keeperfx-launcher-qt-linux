@@ -31,13 +31,22 @@ ModWidget::ModWidget(Mod *mod, QWidget *parent)
         ui->descriptionLabel->hide();
     }
 
-    // Thumbnail
-    if (mod->thumbnailPixmap.isNull() == false) {
+    // Thumbnail — fall back to the KeeperFX icon when the mod ships none, so the
+    // frame reads as an intentional placeholder rather than an empty box.
+    const bool hasThumbnail = (mod->thumbnailPixmap.isNull() == false);
+    QPixmap thumbnailSource = hasThumbnail
+                                  ? mod->thumbnailPixmap
+                                  : QPixmap(QStringLiteral(":/res/img/horny-face.png"));
+    if (thumbnailSource.isNull() == false) {
         // Get the size for the thumbnail
         QSize thumbnailSize = ui->frame->frameSize();
 
-        // Scale the source pixmap while keeping aspect ratio
-        QPixmap scaledPixmap = mod->thumbnailPixmap.scaled(thumbnailSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        // Real thumbnails fill the frame (crop to fill); the fallback icon is
+        // fitted inside it so the whole icon stays visible.
+        const Qt::AspectRatioMode aspectMode = hasThumbnail
+                                                   ? Qt::KeepAspectRatioByExpanding
+                                                   : Qt::KeepAspectRatio;
+        QPixmap scaledPixmap = thumbnailSource.scaled(thumbnailSize, aspectMode, Qt::SmoothTransformation);
 
         // Create final pixmap with transparent (or solid) background
         QPixmap finalPixmap(thumbnailSize);
