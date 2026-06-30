@@ -98,6 +98,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     // Launcher size (accessibility): scale the whole launcher UI. Applied at
     // startup via QT_SCALE_FACTOR (see applySavedUiScale() in main.cpp).
     ui->comboBoxUiScale->addItem(tr("Normal (100%)", "Launcher Size Dropdown"), "1.0");
+    ui->comboBoxUiScale->addItem(tr("Comfortable (110%)", "Launcher Size Dropdown"), "1.1");
     ui->comboBoxUiScale->addItem(tr("Large (125%)", "Launcher Size Dropdown"), "1.25");
     ui->comboBoxUiScale->addItem(tr("Larger (150%)", "Launcher Size Dropdown"), "1.5");
     ui->comboBoxUiScale->addItem(tr("Huge (175%)", "Launcher Size Dropdown"), "1.75");
