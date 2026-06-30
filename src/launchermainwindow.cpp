@@ -564,7 +564,7 @@ void LauncherMainWindow::on_logFileButton_clicked()
     QString logFilePath = QCoreApplication::applicationDirPath() + "/keeperfx.log";
     QFile logFile(logFilePath);
     if (logFile.exists()) {
-        QDesktopServices::openUrl(QUrl::fromLocalFile(logFilePath));
+        Helper::openUrl(QUrl::fromLocalFile(logFilePath));
     } else {
         qWarning() << "File does not exist: " << logFilePath;
     }
@@ -574,7 +574,7 @@ void LauncherMainWindow::on_workshopButton_clicked()
 {
     // Use default browser to open the workshop URL
     QUrl url("https://keeperfx.net/workshop");
-    QDesktopServices::openUrl(url);
+    Helper::openUrl(url);
 }
 
 bool LauncherMainWindow::askForKeeperFxInstall()
@@ -1352,7 +1352,7 @@ void LauncherMainWindow::on_openFolderButton_clicked()
 {
     // Use default file browser to open Application Folder
     QUrl url = QUrl::fromLocalFile(QCoreApplication::applicationDirPath() + QDir::separator());
-    QDesktopServices::openUrl(url);
+    Helper::openUrl(url);
 }
 
 void LauncherMainWindow::on_unearthButton_clicked()
@@ -1430,14 +1430,14 @@ void LauncherMainWindow::on_discordButton_clicked()
 {
     // Use default browser to open Discord invite
     QUrl url("https://discord.gg/WxgE8WZBku");
-    QDesktopServices::openUrl(url);
+    Helper::openUrl(url);
 }
 
 void LauncherMainWindow::on_websiteButton_clicked()
 {
     // Use default browser to open KeeperFX.net
     QUrl url("https://keeperfx.net");
-    QDesktopServices::openUrl(url);
+    Helper::openUrl(url);
 
 }
 

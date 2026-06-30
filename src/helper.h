@@ -1,10 +1,13 @@
 #pragma once
 
 #include <QCoreApplication>
+#include <QDesktopServices>
 #include <QDir>
 #include <QObject>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QString>
+#include <QUrl>
 #include <QVariant>
 #include <QDirIterator>
 #include <QUuid>
@@ -255,5 +258,37 @@ public:
         Q_UNUSED(path);
         return true;
 #endif
+    }
+
+    // Open a URL (or local file) in the user's default browser/app.
+    //
+    // Under the AppImage we run with LD_LIBRARY_PATH / QT_* / GIO_* pointing at our
+    // bundled libraries. If those leak into the spawned handler (xdg-open -> browser or
+    // text editor) it fails to start, so nothing happens when the user clicks "Workshop",
+    // "Open log", etc. On Linux we launch xdg-open with a cleaned environment first, and
+    // only fall back to Qt's handler if that can't start.
+    static void openUrl(const QUrl &url)
+    {
+#ifdef Q_OS_UNIX
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        const QStringList bundledVars = {
+            QStringLiteral("LD_LIBRARY_PATH"), QStringLiteral("LD_PRELOAD"),
+            QStringLiteral("QT_PLUGIN_PATH"), QStringLiteral("QT_QPA_PLATFORM_PLUGIN_PATH"),
+            QStringLiteral("GIO_MODULE_DIR"), QStringLiteral("GTK_PATH"),
+            QStringLiteral("GDK_PIXBUF_MODULE_FILE"), QStringLiteral("GSETTINGS_SCHEMA_DIR")
+        };
+        for (const QString &var : bundledVars) {
+            env.remove(var);
+        }
+        QProcess proc;
+        proc.setProgram(QStringLiteral("xdg-open"));
+        proc.setArguments({url.isLocalFile() ? url.toLocalFile() : url.toString()});
+        proc.setProcessEnvironment(env);
+        if (proc.startDetached()) {
+            return;
+        }
+        qWarning() << "Helper::openUrl: xdg-open failed; falling back to QDesktopServices";
+#endif
+        QDesktopServices::openUrl(url);
     }
 };
