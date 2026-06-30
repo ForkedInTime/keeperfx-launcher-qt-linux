@@ -2,7 +2,12 @@
 # launcher + engine + every library + the free game data, all in one file. The user
 # downloads it, runs it, and the only thing it ever needs is their own Dungeon Keeper
 # files. Runs on GitHub's servers.
-name: Build Self-Contained AppImage + Flatpak
+#
+# Also emits the flat full.7z that the in-launcher self-updater downloads.
+# The Flatpak is built separately (build-flatpak.yml, monthly/manual) to keep this
+# per-release build fast. ccache + Qt/CPM caches turn a ~18 min cold build into a
+# ~4-5 min warm one.
+name: Build Self-Contained AppImage
 
 on:
   release:
@@ -11,6 +16,10 @@ on:
 
 permissions:
   contents: write
+
+env:
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CPM_SOURCE_CACHE: ${{ github.workspace }}/.cpm-cache
 
 jobs:
   appimage:
@@ -22,7 +31,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build git pkg-config file wget desktop-file-utils python3 python3-pip p7zip-full \
+            build-essential ccache cmake ninja-build git pkg-config file wget desktop-file-utils python3 python3-pip p7zip-full \
             libgl1-mesa-dev zlib1g-dev libfuse2t64 \
             libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
             libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 libxcb-util1 \
@@ -31,19 +40,49 @@ jobs:
             libopenal-dev libluajit-5.1-dev libspng-dev libminizip-dev libepoxy-dev \
             libminiupnpc-dev libnatpmp-dev libssl-dev libzstd-dev
 
+      # --- Caches: the launcher build (LIEF + CPM deps) dominates cold-build time ---
+      - name: Cache compiled objects (ccache)
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-appimage-${{ github.run_id }}
+          restore-keys: ccache-appimage-
+
+      - name: Cache CPM dependency sources (LIEF, etc.)
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CPM_SOURCE_CACHE }}
+          key: cpm-${{ hashFiles('CMakeLists.txt', 'cmake/**', 'cpm-package-lock.cmake') }}
+          restore-keys: cpm-
+
+      - name: Cache Qt 6.8
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/Qt
+          key: qt-6.8.3-linux-gcc64
+
       - name: Install Qt 6.8 (the launcher needs Qt >=6.7; 24.04 only has 6.4)
+        if: steps.cache-qt.outputs.cache-hit != 'true'
         run: |
           pip install --break-system-packages aqtinstall
           python3 -m aqt install-qt linux desktop 6.8.3 linux_gcc_64 -O "$RUNNER_TEMP/Qt"
+
+      - name: Set up Qt + ccache environment
+        run: |
           QT="$RUNNER_TEMP/Qt/6.8.3/gcc_64"
           echo "$QT/bin" >> "$GITHUB_PATH"
           echo "CMAKE_PREFIX_PATH=$QT" >> "$GITHUB_ENV"
           echo "QMAKE=$QT/bin/qmake" >> "$GITHUB_ENV"
+          ccache --max-size=1G --zero-stats
 
       - name: Build the launcher
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build build -j"$(nproc)"
+          ccache --show-stats
 
       - name: Build the engine on 24.04 (the released Arch engine won't run on Ubuntu)
         run: |
@@ -200,31 +239,3 @@ jobs:
           files: |
             KeeperFX-Linux-Alpha-x86_64.AppImage
             keeperfx-linux-alpha-x86_64-full.7z
-
-      # ---- Flatpak: reuse the same bundled AppDir, wrap it as a .flatpak ----
-      - name: Install Flatpak + builder + runtime
-        run: |
-          sudo apt-get install -y flatpak flatpak-builder
-          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
-
-      - name: Build the Flatpak bundle
-        run: |
-          flatpak-builder --user --force-clean --repo=fp-repo fp-build \
-            packaging/io.github.forkedintime.KeeperFXLinuxAlpha.yml
-          flatpak build-bundle fp-repo KeeperFX-Linux-Alpha-x86_64.flatpak \
-            io.github.forkedintime.KeeperFXLinuxAlpha \
-            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
-          ls -la KeeperFX-Linux-Alpha-x86_64.flatpak
-
-      - name: Upload the Flatpak (downloadable from this CI run)
-        uses: actions/upload-artifact@v4
-        with:
-          name: KeeperFX-Linux-Alpha-Flatpak
-          path: KeeperFX-Linux-Alpha-x86_64.flatpak
-
-      - name: Attach the Flatpak to the release (only when triggered by a release)
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: KeeperFX-Linux-Alpha-x86_64.flatpak
