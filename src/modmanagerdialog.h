@@ -16,10 +16,14 @@ public:
 
 private slots:
     void on_closeButton_clicked();
+    void on_installButton_clicked();
     void saveLoadOrder();
 
 private:
     Ui::ModManagerDialog *ui;
 
-    ModManager *manager;
+    ModManager *manager = nullptr;
+
+    // (Re)build the manager and the list of mod widgets shown in the scroll area.
+    void reloadMods();
 };

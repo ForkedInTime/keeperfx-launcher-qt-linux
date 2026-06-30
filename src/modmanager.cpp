@@ -162,6 +162,15 @@ ModManager::ModManager()
     }*/
 }
 
+ModManager::~ModManager()
+{
+    // The scan list and the per-section lists hold separate Mod allocations
+    qDeleteAll(this->mods);
+    qDeleteAll(this->modsAfterBase);
+    qDeleteAll(this->modsAfterCampaign);
+    qDeleteAll(this->modsAfterMap);
+}
+
 bool ModManager::writeLoadOrder(const QList<Mod *> &mods)
 {
     // Open (or create) the load order file for writing
