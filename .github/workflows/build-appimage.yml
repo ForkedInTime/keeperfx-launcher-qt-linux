@@ -121,6 +121,18 @@ jobs:
           cp -rf pkg/. "$P/"                                # the full.7z is FLAT (files at root)
           # overwrite with the 24.04-built engine + fonts + version
           cp -f engine/bin/keeperfx "$P/keeperfx"
+          # Overlay the freshly-built engine's game CONFIG over the downloaded payload.
+          # Without this, fxdata/creatrs/mods stay FROZEN at whatever the payload first
+          # shipped, so upstream config changes (objects.cfg, magic.cfg, creature.cfg, ...)
+          # never reach users even as the engine binary advances. Mirrors the engine's
+          # build-linux-alpha.yml and refresh-alpha.sh. Fonts are re-applied AFTER, since
+          # they live in fxdata/ but are generated (not part of config/).
+          for d in fxdata creatrs mods; do
+            if [ -d "engine/config/$d" ]; then
+              mkdir -p "$P/$d"
+              cp -rf "engine/config/$d/." "$P/$d/"
+            fi
+          done
           cp -f engine/tools/fxfontmaker/*.fxfont "$P/fxdata/"
           sed -n 's/.*VER_STRING  "\(.*\)".*/\1/p' engine/src/ver_defs.h > "$P/version.txt"
           # include the launcher + 7z.so IN the payload, so an in-launcher update (which
