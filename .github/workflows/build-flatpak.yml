@@ -31,7 +31,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential ccache cmake ninja-build git pkg-config file wget desktop-file-utils python3 python3-pip p7zip-full \
-            flatpak flatpak-builder \
+            flatpak flatpak-builder elfutils \
             libgl1-mesa-dev zlib1g-dev \
             libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
             libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 libxcb-util1 \
