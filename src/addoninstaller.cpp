@@ -1,0 +1,328 @@
+#include "addoninstaller.h"
+#include "archiver.h"
+
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QObject>
+#include <QPair>
+#include <QSet>
+#include <QTextStream>
+
+#include <bit7z/bitarchivereader.hpp>
+
+namespace {
+
+// Subdirectories that mark a folder as an actual mod (engine config trees).
+const QStringList kModContentDirs = {
+    "creatrs", "fxdata", "ldata", "cmpgfx", "sound", "data", "lang", "campgns", "levels"
+};
+
+// A folder "is a mod" if it has a mod.cfg or any engine config subdirectory.
+bool looksLikeMod(const QString &dir)
+{
+    if (QFileInfo::exists(dir + "/mod.cfg")) {
+        return true;
+    }
+    for (const QString &content : kModContentDirs) {
+        if (QFileInfo(dir + "/" + content).isDir()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Archive junk that should never be installed into the game tree — version-control
+// metadata and OS cruft. Some workshop archives ship a whole .git/ folder.
+bool isJunkEntry(const QString &name)
+{
+    static const QStringList junk = {".git", ".svn", ".hg", "__MACOSX", ".DS_Store", "Thumbs.db"};
+    return junk.contains(name, Qt::CaseInsensitive);
+}
+
+bool copyRecursively(const QString &src, const QString &dst)
+{
+    QFileInfo info(src);
+    if (info.isDir()) {
+        QDir().mkpath(dst);
+        const QStringList entries = QDir(src).entryList(
+            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden);
+        for (const QString &entry : entries) {
+            if (isJunkEntry(entry)) {
+                continue;
+            }
+            if (!copyRecursively(src + "/" + entry, dst + "/" + entry)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    QFile::remove(dst);
+    return QFile::copy(src, dst);
+}
+
+// Like copyRecursively, but NEVER overwrites an existing destination file. Used for the
+// container merge (campgns/levels/mods/multiplayer) so a careless or crafted archive can't
+// clobber stock campaigns/maps or another add-on's files. Returns how many files were
+// skipped because they already existed.
+int copyRecursivelyNoClobber(const QString &src, const QString &dst)
+{
+    QFileInfo info(src);
+    if (info.isDir()) {
+        QDir().mkpath(dst);
+        int skipped = 0;
+        const QStringList entries = QDir(src).entryList(
+            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden);
+        for (const QString &entry : entries) {
+            if (isJunkEntry(entry)) {
+                continue;
+            }
+            skipped += copyRecursivelyNoClobber(src + "/" + entry, dst + "/" + entry);
+        }
+        return skipped;
+    }
+    if (QFileInfo::exists(dst)) {
+        return 1; // already present — keep it, don't overwrite
+    }
+    QFile::copy(src, dst);
+    return 0;
+}
+
+// Workshop mods don't always ship a mod.cfg; without one the manager can't list
+// them. Write a minimal one so the mod shows up and is toggleable.
+void writeStubModCfg(const QString &dir, const QString &modName, const QString &archiveName)
+{
+    QFile file(dir + "/mod.cfg");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return;
+    }
+    QString pretty = modName;
+    pretty.replace('_', ' ');
+    QTextStream out(&file);
+    out << "[mod]\n";
+    out << "Name=" << pretty << "\n";
+    out << "Description=" << QObject::tr("Installed from %1.").arg(archiveName) << "\n";
+    file.close();
+}
+
+// Read a campaign's display name from its .cfg (the "NAME = ..." line), so the
+// install summary shows "Another Dungeon" rather than "anthrdunj".
+QString campaignDisplayName(const QString &cfgPath)
+{
+    QFile file(cfgPath);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            const QString line = in.readLine().trimmed();
+            if (line.isEmpty() || line.startsWith(';') || line.startsWith('#')) {
+                continue;
+            }
+            const int eq = line.indexOf('=');
+            if (eq <= 0) {
+                continue;
+            }
+            if (line.left(eq).trimmed().compare("NAME", Qt::CaseInsensitive) == 0) {
+                const QString value = line.mid(eq + 1).trimmed();
+                if (!value.isEmpty()) {
+                    return value;
+                }
+            }
+        }
+    }
+    return QFileInfo(cfgPath).completeBaseName();
+}
+
+// A standalone KeeperFX map is a set of loose files sharing a mapNNNNN stem
+// (map00378.slb, .dat, .clm, .own, .lof …). Every map has a .slb slab file, so
+// use that as the signature. Returns the directory holding them (the archive
+// root, or a single nested folder), or empty if this isn't a standalone map.
+QString findStandaloneMapDir(const QString &root)
+{
+    if (!QDir(root).entryList(QStringList{"map*.slb"}, QDir::Files).isEmpty()) {
+        return root;
+    }
+    const QStringList subs = QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QString &s : subs) {
+        if (!QDir(root + "/" + s).entryList(QStringList{"map*.slb"}, QDir::Files).isEmpty()) {
+            return root + "/" + s;
+        }
+    }
+    return QString();
+}
+
+} // namespace
+
+AddonInstaller::Result AddonInstaller::installArchive(const QString &archivePath,
+                                                      const QString &gameRoot)
+{
+    Result r;
+
+    // Extract into a temp dir on the SAME filesystem as the install, so files can be
+    // merged into place without a cross-device copy.
+    const QString tmpPath = gameRoot + "/.kfx-install-tmp";
+    QDir tmpDir(tmpPath);
+    if (tmpDir.exists()) {
+        tmpDir.removeRecursively();
+    }
+    if (!QDir().mkpath(tmpPath)) {
+        r.error = QObject::tr("Could not create a temporary folder to install into.");
+        return r;
+    }
+
+    try {
+        bit7z::BitArchiveReader reader = Archiver::getReader(archivePath.toStdString());
+        reader.extractTo(tmpPath.toStdString());
+    } catch (const bit7z::BitException &ex) {
+        qWarning() << "Add-on install: extract failed:" << ex.what();
+        r.error = QObject::tr("Could not extract the archive:\n%1").arg(ex.what());
+        tmpDir.removeRecursively();
+        return r;
+    }
+
+    r = installExtractedDir(tmpPath, gameRoot, QFileInfo(archivePath).fileName());
+    tmpDir.removeRecursively();
+    return r;
+}
+
+AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPath,
+                                                           const QString &gameRoot,
+                                                           const QString &archiveName)
+{
+    Result r;
+    r.ok = true; // extraction already succeeded by the time we get here
+
+    // Case 1 — "extract into the game directory": the archive has one or more known
+    // container folders at its root (campgns/, mods/, levels/, multiplayer/). This is
+    // how workshop campaigns, mods and map packs ship. Merge each into the install,
+    // leaving other add-ons' files untouched. We only ever touch these known folders,
+    // so a stray root file can't overwrite core game config.
+    static const QStringList kContainers = {"campgns", "mods", "levels", "multiplayer"};
+    const QStringList topDirs = QDir(tmpPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    bool handledAsContainer = false;
+
+    for (const QString &dirName : topDirs) {
+        const QString kind = dirName.toLower();
+        if (!kContainers.contains(kind)) {
+            continue;
+        }
+        handledAsContainer = true;
+        r.foundContent = true;
+        const QString src = tmpPath + "/" + dirName;
+        const QString dst = gameRoot + "/" + kind; // canonical lowercase install folder
+
+        // Summarise what's being added (before the merge)
+        if (kind == "campgns") {
+            const QStringList cfgs = QDir(src).entryList(QStringList{"*.cfg"}, QDir::Files);
+            for (const QString &cfg : cfgs) {
+                r.lines << QObject::tr("Campaign: %1").arg(campaignDisplayName(src + "/" + cfg));
+            }
+        } else if (kind == "mods") {
+            const QStringList modDirs = QDir(src).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &m : modDirs) {
+                r.lines << QObject::tr("Mod: %1").arg(m);
+            }
+            r.installedMod = r.installedMod || !modDirs.isEmpty();
+        } else if (kind == "levels") {
+            r.lines << QObject::tr("Map pack (added to 'levels')");
+        } else if (kind == "multiplayer") {
+            r.lines << QObject::tr("Multiplayer maps");
+        }
+
+        // No-clobber merge: keep existing files (stock campaigns/maps, other add-ons)
+        const int kept = copyRecursivelyNoClobber(src, dst);
+        if (kept > 0) {
+            r.lines << QObject::tr("(kept %1 existing file(s) in '%2', not overwritten)")
+                           .arg(kept).arg(kind);
+        }
+
+        // Mods shipped without a mod.cfg still need one to list in the manager
+        if (kind == "mods") {
+            const QStringList modDirs = QDir(src).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &m : modDirs) {
+                const QString modDest = dst + "/" + m;
+                if (!QFileInfo::exists(modDest + "/mod.cfg")) {
+                    writeStubModCfg(modDest, m, archiveName);
+                }
+            }
+        }
+    }
+
+    // Case 2 — a standalone map: loose mapNNNNN.* files (no container folder). These
+    // are single workshop maps; the "Install…" file picker and the older installer
+    // both used to reject them. Drop them into levels/personal so they show up under
+    // the "Personal levels" pack in free play.
+    bool handledAsMap = false;
+    if (!handledAsContainer) {
+        const QString mapDir = findStandaloneMapDir(tmpPath);
+        if (!mapDir.isEmpty()) {
+            handledAsMap = true;
+            const QString dst = gameRoot + "/levels/personal";
+            QDir().mkpath(dst);
+            const QStringList mapFiles = QDir(mapDir).entryList(QStringList{"map*"}, QDir::Files);
+            QSet<QString> stems;
+            int copied = 0, kept = 0;
+            for (const QString &f : mapFiles) {
+                stems.insert(f.left(f.indexOf('.')));
+                const QString d = dst + "/" + f;
+                if (QFileInfo::exists(d)) {
+                    kept++;
+                    continue;
+                }
+                QFile::copy(mapDir + "/" + f, d);
+                copied++;
+            }
+            if (copied > 0) {
+                r.lines << QObject::tr("%n map(s) (added to Personal levels)", "", stems.size());
+                r.foundContent = true;
+            } else if (kept > 0) {
+                r.lines << QObject::tr("Map already installed (Personal levels)");
+                r.foundContent = true;
+            }
+        }
+    }
+
+    // Case 3 — a bare mod: no container folder and not a map, just a mod folder (or its
+    // contents) at the archive root. Install it into mods/.
+    if (!handledAsContainer && !handledAsMap) {
+        const QString modsRoot = gameRoot + "/mods";
+        QDir modsDir(modsRoot);
+        if (!modsDir.exists()) {
+            QDir().mkpath(modsRoot);
+        }
+
+        QList<QPair<QString, QString>> found; // (name, sourcePath)
+        if (looksLikeMod(tmpPath)) {
+            found.append({QFileInfo(archiveName).completeBaseName(), tmpPath});
+        } else {
+            const QStringList subDirs = QDir(tmpPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &subDir : subDirs) {
+                found.append({subDir, tmpPath + "/" + subDir});
+            }
+        }
+
+        for (const auto &entry : std::as_const(found)) {
+            QString name = entry.first;
+            name.replace('/', '_').replace('\\', '_'); // never let a name escape mods/
+            const QString dest = modsDir.absoluteFilePath(name);
+
+            // Unlike the file picker, callers here can't answer a "replace?" prompt per
+            // item, so replace an existing mod of the same name (a re-install/update).
+            if (QFileInfo::exists(dest)) {
+                QDir(dest).removeRecursively();
+            }
+            if (!copyRecursively(entry.second, dest)) {
+                r.lines << QObject::tr("Could not copy “%1” into the mods folder.").arg(name);
+                continue;
+            }
+            if (!QFileInfo::exists(dest + "/mod.cfg")) {
+                writeStubModCfg(dest, name, archiveName);
+            }
+            r.lines << QObject::tr("Mod: %1").arg(name);
+            r.installedMod = true;
+            r.foundContent = true;
+        }
+    }
+
+    return r;
+}

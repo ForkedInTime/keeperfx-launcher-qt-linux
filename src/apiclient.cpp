@@ -12,6 +12,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequestFactory>
 #include <QRegularExpression>
+#include <QUrlQuery>
 
 #define API_ENDPOINT "https://keeperfx.net/api"
 
@@ -77,6 +78,27 @@ QString ApiClient::getApiEndpoint()
 
     // Return default endpoint
     return QString(API_ENDPOINT);
+}
+
+QImage ApiClient::downloadImage(QUrl url)
+{
+    QNetworkAccessManager manager;
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
+
+    QNetworkReply *reply = manager.get(req);
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    QImage image;
+    if (reply->error() == QNetworkReply::NoError) {
+        image.loadFromData(reply->readAll());
+    } else {
+        qWarning() << "downloadImage failed:" << url.toString() << "->" << reply->errorString();
+    }
+    reply->deleteLater();
+    return image;
 }
 
 QJsonDocument ApiClient::getJsonResponse(QUrl endpointPath, HttpMethod method, QJsonObject jsonPostObject)
@@ -323,6 +345,53 @@ QUrl ApiClient::getDownloadUrlMapEditor()
 
     qWarning() << "Map editor download URL: no matching asset found";
     return QUrl();
+}
+
+QJsonArray ApiClient::getWorkshopCatalog()
+{
+    // The keeperfx.net search endpoint requires a query and ignores category/sort
+    // params, but a single space matches the whole catalogue in one call. We then
+    // filter and sort client-side by the numeric "category" code and the rating /
+    // download / date fields each item carries.
+    QUrl url("v1/workshop/search");
+    QUrlQuery query;
+    query.addQueryItem("q", " ");
+    url.setQuery(query);
+
+    QJsonDocument jsonDoc = ApiClient::getJsonResponse(url);
+    if (jsonDoc.isObject() == false) {
+        qWarning() << "Workshop catalog: invalid response";
+        return QJsonArray();
+    }
+    return jsonDoc.object()["workshop_items"].toArray();
+}
+
+QUrl ApiClient::getWorkshopItemDownloadUrl(int itemId)
+{
+    QUrl url(QString("v1/workshop/item/%1").arg(itemId));
+
+    QJsonDocument jsonDoc = ApiClient::getJsonResponse(url);
+    if (jsonDoc.isObject() == false) {
+        qWarning() << "Workshop item download URL: invalid response for item" << itemId;
+        return QUrl();
+    }
+
+    const QJsonObject workshopItemObj = jsonDoc.object()["workshop_item"].toObject();
+    const QJsonArray filesArray = workshopItemObj["files"].toArray();
+    if (filesArray.isEmpty()) {
+        qWarning() << "Workshop item download URL: no files for item" << itemId;
+        return QUrl();
+    }
+
+    // The primary (latest) file is what the website's Download button serves.
+    const QString fileUrl = filesArray.first().toObject()["url"].toString();
+    if (fileUrl.isEmpty()) {
+        qWarning() << "Workshop item download URL: empty file URL for item" << itemId;
+        return QUrl();
+    }
+
+    qDebug() << "Workshop item" << itemId << "download URL:" << fileUrl;
+    return QUrl(fileUrl);
 }
 
 std::optional<QMap<QString, QString>> ApiClient::getGameFileList(KfxVersion::ReleaseType type,

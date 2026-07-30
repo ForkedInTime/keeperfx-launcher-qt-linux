@@ -36,6 +36,7 @@
 #include "launcheroptions.h"
 #include "modmanager.h"
 #include "modmanagerdialog.h"
+#include "workshopbrowserdialog.h"
 #include "newsarticlewidget.h"
 #include "runpacketfiledialog.h"
 #include "savefile.h"
@@ -1425,6 +1426,14 @@ void LauncherMainWindow::on_modsButton_clicked()
 
     ModManagerDialog modManagerDialog(this);
     modManagerDialog.exec();
+}
+
+void LauncherMainWindow::on_browseWorkshopButton_clicked()
+{
+    qDebug() << "Browse Workshop button clicked. Opening in-launcher workshop browser";
+
+    WorkshopBrowserDialog workshopBrowserDialog(this);
+    workshopBrowserDialog.exec();
 }
 
 void LauncherMainWindow::on_discordButton_clicked()

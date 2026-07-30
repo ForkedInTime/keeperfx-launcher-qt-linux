@@ -51,6 +51,7 @@ void LauncherOptions::processApp(QApplication &app)
         {"disable-gzip-upload",         "Disable GZip compression of uploads"},
         {"crash-report",                "Force a crash report dialog"},
         {"disable-tls-verification",    "Disable certificate validation for web requests"},
+        {"allow-multiple",              "Allow more than one launcher instance to run (development/troubleshooting)"},
 
         // Parameters
         {"api-endpoint",                "Specify the API endpoint",                    "url"},

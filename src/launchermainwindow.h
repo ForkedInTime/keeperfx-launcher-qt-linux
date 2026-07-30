@@ -39,6 +39,7 @@ private slots:
     void on_openFolderButton_clicked();
     void on_unearthButton_clicked();
     void on_modsButton_clicked();
+    void on_browseWorkshopButton_clicked();
 
     void onUpdateFound(KfxVersion::VersionInfo versionInfo);
     void onShowUpdateIcon(bool show);

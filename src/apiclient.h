@@ -4,6 +4,7 @@
 
 #include <QUrl>
 #include <QImage>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -26,6 +27,11 @@ public:
     static QUrl getDownloadUrlAlpha();
     static QUrl getDownloadUrlMusic();
     static QUrl getDownloadUrlMapEditor();
+
+    // Workshop browser: the full catalogue (client filters/sorts it) and the
+    // download URL for a given workshop item's primary file.
+    static QJsonArray getWorkshopCatalog();
+    static QUrl getWorkshopItemDownloadUrl(int itemId);
 
     static std::optional<QMap<QString, QString>> getGameFileList(KfxVersion::ReleaseType type, QString version);
 };

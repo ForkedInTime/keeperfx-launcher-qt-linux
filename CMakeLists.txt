@@ -99,7 +99,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_SOURCE_DIR}/ui)
 #add_subdirectory(${BIT7Z_DIR})
 
 # Find packages
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Gui)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network Gui Concurrent)
 find_package(ZLIB REQUIRED)
 find_package(LIEF REQUIRED COMPONENTS STATIC)
 find_package(bit7z REQUIRED)
@@ -169,6 +169,7 @@ target_link_libraries(keeperfx-launcher-qt PRIVATE
     Qt6::Widgets
     Qt6::Network
     Qt6::Gui
+    Qt6::Concurrent
     ZLIB::ZLIB
     LIEF::LIEF
     bit7z
