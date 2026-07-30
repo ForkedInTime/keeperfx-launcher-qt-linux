@@ -13,6 +13,9 @@
 #include <QNetworkRequestFactory>
 #include <QRegularExpression>
 #include <QUrlQuery>
+#include <QCryptographicHash>
+#include <QDir>
+#include <QFile>
 
 #define API_ENDPOINT "https://keeperfx.net/api"
 
@@ -82,6 +85,27 @@ QString ApiClient::getApiEndpoint()
 
 QImage ApiClient::downloadImage(QUrl url)
 {
+    // Disk cache (shared dir with ImageHelper): keep the raw bytes keyed by a URL hash,
+    // so re-opening the Workshop loads thumbnails from disk instead of the network. This
+    // is what made the browser re-download ~150 images on every open. Thread-safe (QImage /
+    // QFile / QCryptographicHash), so it's fine to call from the thumbnail worker threads.
+    const bool useCache = !LauncherOptions::isSet("no-image-cache");
+    const QString cacheDir = QDir::temp().filePath("kfx-launcher-img-cache");
+    const QString cachePath = cacheDir + "/"
+        + QString::fromLatin1(
+              QCryptographicHash::hash(url.toString().toUtf8(), QCryptographicHash::Sha256).toHex().left(16))
+        + "_orig";
+
+    if (useCache) {
+        QFile cf(cachePath);
+        if (cf.open(QIODevice::ReadOnly)) {
+            QImage cached;
+            if (cached.loadFromData(cf.readAll())) {
+                return cached;
+            }
+        }
+    }
+
     QNetworkAccessManager manager;
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
@@ -93,7 +117,15 @@ QImage ApiClient::downloadImage(QUrl url)
 
     QImage image;
     if (reply->error() == QNetworkReply::NoError) {
-        image.loadFromData(reply->readAll());
+        const QByteArray data = reply->readAll();
+        if (image.loadFromData(data) && useCache) {
+            QDir().mkpath(cacheDir);
+            QFile cf(cachePath);
+            if (cf.open(QIODevice::WriteOnly)) {
+                cf.write(data);
+                cf.close();
+            }
+        }
     } else {
         qWarning() << "downloadImage failed:" << url.toString() << "->" << reply->errorString();
     }
