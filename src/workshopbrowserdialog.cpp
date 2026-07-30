@@ -26,6 +26,8 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QSet>
+#include <QStandardPaths>
 #include <QTabWidget>
 #include <QTextStream>
 #include <QUrl>
@@ -272,6 +274,43 @@ QString originLabel(bool stock)
     return stock ? QObject::tr("🏰 KeeperFX stock") : QObject::tr("🌐 Workshop / user");
 }
 
+// --- Catalogue disk cache (stale-while-revalidate) ---
+QString catalogCachePath()
+{
+    const QString dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    return dir + "/workshop-catalog.json";
+}
+
+QVector<QJsonObject> loadCachedCatalog()
+{
+    QVector<QJsonObject> out;
+    QFile f(catalogCachePath());
+    if (!f.open(QIODevice::ReadOnly)) {
+        return out;
+    }
+    const QJsonArray arr = QJsonDocument::fromJson(f.readAll()).array();
+    out.reserve(arr.size());
+    for (const QJsonValue &v : arr) {
+        out.append(v.toObject());
+    }
+    return out;
+}
+
+void saveCachedCatalog(const QVector<QJsonObject> &items)
+{
+    const QString path = catalogCachePath();
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    QJsonArray arr;
+    for (const QJsonObject &o : items) {
+        arr.append(o);
+    }
+    QFile f(path);
+    if (f.open(QIODevice::WriteOnly)) {
+        f.write(QJsonDocument(arr).toJson(QJsonDocument::Compact));
+        f.close();
+    }
+}
+
 } // namespace
 
 WorkshopBrowserDialog::WorkshopBrowserDialog(QWidget *parent)
@@ -397,16 +436,56 @@ QWidget *WorkshopBrowserDialog::buildInstalledTab()
 
 void WorkshopBrowserDialog::fetchCatalog()
 {
-    auto *watcher = new QFutureWatcher<QVector<QJsonObject>>(this);
-    connect(watcher, &QFutureWatcher<QVector<QJsonObject>>::finished, this, [this, watcher]() {
-        catalog = watcher->result();
+    // Stale-while-revalidate: render the disk-cached catalogue instantly (no blank
+    // "Loading…" wait), then refresh from the network in the background and quietly
+    // update if the workshop changed.
+    const QVector<QJsonObject> cached = loadCachedCatalog();
+    const bool hadCache = !cached.isEmpty();
+    if (hadCache) {
+        catalog = cached;
         loaded = true;
-        watcher->deleteLater();
-        if (catalog.isEmpty()) {
-            statusLabel->setText(tr("Could not load the workshop (offline?)."));
-        }
         applyFilter();
-    });
+        statusLabel->setText(tr("Refreshing workshop…"));
+    }
+
+    auto *watcher = new QFutureWatcher<QVector<QJsonObject>>(this);
+    connect(watcher, &QFutureWatcher<QVector<QJsonObject>>::finished, this,
+            [this, watcher, hadCache]() {
+                const QVector<QJsonObject> fresh = watcher->result();
+                watcher->deleteLater();
+
+                if (fresh.isEmpty()) {
+                    // Network failed — keep showing the cache if we have one.
+                    statusLabel->setText(hadCache ? tr("Offline — showing cached workshop.")
+                                                  : tr("Could not load the workshop (offline?)."));
+                    return;
+                }
+
+                // Diff by item id for a subtle "updated" note.
+                QSet<int> oldIds, newIds;
+                for (const QJsonObject &o : std::as_const(catalog)) {
+                    oldIds.insert(o["id"].toInt());
+                }
+                for (const QJsonObject &o : std::as_const(fresh)) {
+                    newIds.insert(o["id"].toInt());
+                }
+                int added = 0, removed = 0;
+                for (int id : std::as_const(newIds)) {
+                    if (!oldIds.contains(id)) added++;
+                }
+                for (int id : std::as_const(oldIds)) {
+                    if (!newIds.contains(id)) removed++;
+                }
+
+                saveCachedCatalog(fresh);
+                catalog = fresh;
+                loaded = true;
+                applyFilter(); // sets the normal item count in the status bar
+                if (hadCache && (added > 0 || removed > 0)) {
+                    statusLabel->setText(statusLabel->text()
+                                         + tr("  ·  updated (+%1 / −%2)").arg(added).arg(removed));
+                }
+            });
     watcher->setFuture(QtConcurrent::run([]() {
         QVector<QJsonObject> items;
         const QJsonArray arr = ApiClient::getWorkshopCatalog();
