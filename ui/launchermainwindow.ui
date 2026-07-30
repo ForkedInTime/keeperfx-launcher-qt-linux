@@ -331,6 +331,25 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="browseWorkshopButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="font">
+          <font/>
+         </property>
+         <property name="text">
+          <string comment="Button">Browse Workshop</string>
+         </property>
+         <property name="toolTip">
+          <string comment="Tooltip">Browse and install workshop maps, campaigns and mods without leaving the launcher</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="unearthButton">
          <property name="minimumSize">
           <size>

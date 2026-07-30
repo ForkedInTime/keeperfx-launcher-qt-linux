@@ -10,6 +10,8 @@
 #include <QFontDatabase>
 #include <QThread>
 #include <QMessageBox>
+#include <QLockFile>
+#include <QDir>
 
 using namespace Qt::StringLiterals;
 
@@ -357,9 +359,36 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    // Single-instance guard. Running two launchers lets a user start two copies of
+    // the game — separate saves fighting over the same files. One at a time. The lock
+    // reaches here only after the "-new"/default self-update reconciliation and the
+    // crash-report path (both return earlier), so it never blocks an update handoff.
+    // tryLock's timeout + QLockFile's PID-liveness staleness cover a crashed launcher
+    // and the brief overlap while an updated instance takes over. --allow-multiple
+    // overrides it for development/troubleshooting.
+    QLockFile singleInstanceLock(QDir::tempPath() + "/keeperfx-launcher-qt.lock");
+    singleInstanceLock.setStaleLockTime(0); // rely on PID liveness, not a fixed timeout
+    if (!LauncherOptions::isSet("allow-multiple")) {
+        if (!singleInstanceLock.tryLock(2000)) {
+            qWarning() << "Another KeeperFX Launcher instance is already running";
+            QMessageBox::information(
+                nullptr,
+                QCoreApplication::translate("main", "KeeperFX Launcher", "MessageBox Title"),
+                QCoreApplication::translate("main",
+                    "KeeperFX Launcher is already running.\n\n"
+                    "Only one instance can run at a time.", "MessageBox Text"));
+            return 0;
+        }
+    }
+
     // Create the main window and show it
     LauncherMainWindow mainWindow;
     mainWindow.show();
+    // Nudge the window to the front on show. raise()/activateWindow() are honoured on
+    // X11/Windows; on Wayland the compositor may ignore them (it logs "does not support
+    // raise()") — harmless there, helpful everywhere else.
+    mainWindow.raise();
+    mainWindow.activateWindow();
 
     // Execute main event loop
     return app.exec();

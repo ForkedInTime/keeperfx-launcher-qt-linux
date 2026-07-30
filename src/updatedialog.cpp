@@ -411,6 +411,19 @@ void UpdateDialog::updateUsingFilemap(QMap<QString, QString> fileMap)
 
 void UpdateDialog::updateUsingArchive(QString downloadUrlString)
 {
+    // A newer version was detected, but its release has no downloadable Linux game
+    // package attached (the .../-full.7z asset). This happens when a release is still
+    // building, or was published engine-only. Say so plainly instead of failing with a
+    // bare "download failed" on an empty URL.
+    if (downloadUrlString.trimmed().isEmpty()) {
+        emit appendLog("Update archive URL is empty — the latest release has no Linux package yet");
+        emit setUpdateFailed(tr("A newer version was found, but its release doesn't include a "
+                                "downloadable Linux package yet. It may still be building — "
+                                "please try again in a few minutes.",
+                                "Failure Message"));
+        return;
+    }
+
     emit appendLog(QString("Downloading archive: %1").arg(downloadUrlString));
 
     QUrl downloadUrl(downloadUrlString);
