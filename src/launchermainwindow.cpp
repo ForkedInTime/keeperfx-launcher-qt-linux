@@ -1340,7 +1340,7 @@ void LauncherMainWindow::refreshKfxVersionInGui()
     qInfo() << "KeeperFX version:" << KfxVersion::currentVersion.fullString;
     ui->versionLabel->setText("v" + KfxVersion::currentVersion.fullString);
 
-    QString windowTitle = tr("KeeperFX Launcher", "Window Title") + " - v" + KfxVersion::currentVersion.fullString;
+    QString windowTitle = tr("KeeperFX Tux Edition", "Window Title") + " - v" + KfxVersion::currentVersion.fullString;
 
     if(Settings::getLauncherSetting("SHOW_DIR_NAME_IN_WINDOW_TITLE") == true){
         windowTitle.prepend("[ " + QDir(QCoreApplication::applicationDirPath()).dirName() + " ] - ");

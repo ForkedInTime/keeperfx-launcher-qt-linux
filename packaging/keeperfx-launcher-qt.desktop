@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=KeeperFX Linux Alpha
+Name=KeeperFX Tux Edition
 Comment=Install, configure and play KeeperFX (Dungeon Keeper) on Linux
 Exec=keeperfx-launcher-qt
 Icon=keeperfx-launcher-qt
