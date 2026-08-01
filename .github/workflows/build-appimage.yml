@@ -210,7 +210,7 @@ jobs:
             {
               echo "[Desktop Entry]"
               echo "Type=Application"
-              echo "Name=KeeperFX Linux Alpha"
+              echo "Name=KeeperFX Tux Edition"
               echo "Comment=Dungeon Keeper, native on Linux"
               echo "Exec=\"$APPIMAGE\""
               echo "Icon=$icondir/keeperfx-linux-alpha.png"
