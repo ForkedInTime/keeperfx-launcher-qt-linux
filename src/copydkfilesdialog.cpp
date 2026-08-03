@@ -117,7 +117,7 @@ void CopyDkFilesDialog::on_copyButton_clicked()
     }
 
     // Check if music files have been copied
-    if (DkFiles::areAllSoundFilesPresent() == false) {
+    if (DkFiles::isAnyMusicPresent() == false) {
         DownloadMusicDialog downloadMusicDialog(this);
         downloadMusicDialog.exec();
     }

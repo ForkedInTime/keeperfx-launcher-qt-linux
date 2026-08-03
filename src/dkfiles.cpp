@@ -385,7 +385,7 @@ bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir)
             }
 
             // A failed copy is deliberately not fatal here. The music is optional and
-            // the caller re-checks with areAllSoundFilesPresent() afterwards, which
+            // the caller re-checks with isAnyMusicPresent() afterwards, which
             // falls back to offering the download. Silently swallowing the failure is
             // what made a half-copied music dir look like a successful install.
             if(file.copy(destFilePath) == false){
@@ -471,21 +471,28 @@ std::optional<QDir> DkFiles::findSteamDkInstallDir()
     return std::nullopt;
 }
 
-bool DkFiles::areAllSoundFilesPresent()
+bool DkFiles::isAnyMusicPresent()
 {
-    // Loop trough music files
-    for (const QString& musicFileName : musicFiles) {
-        // Get the destination file
-        QString destFilePath = QCoreApplication::applicationDirPath() + "/music/" + musicFileName.toLower();
-        QFile destFile(destFilePath);
+    // The engine resolves track numbers from whatever audio files are in music/,
+    // so an exact keeperNN.ogg list is no longer a valid test: a user with a FLAC
+    // soundtrack has working music and must never be told it is missing.
+    // Under-reporting is the deliberate trade -- a curated folder is an intentional
+    // act, whereas an empty one is the failure actually worth prompting about.
+    static const QStringList musicExtensions = {"ogg", "flac", "wav", "mp3"};
 
-        // Check if file exists
-        if (destFile.exists() == false) {
-            return false;
+    QDir musicDir(QCoreApplication::applicationDirPath() + "/music");
+    if (musicDir.exists() == false) {
+        return false;
+    }
+
+    const QFileInfoList entries = musicDir.entryInfoList(QDir::Files | QDir::NoSymLinks);
+    for (const QFileInfo& entry : entries) {
+        if (musicExtensions.contains(entry.suffix().toLower())) {
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 bool DkFiles::isOriginalDkExecutableFound()
