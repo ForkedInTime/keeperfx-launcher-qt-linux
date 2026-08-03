@@ -40,6 +40,7 @@ QMap<QString, QVariant> Settings::defaultLauncherSettingsMap = {
 
     // Stuff to remember
     {"SUPPRESS_ORIGINAL_DK_FOUND_MESSAGEBOX", false},
+    {"SUPPRESS_MISSING_MUSIC_MESSAGEBOX", false},
 
     // Game executable parameters
     // These also go in the launcher config

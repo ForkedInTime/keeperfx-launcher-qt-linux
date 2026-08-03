@@ -365,39 +365,34 @@ bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir)
             }
         }
 
-        // Digital installation music files (lowercase)
-        // These music files are in the root dir, and not in "/music"
-        QFile musicFileLowercase(dir.absolutePath() + "/" + musicFileName.toLower());
-        if(musicFileLowercase.exists()){
-            musicFileLowercase.copy(destFilePath);
-            continue;
-        }
+        // Locations to look for this track, in order of preference:
+        // - Digital installations (Steam/GOG) keep the tracks loose in the root dir
+        // - An existing KeeperFX installation keeps them in the "/music" dir, which
+        //   also covers tracks that were copied over manually or downloaded
+        // The "/music" variants go through getFilePathCases() so an uppercase "MUSIC"
+        // directory is found too, the same way the data and sound dirs are handled.
+        QStringList musicFilePaths = {
+            musicFileName.toLower(),
+            musicFileName.toUpper(),
+        };
+        musicFilePaths.append(getFilePathCases("music", musicFileName));
 
-        // Digital installation music files (uppercase)
-        // These music files are in the root dir, and not in "/music"
-        QFile musicFileUppercase(dir.absolutePath() + "/" + musicFileName.toUpper());
-        if(musicFileUppercase.exists()){
-            musicFileUppercase.copy(destFilePath);
-            continue;
-        }
+        for (const QString& musicFilePath : musicFilePaths)
+        {
+            QFile file(dir.absolutePath() + "/" + musicFilePath);
+            if(file.exists() == false){
+                continue;
+            }
 
-        // KeeperFX installation music files (lowercase)
-        // These music files are in the "/music" dir
-        // This allows copying them over from another existing KFX installation
-        QFile kfxMusicFileLowercase(dir.absolutePath() + "/music/" + musicFileName.toLower());
-        if(kfxMusicFileLowercase.exists()){
-            kfxMusicFileLowercase.copy(destFilePath);
-            continue;
-        }
+            // A failed copy is deliberately not fatal here. The music is optional and
+            // the caller re-checks with areAllSoundFilesPresent() afterwards, which
+            // falls back to offering the download. Silently swallowing the failure is
+            // what made a half-copied music dir look like a successful install.
+            if(file.copy(destFilePath) == false){
+                qWarning() << "Failed to copy music file:" << file.fileName() << "-" << file.errorString();
+            }
 
-        // KeeperFX installation music files (uppercase)
-        // These music files are in the "/music" dir
-        // This allows copying them over from another existing KFX installation
-        // We also check uppercase here because they might have been copied manually or downloaded as uppercase
-        QFile kfxMusicFileUppercase(dir.absolutePath() + "/music/" + musicFileName.toUpper());
-        if(kfxMusicFileUppercase.exists()){
-            kfxMusicFileUppercase.copy(destFilePath);
-            continue;
+            break;
         }
     }
 
