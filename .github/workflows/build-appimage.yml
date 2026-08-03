@@ -122,12 +122,17 @@ jobs:
           # overwrite with the 24.04-built engine + fonts + version
           cp -f engine/bin/keeperfx "$P/keeperfx"
           # Overlay the freshly-built engine's game CONFIG over the downloaded payload.
-          # Without this, fxdata/creatrs/mods stay FROZEN at whatever the payload first
-          # shipped, so upstream config changes (objects.cfg, magic.cfg, creature.cfg, ...)
-          # never reach users even as the engine binary advances. Mirrors the engine's
-          # build-linux-alpha.yml and refresh-alpha.sh. Fonts are re-applied AFTER, since
-          # they live in fxdata/ but are generated (not part of config/).
-          for d in fxdata creatrs mods; do
+          # Without this, fxdata/creatrs/mods/music stay FROZEN at whatever the payload
+          # first shipped, so upstream config changes (objects.cfg, magic.cfg,
+          # creature.cfg, ...) never reach users even as the engine binary advances.
+          # Mirrors the engine's build-linux-alpha.yml and refresh-alpha.sh. Fonts are
+          # re-applied AFTER, since they live in fxdata/ but are generated (not part of
+          # config/).
+          # music/ carries our own MusicReadme.txt. It was missing from this list, which
+          # is the very freezing this overlay exists to prevent: each payload is built
+          # from the previous release's payload, so a file only the engine repo knows
+          # about would never have propagated at all.
+          for d in fxdata creatrs mods music; do
             if [ -d "engine/config/$d" ]; then
               mkdir -p "$P/$d"
               cp -rf "engine/config/$d/." "$P/$d/"
