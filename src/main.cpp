@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QFileInfo>
+#include <QIcon>
 #include <QGuiApplication>
 #include <QProcess>
 #include <QSettings>
@@ -113,6 +114,21 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QApplication::setApplicationName("KeeperFX Launcher");
     QApplication::setApplicationVersion(LAUNCHER_VERSION);
+
+    // Give the window an identity, so taskbars and docks show KeeperFX instead of
+    // a generic placeholder. Two mechanisms are needed and neither substitutes
+    // for the other:
+    //
+    //  * setWindowIcon attaches the icon to the window. X11 taskbars read this,
+    //    and it works however the launcher was started.
+    //  * setDesktopFileName sets the Wayland app_id. Wayland compositors ignore
+    //    window-supplied icons entirely and instead look up the .desktop entry
+    //    whose basename matches the app_id -- so without this a Wayland dock
+    //    shows a placeholder no matter how good the icon is. The name must match
+    //    the entry the AppImage installs (keeperfx-linux-alpha.desktop); it is
+    //    not the application name, and carries no .desktop suffix.
+    QApplication::setWindowIcon(QIcon(":/res/icons/icon_128x128.png"));
+    QGuiApplication::setDesktopFileName(u"keeperfx-linux-alpha"_s);
 
     // Parse launcher options
     LauncherOptions::processApp(app);
