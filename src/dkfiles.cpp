@@ -498,9 +498,14 @@ bool DkFiles::isAnyMusicPresent()
     // Symlinks are followed deliberately here (QDir::Files alone, no QDir::NoSymLinks):
     // a symlinked track pointing at a real audio file is real, playable music, and
     // excluding it would tell the user their music is missing when it is not.
+    // An empty file is never playable music, and it is exactly what an interrupted
+    // copy or a failed download leaves behind. Without the size check the launcher
+    // reports "music present" and stays quiet while the engine logs "Cannot load
+    // music" for the same file -- the launcher and the engine disagreeing about the
+    // same folder, which is the failure this whole check exists to prevent.
     const QFileInfoList entries = musicDir.entryInfoList(QDir::Files);
     for (const QFileInfo& entry : entries) {
-        if (musicExtensions.contains(entry.suffix().toLower())) {
+        if (musicExtensions.contains(entry.suffix().toLower()) && entry.size() > 0) {
             return true;
         }
     }
