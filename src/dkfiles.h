@@ -17,7 +17,7 @@ public:
     static std::optional<QDir> searchForDkInstallDir();
     static bool copyDkDirToDir(QDir dir, QDir toDir);
     static bool isCurrentAppDirValidDkDir();
-    static bool areAllSoundFilesPresent();
+    static bool isAnyMusicPresent();
     static bool isOriginalDkExecutableFound();
 
 private:
