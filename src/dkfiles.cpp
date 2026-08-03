@@ -279,8 +279,12 @@ std::optional<QDir> DkFiles::findExistingDkInstallDir()
     return std::nullopt;
 }
 
-bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir)
+bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir, bool *musicCopyFailed)
 {
+    if (musicCopyFailed != nullptr) {
+        *musicCopyFailed = false;
+    }
+
     // Double check that the given directory is a valid DK dir
     if(!isValidDkDir(dir)){
         return false;
@@ -384,12 +388,18 @@ bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir)
                 continue;
             }
 
-            // A failed copy is deliberately not fatal here. The music is optional and
-            // the caller re-checks with areAllSoundFilesPresent() afterwards, which
-            // falls back to offering the download. Silently swallowing the failure is
-            // what made a half-copied music dir look like a successful install.
+            // A failed copy is deliberately not fatal here: the music is optional and
+            // one missing track shouldn't block the rest of the install. But it must
+            // not go unnoticed either -- isAnyMusicPresent() only checks whether *any*
+            // playable audio file exists, so a partial copy (e.g. 5 of 6 tracks) still
+            // reports "music present" and would otherwise never trigger the download
+            // offer. musicCopyFailed lets the caller OR this in alongside its own
+            // isAnyMusicPresent() check.
             if(file.copy(destFilePath) == false){
                 qWarning() << "Failed to copy music file:" << file.fileName() << "-" << file.errorString();
+                if (musicCopyFailed != nullptr) {
+                    *musicCopyFailed = true;
+                }
             }
 
             break;
@@ -471,21 +481,31 @@ std::optional<QDir> DkFiles::findSteamDkInstallDir()
     return std::nullopt;
 }
 
-bool DkFiles::areAllSoundFilesPresent()
+bool DkFiles::isAnyMusicPresent()
 {
-    // Loop trough music files
-    for (const QString& musicFileName : musicFiles) {
-        // Get the destination file
-        QString destFilePath = QCoreApplication::applicationDirPath() + "/music/" + musicFileName.toLower();
-        QFile destFile(destFilePath);
+    // The engine resolves track numbers from whatever audio files are in music/,
+    // so an exact keeperNN.ogg list is no longer a valid test: a user with a FLAC
+    // soundtrack has working music and must never be told it is missing.
+    // Under-reporting is the deliberate trade -- a curated folder is an intentional
+    // act, whereas an empty one is the failure actually worth prompting about.
+    static const QStringList musicExtensions = {"ogg", "flac", "wav", "mp3"};
 
-        // Check if file exists
-        if (destFile.exists() == false) {
-            return false;
+    QDir musicDir(QCoreApplication::applicationDirPath() + "/music");
+    if (musicDir.exists() == false) {
+        return false;
+    }
+
+    // Symlinks are followed deliberately here (QDir::Files alone, no QDir::NoSymLinks):
+    // a symlinked track pointing at a real audio file is real, playable music, and
+    // excluding it would tell the user their music is missing when it is not.
+    const QFileInfoList entries = musicDir.entryInfoList(QDir::Files);
+    for (const QFileInfo& entry : entries) {
+        if (musicExtensions.contains(entry.suffix().toLower())) {
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 bool DkFiles::isOriginalDkExecutableFound()

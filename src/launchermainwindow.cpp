@@ -257,7 +257,7 @@ LauncherMainWindow::LauncherMainWindow(QWidget *parent)
     // files over by hand all leave the game running without music and without a way to
     // fix it from the launcher. It's also possible for the user to suppress this.
     if (Helper::isKeeperFxInstalled() == true
-        && DkFiles::areAllSoundFilesPresent() == false
+        && DkFiles::isAnyMusicPresent() == false
         && Settings::getLauncherSetting("SUPPRESS_MISSING_MUSIC_MESSAGEBOX").toBool() == false) {
         qDebug() << "Music files not found: Asking if user wants to download them";
 
