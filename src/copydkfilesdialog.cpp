@@ -111,13 +111,16 @@ void CopyDkFilesDialog::on_copyButton_clicked()
 
     // Copy the files
     QDir toDir(QCoreApplication::applicationDirPath());
-    if(!DkFiles::copyDkDirToDir(dkDir, toDir)){
+    bool musicCopyFailed = false;
+    if(!DkFiles::copyDkDirToDir(dkDir, toDir, &musicCopyFailed)){
         QMessageBox::warning(this, tr("Failed to copy files", "MessageBox Title"), tr("Something went wrong while copying the files.", "MessageBox Text"));
         return;
     }
 
-    // Check if music files have been copied
-    if (DkFiles::areAllSoundFilesPresent() == false) {
+    // Offer the music download if no playable music ended up present, or if a
+    // partial copy left the music dir incomplete (isAnyMusicPresent() alone would
+    // miss that: any surviving track makes it report "present").
+    if (DkFiles::isAnyMusicPresent() == false || musicCopyFailed == true) {
         DownloadMusicDialog downloadMusicDialog(this);
         downloadMusicDialog.exec();
     }
