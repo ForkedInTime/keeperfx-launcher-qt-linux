@@ -485,7 +485,10 @@ bool DkFiles::isAnyMusicPresent()
         return false;
     }
 
-    const QFileInfoList entries = musicDir.entryInfoList(QDir::Files | QDir::NoSymLinks);
+    // Symlinks are followed deliberately here (QDir::Files alone, no QDir::NoSymLinks):
+    // a symlinked track pointing at a real audio file is real, playable music, and
+    // excluding it would tell the user their music is missing when it is not.
+    const QFileInfoList entries = musicDir.entryInfoList(QDir::Files);
     for (const QFileInfo& entry : entries) {
         if (musicExtensions.contains(entry.suffix().toLower())) {
             return true;
