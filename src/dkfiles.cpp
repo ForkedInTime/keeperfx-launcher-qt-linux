@@ -279,8 +279,12 @@ std::optional<QDir> DkFiles::findExistingDkInstallDir()
     return std::nullopt;
 }
 
-bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir)
+bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir, bool *musicCopyFailed)
 {
+    if (musicCopyFailed != nullptr) {
+        *musicCopyFailed = false;
+    }
+
     // Double check that the given directory is a valid DK dir
     if(!isValidDkDir(dir)){
         return false;
@@ -384,12 +388,18 @@ bool DkFiles::copyDkDirToDir(QDir dir, QDir toDir)
                 continue;
             }
 
-            // A failed copy is deliberately not fatal here. The music is optional and
-            // the caller re-checks with isAnyMusicPresent() afterwards, which
-            // falls back to offering the download. Silently swallowing the failure is
-            // what made a half-copied music dir look like a successful install.
+            // A failed copy is deliberately not fatal here: the music is optional and
+            // one missing track shouldn't block the rest of the install. But it must
+            // not go unnoticed either -- isAnyMusicPresent() only checks whether *any*
+            // playable audio file exists, so a partial copy (e.g. 5 of 6 tracks) still
+            // reports "music present" and would otherwise never trigger the download
+            // offer. musicCopyFailed lets the caller OR this in alongside its own
+            // isAnyMusicPresent() check.
             if(file.copy(destFilePath) == false){
                 qWarning() << "Failed to copy music file:" << file.fileName() << "-" << file.errorString();
+                if (musicCopyFailed != nullptr) {
+                    *musicCopyFailed = true;
+                }
             }
 
             break;

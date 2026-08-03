@@ -15,7 +15,7 @@ public:
     static bool isValidDkDirPath(QString path);
     static std::optional<QDir> findExistingDkInstallDir();
     static std::optional<QDir> searchForDkInstallDir();
-    static bool copyDkDirToDir(QDir dir, QDir toDir);
+    static bool copyDkDirToDir(QDir dir, QDir toDir, bool *musicCopyFailed = nullptr);
     static bool isCurrentAppDirValidDkDir();
     static bool isAnyMusicPresent();
     static bool isOriginalDkExecutableFound();
