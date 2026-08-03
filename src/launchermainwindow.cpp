@@ -249,6 +249,56 @@ LauncherMainWindow::LauncherMainWindow(QWidget *parent)
         copyDkFilesWindow.exec();
     }
 
+    // Check if the background music is present
+    // The copy dialog above is the only other place that offers the music download, and
+    // it only opens when the original DK files are missing. An installation that is
+    // otherwise complete therefore never gets its music re-checked: reinstalling over an
+    // existing directory, cancelling or failing the music download, or copying the DK
+    // files over by hand all leave the game running without music and without a way to
+    // fix it from the launcher. It's also possible for the user to suppress this.
+    if (Helper::isKeeperFxInstalled() == true
+        && DkFiles::areAllSoundFilesPresent() == false
+        && Settings::getLauncherSetting("SUPPRESS_MISSING_MUSIC_MESSAGEBOX").toBool() == false) {
+        qDebug() << "Music files not found: Asking if user wants to download them";
+
+        // Create messagebox
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("KeeperFX", "MessageBox Title"));
+        msgBox.setText(tr("The background music files are missing, so the game will play without music."
+                          "\n\n"
+                          "The music is not part of the KeeperFX download. It can be downloaded separately, "
+                          "or copied from an original Dungeon Keeper installation."
+                          "\n\n"
+                          "Do you want to download the music now?",
+                          "MessageBox Text"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::Yes);
+
+        // Add "Don't show this again" checkbox
+        QCheckBox dontShowAgain(tr("Don't show this again", "Messagebox Checkbox label"));
+        dontShowAgain.setStyleSheet("margin-top: 12px;");
+        msgBox.setCheckBox(&dontShowAgain);
+
+        // Show the dialog and get the result
+        int result = msgBox.exec();
+
+        // Store the preference before acting on the answer, so that a user who declines
+        // and ticks the box is not asked again on the next start
+        if (dontShowAgain.isChecked()) {
+            Settings::setLauncherSetting("SUPPRESS_MISSING_MUSIC_MESSAGEBOX", true);
+        }
+
+        // Handle the result
+        if (result == QMessageBox::Yes) {
+            qDebug() << "Music files not found: User chose to download";
+            DownloadMusicDialog downloadMusicDialog(this);
+            downloadMusicDialog.exec();
+        } else {
+            qDebug() << "Music files not found: User chose to ignore";
+        }
+    }
+
     // Load keeperfx version if keeperfx is installed
     if (Helper::isKeeperFxInstalled()) {
         if (KfxVersion::loadCurrentVersion() == true) {
@@ -460,6 +510,17 @@ void LauncherMainWindow::setupPlayExtraMenu()
             Settings::setLauncherSetting("GAME_HEAVY_LOG_ENABLED", enabled);
         });
     }
+
+    // Download music action
+    // Kept unconditional so a user whose music dir is empty always has a way to fix it.
+    // Without this the download is only reachable via the '--download-music' argument or
+    // by making the launcher believe the original DK files went missing.
+    menu->addSeparator();
+    menu->addAction(tr("Download music", "Menu"), [this]() {
+        qDebug() << "Download music selected!";
+        DownloadMusicDialog downloadMusicDialog(this);
+        downloadMusicDialog.exec();
+    });
 
     // Attach the menu to the button
     ui->playExtraButton->setMenu(menu);
