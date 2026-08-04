@@ -138,6 +138,21 @@ jobs:
               cp -rf "engine/config/$d/." "$P/$d/"
             fi
           done
+          # The same freezing applies to the trees that live at the engine repo's TOP
+          # level rather than under config/, and they were never overlaid at all. The
+          # payload was still shipping campaign configs from before "Remove unused Name
+          # fields in configs" (#4980, 2026-07-04) and level scripts from before
+          # "Multiplayer: client-side info buttons" (#5045, 2026-07-20). multiplayer/
+          # was worse: absent from every payload ever built, so the engine failed to
+          # read multiplayer/mp_mappck_order.txt and reported no mappacks at all.
+          # These trees also hold large binary assets that only exist in the payload,
+          # so this overlays the repo's text files onto them rather than replacing them.
+          for d in campgns levels lang multiplayer; do
+            if [ -d "engine/$d" ]; then
+              mkdir -p "$P/$d"
+              cp -rf "engine/$d/." "$P/$d/"
+            fi
+          done
           cp -f engine/tools/fxfontmaker/*.fxfont "$P/fxdata/"
           sed -n 's/.*VER_STRING  "\(.*\)".*/\1/p' engine/src/ver_defs.h > "$P/version.txt"
           # include the launcher + 7z.so IN the payload, so an in-launcher update (which
