@@ -9,9 +9,11 @@
 # ~4-5 min warm one.
 name: Build Self-Contained AppImage
 
+# Manual only. The AppImage is now built by build-appimage.yml in the ENGINE repo,
+# which is where it has to live to be triggered by an engine release and to attach
+# assets to it. This copy is kept for launcher-side debugging: it still builds a
+# working AppImage from the current launcher branch without touching any release.
 on:
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
