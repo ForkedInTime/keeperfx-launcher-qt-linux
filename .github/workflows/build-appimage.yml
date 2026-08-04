@@ -113,29 +113,41 @@ jobs:
             "$APPDIR/usr/share/icons/hicolor/256x256/apps/keeperfx-launcher-qt.png"
           install -Dm644 packaging/keeperfx-launcher-qt.desktop \
             "$APPDIR/usr/share/applications/keeperfx-launcher-qt.desktop"
-          # payload base = UPSTREAM's current data package.
+          # payload = our previous release's data, with UPSTREAM's current data
+          # overlaid on top.
           #
-          # This used to download our OWN previous release's full.7z, which meant every
-          # payload was a copy of the one before it. Anything not present in the first
-          # payload and not overlaid below could therefore never appear, and anything
-          # upstream changed in data we do not track could never update. Two things were
-          # lost that way: the multiplayer/ map data (653 files, including the .lof files
-          # the engine needs to list mappacks at all) and fxdata/gtext_*.dat, whose
-          # staleness made the multiplayer service menu show the original game's
-          # "Serial / Modem / IPX" instead of "Online / LAN / Skirmish".
+          # Our payload alone was a copy of a copy: anything absent from the first one
+          # could never appear (the multiplayer map data -- 653 files including the .lof
+          # files the engine needs before it will list a mappack at all) and anything
+          # upstream changed could never update (fxdata/gtext_*.dat drifted far enough
+          # that the multiplayer service menu showed the original game's
+          # "Serial / Modem / IPX" instead of "Online / LAN / Skirmish").
           #
-          # Starting from upstream's package each build makes this self-healing: their
-          # data is the authority, and our engine, launcher and config are overlaid on
-          # top. The asset name carries the version, so resolve it from the API.
+          # But upstream's package alone is not a superset of ours: it lacks ~731 files
+          # we ship, including the whole campgns/burdnimp level pack, and its ldata
+          # movies are the original 320x200 Smacker files where ours are the H.264
+          # 1280x800 re-encodes the truecolor playback path exists for. So ours is the
+          # base and upstream is layered over it, with our movies restored afterwards.
+          wget -q https://github.com/ForkedInTime/keeperfx-linux-alpha/releases/latest/download/keeperfx-linux-alpha-x86_64-full.7z
+          7z x -bso0 keeperfx-linux-alpha-x86_64-full.7z -opkg
+
           UP_URL=$(curl -fsSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/dkfans/keeperfx/releases/latest \
             | python3 -c "import sys,json; print(next(a['browser_download_url'] for a in json.load(sys.stdin)['assets'] if a['name'].endswith('_complete.7z')))")
           echo "upstream data package: $UP_URL"
           wget -q -O upstream-complete.7z "$UP_URL"
-          7z x -bso0 upstream-complete.7z -opkg
+          7z x -bso0 upstream-complete.7z -oupstream
           # That package is the Windows distribution, so drop its binaries and debug maps.
-          find pkg -maxdepth 1 -type f \( -iname '*.exe' -o -iname '*.dll' \
+          find upstream -maxdepth 1 -type f \( -iname '*.exe' -o -iname '*.dll' \
             -o -iname '*.map' -o -iname 'launch.sh' \) -delete
+          # Keep our re-encoded movies across the overlay.
+          mkdir -p /tmp/ourmovies
+          find pkg/ldata -maxdepth 1 -iname '*.smk' -exec cp -f {} /tmp/ourmovies/ \; 2>/dev/null || true
+          cp -rf upstream/. pkg/
+          if [ -n "$(ls -A /tmp/ourmovies 2>/dev/null)" ]; then
+            cp -f /tmp/ourmovies/*.smk pkg/ldata/
+            echo "restored $(ls /tmp/ourmovies | wc -l) re-encoded movie(s)"
+          fi
           echo "payload base: $(du -sh pkg | cut -f1), $(find pkg -type f | wc -l) files"
           P="$APPDIR/payload"
           mkdir -p "$P"
