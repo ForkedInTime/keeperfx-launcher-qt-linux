@@ -1,5 +1,6 @@
 #include "addoninstaller.h"
 
+#include "addonshape.h"
 #include "copytree.h"
 #include "archiver.h"
 
@@ -17,23 +18,7 @@
 namespace {
 
 // Subdirectories that mark a folder as an actual mod (engine config trees).
-const QStringList kModContentDirs = {
-    "creatrs", "fxdata", "ldata", "cmpgfx", "sound", "data", "lang", "campgns", "levels"
-};
 
-// A folder "is a mod" if it has a mod.cfg or any engine config subdirectory.
-bool looksLikeMod(const QString &dir)
-{
-    if (QFileInfo::exists(dir + "/mod.cfg")) {
-        return true;
-    }
-    for (const QString &content : kModContentDirs) {
-        if (QFileInfo(dir + "/" + content).isDir()) {
-            return true;
-        }
-    }
-    return false;
-}
 
 // The recursive copy helpers live in copytree.h so tests can exercise them
 // without linking bit7z and LIEF. copy_tree_no_clobber() reports whether the
@@ -87,19 +72,6 @@ QString campaignDisplayName(const QString &cfgPath)
 // (map00378.slb, .dat, .clm, .own, .lof …). Every map has a .slb slab file, so
 // use that as the signature. Returns the directory holding them (the archive
 // root, or a single nested folder), or empty if this isn't a standalone map.
-QString findStandaloneMapDir(const QString &root)
-{
-    if (!QDir(root).entryList(QStringList{"map*.slb"}, QDir::Files).isEmpty()) {
-        return root;
-    }
-    const QStringList subs = QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    for (const QString &s : subs) {
-        if (!QDir(root + "/" + s).entryList(QStringList{"map*.slb"}, QDir::Files).isEmpty()) {
-            return root + "/" + s;
-        }
-    }
-    return QString();
-}
 
 } // namespace
 
@@ -209,13 +181,55 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
         }
     }
 
+    // Case 1b — a loose campaign: "<name>.cfg" beside "<name>/" at the archive root,
+    // which is how workshop campaigns ship (no campgns/ wrapper).
+    //
+    // This MUST be tested before the standalone-map case below. A campaign's own
+    // levels live inside "<name>/" as map*.slb, so the map detector matches a
+    // campaign archive: Pandaemonium scattered 282 map files into levels/personal,
+    // dropped the campaign cfg and its _configs/_land/_media directories entirely,
+    // and reported a successful map-pack install.
+    bool handledAsCampaign = false;
+    if (!handledAsContainer) {
+        const QString base = find_loose_campaign(tmpPath);
+        if (!base.isEmpty()) {
+            handledAsCampaign = true;
+            // campgns/ or levels/ as the add-on's own cfg declares -- see
+            // loose_addon_install_dir(). A map pack shipped in this shape used to be
+            // forced into campgns/ where the game would never list it.
+            const QString kindDir = loose_addon_install_dir(tmpPath + "/" + base + ".cfg");
+            const QString dst = gameRoot + "/" + kindDir;
+            QDir().mkpath(dst);
+            int kept = 0;
+            for (const QString &rel : loose_campaign_entries(tmpPath, base)) {
+                const CopyTreeOutcome m = copy_tree_no_clobber(tmpPath + "/" + rel, dst + "/" + rel);
+                if (!m.ok) {
+                    r.error = QObject::tr("Could not write into “%1”.\n\n"
+                                          "The folder may be read-only — on a package-managed "
+                                          "install the game's data folders are owned by the "
+                                          "package manager.").arg(kindDir);
+                    return r;
+                }
+                kept += m.skipped;
+            }
+            r.foundContent = true;
+            r.lines << (kindDir == "levels"
+                            ? QObject::tr("Map pack: %1").arg(campaignDisplayName(tmpPath + "/" + base + ".cfg"))
+                            : QObject::tr("Campaign: %1").arg(campaignDisplayName(tmpPath + "/" + base + ".cfg")));
+            if (kept > 0) {
+                r.lines << QObject::tr("(kept %1 existing file(s) in '%2', not overwritten)")
+                               .arg(kept).arg(kindDir);
+            }
+        }
+    }
+
     // Case 2 — a standalone map: loose mapNNNNN.* files (no container folder). These
     // are single workshop maps; the "Install…" file picker and the older installer
     // both used to reject them. Drop them into levels/personal so they show up under
     // the "Personal levels" pack in free play.
     bool handledAsMap = false;
-    if (!handledAsContainer) {
-        const QString mapDir = findStandaloneMapDir(tmpPath);
+    if (!handledAsContainer && !handledAsCampaign) {
+        const QString mapDir = find_standalone_map_dir(tmpPath);
         if (!mapDir.isEmpty()) {
             handledAsMap = true;
             const QString dst = gameRoot + "/levels/personal";
@@ -245,7 +259,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
 
     // Case 3 — a bare mod: no container folder and not a map, just a mod folder (or its
     // contents) at the archive root. Install it into mods/.
-    if (!handledAsContainer && !handledAsMap) {
+    if (!handledAsContainer && !handledAsCampaign && !handledAsMap) {
         const QString modsRoot = gameRoot + "/mods";
         QDir modsDir(modsRoot);
         if (!modsDir.exists()) {
@@ -253,12 +267,24 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
         }
 
         QList<QPair<QString, QString>> found; // (name, sourcePath)
-        if (looksLikeMod(tmpPath)) {
-            found.append({QFileInfo(archiveName).completeBaseName(), tmpPath});
+        const QString archiveBase = QFileInfo(archiveName).completeBaseName();
+        if (looks_like_mod(tmpPath)) {
+            found.append({archiveBase, tmpPath});
         } else {
+            // Subdirectories are separate mods only when they actually look like mods
+            // -- an archive bundling several. Otherwise they are the *parts* of one
+            // mod: a creature replacement ships stand_fp/, attack_td/, icons/ and so
+            // on, and treating each as its own mod turned one sprite pack into 27
+            // broken ones. An archive with no subdirectories at all (loose sprite zips
+            // beside magic.cfg, say) previously installed nothing whatsoever.
             const QStringList subDirs = QDir(tmpPath).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
             for (const QString &subDir : subDirs) {
-                found.append({subDir, tmpPath + "/" + subDir});
+                if (looks_like_mod(tmpPath + "/" + subDir)) {
+                    found.append({subDir, tmpPath + "/" + subDir});
+                }
+            }
+            if (found.isEmpty()) {
+                found.append({archiveBase, tmpPath});
             }
         }
 

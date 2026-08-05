@@ -31,3 +31,10 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_copytree" "$ROOT_DIR/tests/test_copytree.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_copytree"
+
+# Archive-shape detection (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_addonshape" "$ROOT_DIR/tests/test_addonshape.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_addonshape"
