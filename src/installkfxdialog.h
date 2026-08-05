@@ -29,11 +29,11 @@ private slots:
     void updateProgressBarDownload(qint64 bytesReceived, qint64 bytesTotal);
 
     void onStableDownloadFinished(bool success);
-    void onStableArchiveTestComplete(uint64_t archiveSize);
+    void onStableArchiveTestComplete(int64_t archiveSize);
     void onStableExtractComplete();
 
     void onAlphaDownloadFinished(bool success);
-    void onAlphaArchiveTestComplete(uint64_t archiveSize);
+    void onAlphaArchiveTestComplete(int64_t archiveSize);
     void onAlphaExtractComplete();
 
 signals:

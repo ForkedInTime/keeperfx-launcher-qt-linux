@@ -728,6 +728,7 @@ void WorkshopBrowserDialog::renderInstalled()
                                   + "_" + QString::number(QDateTime::currentMSecsSinceEpoch());
             const QString bRoot = backupRoot(gameRoot) + "/" + token;
             QStringList movedPaths;
+            QStringList failedPaths;
             for (const QString &rel : entry.relPaths) {
                 const QString src = gameRoot + "/" + rel;
                 if (!QFileInfo::exists(src)) {
@@ -737,8 +738,30 @@ void WorkshopBrowserDialog::renderInstalled()
                 QDir().mkpath(QFileInfo(dst).absolutePath());
                 if (QDir().rename(src, dst)) {
                     movedPaths << rel;
+                } else {
+                    failedPaths << rel;
                 }
             }
+
+            // A rename that fails used to be dropped silently: the item stayed
+            // installed, no message appeared, and the list simply refreshed -- so
+            // Uninstall looked like it had done nothing at all. Partial success is
+            // worse still, leaving half an add-on behind and a manifest describing
+            // only the half that moved.
+            if (!failedPaths.isEmpty()) {
+                QMessageBox::warning(this, tr("Uninstall failed"),
+                    tr("Could not remove %1 of “%2”.\n\n"
+                       "The folder may be read-only — on a package-managed install the "
+                       "game's data folders are owned by the package manager.\n\n%3")
+                        .arg(movedPaths.isEmpty() ? tr("any part") : tr("every part"))
+                        .arg(entry.name)
+                        .arg(failedPaths.join("\n")));
+                if (movedPaths.isEmpty()) {
+                    rescanInstalled();
+                    return;   // nothing moved: leave no manifest claiming otherwise
+                }
+            }
+
             QJsonObject o;
             o["name"] = entry.name;
             o["kind"] = entry.kind;

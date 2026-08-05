@@ -23,7 +23,7 @@ private slots:
     void updateProgressBarDownload(qint64 bytesReceived, qint64 bytesTotal);
 
     void onDownloadFinished(bool success);
-    void onArchiveTestComplete(uint64_t archiveSize);
+    void onArchiveTestComplete(int64_t archiveSize);
     void onExtractComplete();
 
 signals:

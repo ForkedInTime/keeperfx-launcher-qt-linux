@@ -19,7 +19,8 @@ public:
 
     static bool compressSingleFile(QFile *inputFile, std::string outputPath);
 
-    static uint64_t testArchiveAndGetSize(QFile *archiveFile);
+    // Uncompressed total, or -1 when the archive fails its integrity test.
+    static int64_t testArchiveAndGetSize(QFile *archiveFile);
 
 private:
 

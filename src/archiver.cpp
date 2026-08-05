@@ -114,7 +114,7 @@ bool Archiver::compressSingleFile(QFile *inputFile, std::string outputPath)
     return false;
 }
 
-uint64_t Archiver::testArchiveAndGetSize(QFile *archiveFile)
+int64_t Archiver::testArchiveAndGetSize(QFile *archiveFile)
 {
     // Get file info for the archive file
     QFileInfo archiveFileInfo(archiveFile->filesystemFileName());
@@ -131,11 +131,14 @@ uint64_t Archiver::testArchiveAndGetSize(QFile *archiveFile)
         archive.test();
 
         // Return the total size of the uncompressed files
-        return archive.size();
+        return static_cast<int64_t>(archive.size());
 
     } catch (const bit7z::BitException& ex) {
 
         qWarning() << "Archive test failure:" << ex.what();
+        // Signed on purpose: this used to be uint64_t, so -1 wrapped to UINT64_MAX
+        // and every caller's "if (archiveSize < 0)" was always false. A corrupt or
+        // truncated archive sailed straight through to extraction.
         return -1;
     }
 }

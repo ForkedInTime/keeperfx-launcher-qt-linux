@@ -43,6 +43,8 @@ QString Game::getStringFromStartType(StartType startType)
         return "Load Save";
     case LOAD_PACKETSAVE:
         return "Load Packetsave";
+    case START_WITHOUT_MODS:
+        return "Start Without Mods";
     }
     return "Unknown start type";
 }

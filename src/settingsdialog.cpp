@@ -581,8 +581,8 @@ void SettingsDialog::loadSettings()
         }
 
         // Select combobox widgets
-        QComboBox *resolutionComboBox;
-        QComboBox *displayModeComboBox;
+        QComboBox *resolutionComboBox = nullptr;
+        QComboBox *displayModeComboBox = nullptr;
         switch (resolutionIndex) {
             case 0:
                 resolutionComboBox = ui->comboBoxResolution1;
@@ -596,6 +596,14 @@ void SettingsDialog::loadSettings()
                 resolutionComboBox = ui->comboBoxResolution3;
                 displayModeComboBox = ui->comboBoxDisplayMode3;
                 break;
+        }
+
+        // The dialog has three resolution rows, but INGAME_RES is a space-separated
+        // list the user can extend to any length. Without this the fourth entry left
+        // both pointers uninitialised and dereferenced them immediately below --
+        // opening Settings with four resolutions configured was undefined behaviour.
+        if (resolutionComboBox == nullptr || displayModeComboBox == nullptr) {
+            break;
         }
 
         if(res.toLower().contains("x")) {
@@ -647,8 +655,8 @@ void SettingsDialog::loadSettings()
         }
 
         // Select combobox widgets
-        QComboBox *resolutionComboBox;
-        QComboBox *displayModeComboBox;
+        QComboBox *resolutionComboBox = nullptr;
+        QComboBox *displayModeComboBox = nullptr;
         switch (resolutionIndex) {
             case 0:
                 resolutionComboBox = ui->comboBoxResolution1_2;
@@ -662,6 +670,14 @@ void SettingsDialog::loadSettings()
                 resolutionComboBox = ui->comboBoxResolution3_2;
                 displayModeComboBox = ui->comboBoxDisplayMode3_2;
                 break;
+        }
+
+        // The dialog has three resolution rows, but INGAME_RES is a space-separated
+        // list the user can extend to any length. Without this the fourth entry left
+        // both pointers uninitialised and dereferenced them immediately below --
+        // opening Settings with four resolutions configured was undefined behaviour.
+        if (resolutionComboBox == nullptr || displayModeComboBox == nullptr) {
+            break;
         }
 
         if(res.toLower().contains("x")) {

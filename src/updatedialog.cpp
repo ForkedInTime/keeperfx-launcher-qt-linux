@@ -455,12 +455,12 @@ void UpdateDialog::onArchiveDownloadFinished(bool success)
     // Test archive
     emit appendLog("Testing archive...");
     QThreadPool::globalInstance()->start([this, outputFile]() {
-        uint64_t archiveSize = Archiver::testArchiveAndGetSize(outputFile);
-        QMetaObject::invokeMethod(this, "onArchiveTestComplete", Qt::QueuedConnection, Q_ARG(uint64_t, archiveSize));
+        int64_t archiveSize = Archiver::testArchiveAndGetSize(outputFile);
+        QMetaObject::invokeMethod(this, "onArchiveTestComplete", Qt::QueuedConnection, Q_ARG(int64_t, archiveSize));
     });
 }
 
-void UpdateDialog::onArchiveTestComplete(uint64_t archiveSize){
+void UpdateDialog::onArchiveTestComplete(int64_t archiveSize){
 
     QFile *outputFile = new QFile(QCoreApplication::applicationDirPath() + "/" + QUrl(currentUpdateVersionInfo.downloadUrl).fileName() + ".tmp");
 

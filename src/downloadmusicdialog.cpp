@@ -118,12 +118,12 @@ void DownloadMusicDialog::onDownloadFinished(bool success)
     // Test archive
     emit appendLog("Testing music archive...");
     QThreadPool::globalInstance()->start([this, outputFile]() {
-        uint64_t archiveSize = Archiver::testArchiveAndGetSize(outputFile);
-        QMetaObject::invokeMethod(this, "onArchiveTestComplete", Qt::QueuedConnection, Q_ARG(uint64_t, archiveSize));
+        int64_t archiveSize = Archiver::testArchiveAndGetSize(outputFile);
+        QMetaObject::invokeMethod(this, "onArchiveTestComplete", Qt::QueuedConnection, Q_ARG(int64_t, archiveSize));
     });
 }
 
-void DownloadMusicDialog::onArchiveTestComplete(uint64_t archiveSize)
+void DownloadMusicDialog::onArchiveTestComplete(int64_t archiveSize)
 {
     // Make sure test is successful and archive size is valid
     if (archiveSize < 0) {

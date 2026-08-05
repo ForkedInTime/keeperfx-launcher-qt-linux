@@ -151,12 +151,12 @@ void InstallKfxDialog::onStableDownloadFinished(bool success)
     // Test archive
     emit appendLog("Testing stable release archive...");
     QThreadPool::globalInstance()->start([this]() {
-        uint64_t archiveSize = Archiver::testArchiveAndGetSize(this->tempArchiveStable);
-        QMetaObject::invokeMethod(this, "onStableArchiveTestComplete", Qt::QueuedConnection, Q_ARG(uint64_t, archiveSize));
+        int64_t archiveSize = Archiver::testArchiveAndGetSize(this->tempArchiveStable);
+        QMetaObject::invokeMethod(this, "onStableArchiveTestComplete", Qt::QueuedConnection, Q_ARG(int64_t, archiveSize));
     });
 }
 
-void InstallKfxDialog::onStableArchiveTestComplete(uint64_t archiveSize) {
+void InstallKfxDialog::onStableArchiveTestComplete(int64_t archiveSize) {
 
     // Make sure test is successful and archive size is valid
     if (archiveSize < 0) {
@@ -275,12 +275,12 @@ void InstallKfxDialog::onAlphaDownloadFinished(bool success)
     // Test archive
     emit appendLog("Testing alpha patch archive...");
     QThreadPool::globalInstance()->start([this]() {
-        uint64_t archiveSize = Archiver::testArchiveAndGetSize(this->tempArchiveAlpha);
-        QMetaObject::invokeMethod(this, "onAlphaArchiveTestComplete", Qt::QueuedConnection, Q_ARG(uint64_t, archiveSize));
+        int64_t archiveSize = Archiver::testArchiveAndGetSize(this->tempArchiveAlpha);
+        QMetaObject::invokeMethod(this, "onAlphaArchiveTestComplete", Qt::QueuedConnection, Q_ARG(int64_t, archiveSize));
     });
 }
 
-void InstallKfxDialog::onAlphaArchiveTestComplete(uint64_t archiveSize)
+void InstallKfxDialog::onAlphaArchiveTestComplete(int64_t archiveSize)
 {
     // Make sure test is successful and archive size is valid
     if (archiveSize < 0) {

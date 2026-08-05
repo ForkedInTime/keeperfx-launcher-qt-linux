@@ -28,7 +28,7 @@ private slots:
 
     void onFileDownloadProgress();
     void onArchiveDownloadFinished(bool success);
-    void onArchiveTestComplete(uint64_t archiveSize);
+    void onArchiveTestComplete(int64_t archiveSize);
     void onUpdateComplete();
 
     void onAppendLog(const QString &string);
