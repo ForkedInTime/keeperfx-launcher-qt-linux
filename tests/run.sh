@@ -24,3 +24,10 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_workshopurl" "$ROOT_DIR/tests/test_workshopurl.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_workshopurl"
+
+# Add-on copy helpers (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_copytree" "$ROOT_DIR/tests/test_copytree.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_copytree"

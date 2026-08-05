@@ -86,6 +86,7 @@ void Downloader::onReadyRead()
         const qint64 written = localFileOutput->write(chunk);
         if (written < 0) {
             qWarning() << "Write failed:" << localFileOutput->errorString();
+            lastErrorString = localFileOutput->errorString();
             reply->abort();
             return;
         }
@@ -112,6 +113,7 @@ void Downloader::onFinished()
 
     if (!success) {
         qWarning() << "Download failed:" << reply->errorString();
+        lastErrorString = reply->errorString();
     } else {
         // Debug: confirm gzip usage
         qDebug() << "Content-Encoding:"

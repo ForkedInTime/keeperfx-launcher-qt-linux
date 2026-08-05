@@ -934,11 +934,23 @@ void WorkshopBrowserDialog::installItem(const QJsonObject &item)
     downloader->download(downloadUrl, outFile);
     loop.exec();
     progressDlg.hide();
+    // Read the reason before scheduling deletion: deleteLater() only defers the
+    // delete to the event loop, so touching the object afterwards happens to work
+    // and is exactly the kind of ordering that breaks later.
+    const QString downloadError = downloader->lastError();
     downloader->deleteLater();
 
     if (!downloadOk) {
+        // Include the reason. Without it "Could not download" covers a dead link, a
+        // full disk and a network outage alike, and the first diagnosis of a bad
+        // download URL took an evening rather than a glance.
+        const QString reason = downloadError;
         QFile::remove(tmpArchive);
-        QMessageBox::warning(this, tr("Install failed"), tr("Could not download “%1”.").arg(name));
+        QString message = tr("Could not download “%1”.").arg(name);
+        if (!reason.isEmpty()) {
+            message += "\n\n" + reason;
+        }
+        QMessageBox::warning(this, tr("Install failed"), message);
         return;
     }
 

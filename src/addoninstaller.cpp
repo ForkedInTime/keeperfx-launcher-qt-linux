@@ -1,4 +1,6 @@
 #include "addoninstaller.h"
+
+#include "copytree.h"
 #include "archiver.h"
 
 #include <QCoreApplication>
@@ -33,61 +35,9 @@ bool looksLikeMod(const QString &dir)
     return false;
 }
 
-// Archive junk that should never be installed into the game tree — version-control
-// metadata and OS cruft. Some workshop archives ship a whole .git/ folder.
-bool isJunkEntry(const QString &name)
-{
-    static const QStringList junk = {".git", ".svn", ".hg", "__MACOSX", ".DS_Store", "Thumbs.db"};
-    return junk.contains(name, Qt::CaseInsensitive);
-}
-
-bool copyRecursively(const QString &src, const QString &dst)
-{
-    QFileInfo info(src);
-    if (info.isDir()) {
-        QDir().mkpath(dst);
-        const QStringList entries = QDir(src).entryList(
-            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden);
-        for (const QString &entry : entries) {
-            if (isJunkEntry(entry)) {
-                continue;
-            }
-            if (!copyRecursively(src + "/" + entry, dst + "/" + entry)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    QFile::remove(dst);
-    return QFile::copy(src, dst);
-}
-
-// Like copyRecursively, but NEVER overwrites an existing destination file. Used for the
-// container merge (campgns/levels/mods/multiplayer) so a careless or crafted archive can't
-// clobber stock campaigns/maps or another add-on's files. Returns how many files were
-// skipped because they already existed.
-int copyRecursivelyNoClobber(const QString &src, const QString &dst)
-{
-    QFileInfo info(src);
-    if (info.isDir()) {
-        QDir().mkpath(dst);
-        int skipped = 0;
-        const QStringList entries = QDir(src).entryList(
-            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden);
-        for (const QString &entry : entries) {
-            if (isJunkEntry(entry)) {
-                continue;
-            }
-            skipped += copyRecursivelyNoClobber(src + "/" + entry, dst + "/" + entry);
-        }
-        return skipped;
-    }
-    if (QFileInfo::exists(dst)) {
-        return 1; // already present — keep it, don't overwrite
-    }
-    QFile::copy(src, dst);
-    return 0;
-}
+// The recursive copy helpers live in copytree.h so tests can exercise them
+// without linking bit7z and LIEF. copy_tree_no_clobber() reports whether the
+// copy actually happened, which the previous local version could not.
 
 // Workshop mods don't always ship a mod.cfg; without one the manager can't list
 // them. Write a minimal one so the mod shows up and is toggleable.
@@ -230,7 +180,18 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
         }
 
         // No-clobber merge: keep existing files (stock campaigns/maps, other add-ons)
-        const int kept = copyRecursivelyNoClobber(src, dst);
+        const CopyTreeOutcome merge = copy_tree_no_clobber(src, dst);
+        if (!merge.ok) {
+            // Nothing was written, or only part of it was. Saying so beats the old
+            // behaviour, which counted skipped files, ignored failed ones, and
+            // reported a successful install for a directory it could not write to.
+            r.error = QObject::tr("Could not write into “%1”.\n\n"
+                                  "The folder may be read-only — on a package-managed "
+                                  "install the game's data folders are owned by the "
+                                  "package manager.").arg(kind);
+            return r;
+        }
+        const int kept = merge.skipped;
         if (kept > 0) {
             r.lines << QObject::tr("(kept %1 existing file(s) in '%2', not overwritten)")
                            .arg(kept).arg(kind);
@@ -311,7 +272,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
             if (QFileInfo::exists(dest)) {
                 QDir(dest).removeRecursively();
             }
-            if (!copyRecursively(entry.second, dest)) {
+            if (!copy_tree(entry.second, dest)) {
                 r.lines << QObject::tr("Could not copy “%1” into the mods folder.").arg(name);
                 continue;
             }
