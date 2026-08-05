@@ -163,10 +163,25 @@ KfxVersion::VersionInfo KfxVersion::getVersionFromString(QString versionString)
     versionInfo.version = match.captured(0);
 
     // Get the type of the release
-    if (versionInfo.version == versionString) {
+    //
+    // "Stable" means the string carries a version and nothing else. Release tags
+    // arrive with a leading "v" (v1.4.0.5408) while version.txt has none, so that
+    // is normalised away first -- compared raw, a tagged stable does not match and
+    // falls through to UNKNOWN, which checkForKfxUpdate() skips entirely.
+    QString normalizedVersionString = versionString.trimmed();
+    if (normalizedVersionString.startsWith('v', Qt::CaseInsensitive)) {
+        normalizedVersionString = normalizedVersionString.mid(1).trimmed();
+    }
+    if (versionInfo.version == normalizedVersionString) {
         versionInfo.type = KfxVersion::ReleaseType::STABLE;
-        // Make sure only x.y.z are taken from stable version
-        versionInfo.version = versionInfo.version.split('.').mid(0, 3).join('.');
+        // Every part is kept, including the build number.
+        //
+        // Upstream can truncate to x.y.z because their stables really are semantic
+        // releases (1.3.0, 1.4.0). This fork's builds are identified by the fourth
+        // part, on a base upstream controls through version.mk, so discarding it
+        // makes every stable on 1.4.0 look identical: the installed version would
+        // always compare older than the release it already is, and the launcher
+        // would offer an endless update to itself.
         versionInfo.fullString = versionInfo.version;
     } else if (versionString.toLower().contains("alpha")) {
         versionInfo.type = KfxVersion::ReleaseType::ALPHA;
@@ -260,12 +275,23 @@ bool KfxVersion::isNewerVersion(const QString &version1, const QString &version2
     while (version1Parts.size() < maxLength) version1Parts.append("0");
     while (version2Parts.size() < maxLength) version2Parts.append("0");
 
-    // Loop trough the version parts
+    // Loop trough the version parts, most significant first
     for (int i = 0; i < maxLength; ++i) {
 
+        const int part1 = version1Parts[i].toInt();
+        const int part2 = version2Parts[i].toInt();
+
         // Check if version is newer
-        if (version1Parts[i].toInt() > version2Parts[i].toInt()) {
+        if (part1 > part2) {
             return true;
+        }
+
+        // A lower part settles it -- everything after it is less significant.
+        // Without this the loop carries on and a large build number rescues an
+        // older base, so 1.3.0.9999 reports as newer than 1.4.0.0. A version.mk
+        // bump by upstream could then offer users a downgrade.
+        if (part1 < part2) {
+            return false;
         }
     }
 
