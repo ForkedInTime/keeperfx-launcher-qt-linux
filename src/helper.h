@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDesktopServices>
 #include <QDir>
+#include <QFileInfo>
 #include <QObject>
 #include <QProcess>
 #include <QProcessEnvironment>
@@ -33,6 +34,38 @@ public:
         // Native Linux build: the engine is a native ELF named 'keeperfx' (no .exe).
         QFile keeperFxNative (QCoreApplication::applicationDirPath() + "/keeperfx");
         return (keeperFxNative.exists());
+    }
+
+    // True when the game directory is assembled by a system package manager
+    // rather than owned by the launcher.
+    //
+    // The AUR package installs the engine to /usr/lib and the data trees to
+    // /usr/share, then symlinks them into the game directory, so those files
+    // are root-owned and read-only. The launcher's own updater extracts a
+    // downloaded payload over that directory: it follows the symlinks, tries to
+    // replace a root-owned file, and dies with "Cannot delete output file:
+    // Permission denied" -- after a ~400 MB download that was never going to be
+    // usable. Detecting the layout lets the caller say so instead.
+    //
+    // A symlink pointing back inside the game directory is the launcher's own
+    // doing and does not count; only one escaping the directory means somebody
+    // else owns the file.
+    static bool isPackageManagedInstall()
+    {
+        const QString gameDir = QDir(QCoreApplication::applicationDirPath()).absolutePath();
+        const QStringList probes = {"keeperfx", "fxdata", "campgns", "levels", "creatrs"};
+        for (const QString &name : probes) {
+            const QFileInfo info(gameDir + "/" + name);
+            if (info.isSymLink() == false) {
+                continue;
+            }
+            const QString target = QFileInfo(info.symLinkTarget()).absoluteFilePath();
+            if (target.isEmpty() || target == gameDir || target.startsWith(gameDir + "/")) {
+                continue;
+            }
+            return true;
+        }
+        return false;
     }
 
     static void removeLeftoverNewLauncher()

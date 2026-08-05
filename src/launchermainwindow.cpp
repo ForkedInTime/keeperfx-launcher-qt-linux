@@ -1175,6 +1175,25 @@ void LauncherMainWindow::checkForKfxUpdate(bool ignoreInterval, bool showMessage
 {
     qDebug() << "Checking for KeeperFX update";
 
+    // An install assembled by a package manager cannot be updated from here:
+    // its engine and data are root-owned files outside the game directory, and
+    // the updater would download the whole payload only to fail extracting over
+    // them. Say so rather than offering an update that cannot be applied.
+    if (Helper::isPackageManagedInstall()) {
+        qInfo() << "Not checking for updates: this install is managed by a package manager";
+        if (showMessageBox) {
+            QMessageBox::information(this,
+                                     tr("KeeperFX Update", "MessageBox Title"),
+                                     tr("This copy of KeeperFX was installed by your package manager, "
+                                        "which owns the game files.\n\n"
+                                        "Update it the same way you installed it — for example "
+                                        "'yay -Syu' on Arch — and this launcher will follow along.",
+                                        "MessageBox Text"));
+        }
+        checkForFileRemoval(); // Check if there are any files that should be removed
+        return;
+    }
+
     // Only update from stable and alpha
     if (KfxVersion::currentVersion.type != KfxVersion::ReleaseType::STABLE &&
         KfxVersion::currentVersion.type != KfxVersion::ReleaseType::ALPHA) {
