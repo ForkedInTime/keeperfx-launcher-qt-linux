@@ -61,6 +61,12 @@ int main(int argc, char **argv)
 	expectParse("v1.4.0.5408", KfxVersion::ReleaseType::STABLE, "1.4.0.5408",
 		"a stable tag keeps the build number");
 
+	// The real artifact: linux.mk builds VER_STRING as "<version> <suffix>", so an
+	// empty suffix leaves a TRAILING SPACE in version.txt. Verified against the file
+	// inside a published full.7z, which reads "1.4.0.5411 ".
+	expectParse("1.4.0.5411 ", KfxVersion::ReleaseType::STABLE, "1.4.0.5411",
+		"a stable with linux.mk's trailing space is still STABLE");
+
 	// --- Version comparison -----------------------------------------------------
 	expect(KfxVersion::isNewerVersion("1.4.0.5408", "1.4.0.5397"),
 		"a higher build is newer");
