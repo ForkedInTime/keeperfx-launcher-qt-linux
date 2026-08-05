@@ -1,5 +1,6 @@
 #include "apiclient.h"
 
+#include "kfxversion.h"
 #include "launcheroptions.h"
 
 #include <QEventLoop>
@@ -21,12 +22,24 @@
 
 #ifndef Q_OS_WINDOWS
 // keeperfx-linux-alpha: the launcher's "is there a newer version?" check should look at
-// OUR GitHub releases, not keeperfx.net. This returns the latest release shaped like the
-// keeperfx.net response the updater expects: { "version": "1.3.2.5200", "download_url": ... }.
-static QJsonObject getLatestLinuxAlphaRelease()
+// OUR GitHub releases, not keeperfx.net. This returns the newest release OF THE REQUESTED
+// CHANNEL, shaped like the keeperfx.net response the updater expects:
+// { "version": "1.3.2.5200", "download_url": ... }.
+//
+// The channel matters. This used to request /releases/latest, which is simply the newest
+// release of any kind -- so publishing a stable offered it to every alpha user, and the
+// next alpha after it offered an alpha to every stable user. The stable channel would
+// have lasted exactly until the following alpha release.
+//
+// Marking alphas as GitHub prereleases would separate them, but prereleases are excluded
+// from /releases/latest, which the README's download links, the Flatpak attach step and
+// the updater itself all rely on. So the full list is fetched and filtered by tag instead.
+static QJsonObject getLatestLinuxAlphaRelease(KfxVersion::ReleaseType wantedType)
 {
     QNetworkAccessManager manager;
-    QNetworkRequest req(QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-linux-alpha/releases/latest"));
+    // The list endpoint, newest first. per_page is small because only the first
+    // match of each channel is ever needed.
+    QNetworkRequest req(QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-linux-alpha/releases?per_page=30"));
     req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
     req.setRawHeader("Accept", "application/vnd.github+json");
 
@@ -36,39 +49,69 @@ static QJsonObject getLatestLinuxAlphaRelease()
     loop.exec();
 
     if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "Linux alpha update check failed:" << reply->errorString();
+        qWarning() << "Linux update check failed:" << reply->errorString();
         reply->deleteLater();
         return QJsonObject();
     }
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     reply->deleteLater();
-    if (doc.isObject() == false) {
-        return QJsonObject();
-    }
-    QJsonObject root = doc.object();
-
-    // tag like "v1.3.2.5200-alpha" -> numeric version "1.3.2.5200"
-    QRegularExpression re(QStringLiteral("([0-9]+\\.[0-9]+\\.[0-9]+(?:\\.[0-9]+)?)"));
-    QRegularExpressionMatch m = re.match(root["tag_name"].toString());
-    if (m.hasMatch() == false) {
+    if (doc.isArray() == false) {
         return QJsonObject();
     }
 
-    // find the complete game package asset for the in-launcher updater
-    QString downloadUrl;
-    const QJsonArray assets = root["assets"].toArray();
-    for (const QJsonValue &a : assets) {
-        const QString name = a.toObject()["name"].toString();
-        if (name.endsWith("-full.7z")) {
-            downloadUrl = a.toObject()["browser_download_url"].toString();
-            break;
+    // GitHub returns releases newest first, so the first tag matching the wanted
+    // channel is the one to offer. Drafts and prereleases are skipped: a draft is
+    // not published yet, and a prerelease is not part of either channel here.
+    const QJsonArray releases = doc.array();
+    for (const QJsonValue &r : releases) {
+        const QJsonObject root = r.toObject();
+        if (root["draft"].toBool() || root["prerelease"].toBool()) {
+            continue;
         }
+
+        const QString tag = root["tag_name"].toString();
+
+        // Classified by the same code that classifies the installed version, so
+        // the two sides of the comparison can never disagree about what a tag
+        // means: "v1.4.0.5409-alpha" is ALPHA, "v1.4.0.5409" is STABLE.
+        if (KfxVersion::getVersionFromString(tag).type != wantedType) {
+            continue;
+        }
+
+        // tag like "v1.3.2.5200-alpha" -> numeric version "1.3.2.5200"
+        QRegularExpression re(QStringLiteral("([0-9]+\\.[0-9]+\\.[0-9]+(?:\\.[0-9]+)?)"));
+        QRegularExpressionMatch m = re.match(tag);
+        if (m.hasMatch() == false) {
+            continue;
+        }
+
+        // find the complete game package asset for the in-launcher updater
+        QString downloadUrl;
+        const QJsonArray assets = root["assets"].toArray();
+        for (const QJsonValue &a : assets) {
+            const QString name = a.toObject()["name"].toString();
+            if (name.endsWith("-full.7z")) {
+                downloadUrl = a.toObject()["browser_download_url"].toString();
+                break;
+            }
+        }
+
+        // A release with no payload attached cannot be updated to. Keep looking
+        // rather than offering an update that would fail to download -- that is
+        // exactly what stranded users when a release was published before its
+        // assets finished uploading.
+        if (downloadUrl.isEmpty()) {
+            qWarning() << "Skipping release with no -full.7z asset:" << tag;
+            continue;
+        }
+
+        QJsonObject out;
+        out["version"] = m.captured(1);
+        out["download_url"] = downloadUrl;
+        return out;
     }
 
-    QJsonObject out;
-    out["version"] = m.captured(1);
-    out["download_url"] = downloadUrl;
-    return out;
+    return QJsonObject();
 }
 #endif
 
@@ -187,7 +230,7 @@ QJsonDocument ApiClient::getJsonResponse(QUrl endpointPath, HttpMethod method, Q
 QJsonObject ApiClient::getLatestStable(){
 #ifndef Q_OS_WINDOWS
     // Native Linux build: check OUR GitHub releases, not keeperfx.net.
-    return getLatestLinuxAlphaRelease();
+    return getLatestLinuxAlphaRelease(KfxVersion::ReleaseType::STABLE);
 #else
     // URL of the API endpoint
     // API endpoints can be found at: https://github.com/dkfans/keeperfx-website
@@ -208,7 +251,7 @@ QJsonObject ApiClient::getLatestStable(){
 QJsonObject ApiClient::getLatestAlpha(){
 #ifndef Q_OS_WINDOWS
     // Native Linux build: check OUR GitHub releases, not keeperfx.net.
-    return getLatestLinuxAlphaRelease();
+    return getLatestLinuxAlphaRelease(KfxVersion::ReleaseType::ALPHA);
 #else
     // URL of the API endpoint
     // API endpoints can be found at: https://github.com/dkfans/keeperfx-website
