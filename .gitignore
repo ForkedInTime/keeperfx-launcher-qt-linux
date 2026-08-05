@@ -50,3 +50,6 @@ CMakeLists.txt.user*
 # Python byte code
 *.pyc
 
+
+# Test binaries built by tests/run.sh
+/bin/
