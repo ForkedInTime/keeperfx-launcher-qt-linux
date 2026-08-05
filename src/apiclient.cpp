@@ -1,6 +1,7 @@
 #include "apiclient.h"
 
 #include "kfxversion.h"
+#include "workshopurl.h"
 #include "launcheroptions.h"
 
 #include <QEventLoop>
@@ -359,8 +360,9 @@ QUrl ApiClient::getDownloadUrlMusic()
         return QUrl();
     }
 
-    // Get URL
-    QString fileDownloadString = fileObj["url"].toString();
+    // Get URL (repaired: the API form-encodes spaces as "+", which 404s in a path)
+    QString fileDownloadString = repair_workshop_file_url(fileObj["url"].toString(),
+                                                          fileObj["filename"].toString());
     if (fileDownloadString.isEmpty() || fileDownloadString.isNull()) {
         qWarning() << "Download music URL: File download string not found";
         return QUrl();
@@ -459,7 +461,9 @@ QUrl ApiClient::getWorkshopItemDownloadUrl(int itemId)
     }
 
     // The primary (latest) file is what the website's Download button serves.
-    const QString fileUrl = filesArray.first().toObject()["url"].toString();
+    const QJsonObject fileObj = filesArray.first().toObject();
+    const QString fileUrl = repair_workshop_file_url(fileObj["url"].toString(),
+                                                     fileObj["filename"].toString());
     if (fileUrl.isEmpty()) {
         qWarning() << "Workshop item download URL: empty file URL for item" << itemId;
         return QUrl();

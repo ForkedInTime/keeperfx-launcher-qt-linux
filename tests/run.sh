@@ -17,3 +17,10 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	"$ROOT_DIR/tests/test_kfxversion.cpp" "$ROOT_DIR/src/kfxversion.cpp" \
 	$(pkg-config --libs Qt6Core Qt6Gui Qt6Network) -lLIEF
 "$ROOT_DIR/bin/test_kfxversion"
+
+# Workshop download-URL repair (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_workshopurl" "$ROOT_DIR/tests/test_workshopurl.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_workshopurl"
