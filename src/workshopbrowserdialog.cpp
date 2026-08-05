@@ -831,6 +831,7 @@ void WorkshopBrowserDialog::renderInstalled()
             auto *restore = new QPushButton(tr("Restore"), row);
             connect(restore, &QPushButton::clicked, this, [this, entry, gameRoot]() {
                 const QString bRoot = backupRoot(gameRoot) + "/" + entry.token;
+                QStringList failed;
                 for (const QString &rel : entry.relPaths) {
                     const QString src = bRoot + "/" + rel;
                     const QString dst = gameRoot + "/" + rel;
@@ -838,8 +839,27 @@ void WorkshopBrowserDialog::renderInstalled()
                         continue;
                     }
                     QDir().mkpath(QFileInfo(dst).absolutePath());
-                    QDir().rename(src, dst);
+                    if (!QDir().rename(src, dst)) {
+                        failed << rel;
+                    }
                 }
+
+                // The backup used to be deleted whether or not anything came back.
+                // A restore that could not write -- a read-only folder on a package
+                // install, say -- therefore destroyed the add-on permanently: not in
+                // the game, and no longer in the backup either. Keep everything when
+                // any part fails, so Restore can be tried again.
+                if (!failed.isEmpty()) {
+                    QMessageBox::warning(this, tr("Restore failed"),
+                        tr("Could not restore part of “%1”. The backup has been kept, so "
+                           "nothing is lost — you can try again.\n\n"
+                           "The folder may be read-only — on a package-managed install the "
+                           "game's data folders are owned by the package manager.\n\n%2")
+                            .arg(entry.name).arg(failed.join("\n")));
+                    rescanInstalled();
+                    return;
+                }
+
                 QDir(bRoot).removeRecursively();
                 QFile::remove(backupRoot(gameRoot) + "/" + entry.token + ".json");
                 rescanInstalled();

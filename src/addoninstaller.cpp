@@ -236,7 +236,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
             QDir().mkpath(dst);
             const QStringList mapFiles = QDir(mapDir).entryList(QStringList{"map*"}, QDir::Files);
             QSet<QString> stems;
-            int copied = 0, kept = 0;
+            int copied = 0, kept = 0, failed = 0;
             for (const QString &f : mapFiles) {
                 stems.insert(f.left(f.indexOf('.')));
                 const QString d = dst + "/" + f;
@@ -244,8 +244,20 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                     kept++;
                     continue;
                 }
-                QFile::copy(mapDir + "/" + f, d);
-                copied++;
+                if (QFile::copy(mapDir + "/" + f, d)) {
+                    copied++;
+                } else {
+                    failed++;
+                }
+            }
+            if (failed > 0 && copied == 0) {
+                // Every copy failed, so nothing was installed. Counting attempts
+                // rather than successes used to report "N maps added" regardless.
+                r.error = QObject::tr("Could not write into “levels/personal”.\n\n"
+                                      "The folder may be read-only — on a package-managed "
+                                      "install the game's data folders are owned by the "
+                                      "package manager.");
+                return r;
             }
             if (copied > 0) {
                 r.lines << QObject::tr("%n map(s) (added to Personal levels)", "", stems.size());
