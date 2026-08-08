@@ -1,4 +1,5 @@
 #include "downloadmapeditordialog.h"
+#include "settings.h"
 #include "apiclient.h"
 #include "archiver.h"
 #include "downloader.h"
@@ -171,6 +172,15 @@ void DownloadMapEditorDialog::onExtractComplete()
     // dir confuses the launcher's own version detection. Map editing/saving works
     // fine without it; maps are tested via KeeperFX's own Play. (Deferred: native
     // Save & Play integration.)
+
+    // Record what was installed, so the Map Editor button can tell later whether a
+    // newer Unearth exists. Without this the launcher only ever knows "a binary is
+    // present" and an install can sit years out of date.
+    const QString installedVersion = ApiClient::getLatestMapEditorVersion();
+    if (installedVersion.isEmpty() == false) {
+        Settings::setLauncherSetting("MAP_EDITOR_VERSION", installedVersion);
+        emit appendLog("Installed Unearth version: " + installedVersion);
+    }
 
     // Done!
     emit appendLog("Done!");

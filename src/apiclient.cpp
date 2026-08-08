@@ -374,6 +374,40 @@ QUrl ApiClient::getDownloadUrlMusic()
     return QUrl(fileDownloadString);
 }
 
+// The tag of Unearth's newest release, e.g. "0.70.950".
+//
+// The launcher installs the editor once and then only ever checks whether the
+// binary exists, so an install made before a fix was published stays that way
+// forever. A user hit exactly that: their 0.69.931 predated the release that
+// taught Unearth to find a native Linux keeperfx binary, and nothing would ever
+// have offered them the newer one.
+//
+// Empty on any failure -- the caller treats "unknown" as "do not nag".
+QString ApiClient::getLatestMapEditorVersion()
+{
+    QNetworkAccessManager manager;
+    QNetworkRequest req(QUrl("https://api.github.com/repos/rainlizard/Unearth/releases/latest"));
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
+    req.setRawHeader("Accept", "application/vnd.github+json");
+
+    QNetworkReply *reply = manager.get(req);
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Map editor version check failed:" << reply->errorString();
+        reply->deleteLater();
+        return QString();
+    }
+    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    reply->deleteLater();
+    if (doc.isObject() == false) {
+        return QString();
+    }
+    return doc.object()["tag_name"].toString();
+}
+
 QUrl ApiClient::getDownloadUrlMapEditor()
 {
     // The Unearth map editor is hosted on its own GitHub repo, NOT keeperfx.net.

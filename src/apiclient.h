@@ -27,6 +27,8 @@ public:
     static QUrl getDownloadUrlAlpha();
     static QUrl getDownloadUrlMusic();
     static QUrl getDownloadUrlMapEditor();
+    // Newest Unearth release tag; empty if it cannot be determined.
+    static QString getLatestMapEditorVersion();
 
     // Workshop browser: the full catalogue (client filters/sorts it) and the
     // download URL for a given workshop item's primary file.

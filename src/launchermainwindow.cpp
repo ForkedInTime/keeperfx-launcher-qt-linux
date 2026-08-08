@@ -1598,6 +1598,45 @@ void LauncherMainWindow::on_unearthButton_clicked()
 #endif
     }
 
+    // Offer an update if Unearth has moved on.
+    //
+    // Until now the launcher only ever asked "does the binary exist?", so whatever
+    // version was installed first stayed forever. That is not academic: a 0.69.931
+    // install predates the release that taught Unearth to find a native Linux
+    // keeperfx binary, so its file picker filtered for *.exe and could not see the
+    // game at all -- and nothing would ever have offered the fix.
+    //
+    // Checked here rather than at startup: it costs a network round trip, and the
+    // only moment it matters is when the editor is about to be used. Unknown or
+    // unreachable means stay quiet.
+    const QString installedEditorVersion =
+        Settings::getLauncherSetting("MAP_EDITOR_VERSION").toString();
+    const QString latestEditorVersion = ApiClient::getLatestMapEditorVersion();
+    if (latestEditorVersion.isEmpty() == false && installedEditorVersion != latestEditorVersion) {
+        // An install made before this setting existed reports no version. Say so
+        // plainly rather than claiming to know which one they have.
+        const QString have = installedEditorVersion.isEmpty()
+                                 ? tr("an older version")
+                                 : installedEditorVersion;
+        const QMessageBox::StandardButton answer = QMessageBox::question(
+            this, tr("Map editor update"),
+            tr("You have %1 of the Unearth map editor; %2 is available.\n\n"
+               "Update now?")
+                .arg(have, latestEditorVersion),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+        if (answer == QMessageBox::Yes) {
+            DownloadMapEditorDialog updateDialog(this);
+            updateDialog.exec();
+            // The download replaces the binary in place; re-resolve in case the
+            // new archive unpacks under a differently-named directory.
+            const QString updatedPath = Helper::getUnearthBinary().fileName();
+            if (updatedPath.isEmpty() == false) {
+                unearthPath = updatedPath;
+            }
+        }
+    }
+
     qDebug() << "Starting Unearth:" << unearthPath;
 
     // On Linux/Wayland, Unearth's engine (Godot 3.5) renders a black window through
