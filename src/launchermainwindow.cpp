@@ -81,11 +81,18 @@ LauncherMainWindow::LauncherMainWindow(QWidget *parent)
     caretDownIcon.addFile("://res/img/caret-down-disabled.png", QSize(), QIcon::Disabled);
     ui->playExtraButton->setIcon(caretDownIcon);
 
-    // Disable resizing and remove maximize button
-    // This does not work on Wayland (for now)
-    setFixedSize(size());
-    setWindowFlag(Qt::WindowMaximizeButtonHint, false);
-    setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+    // The window is resizable, with the old fixed size as its minimum.
+    //
+    // It used to call setFixedSize(), but that is only honoured under X11 -- Wayland
+    // compositors ignore it, so on a Wayland desktop the window was already draggable
+    // and simply looked broken when enlarged, because the content did not follow. That
+    // is the worst of both worlds: unsupported on one display server and unpolished on
+    // the other. Growing is now deliberate and the panels expand with it.
+    //
+    // The minimum is the original design size, so the layout can never be dragged
+    // smaller than it was built for.
+    setMinimumSize(size());
+    setWindowFlag(Qt::WindowMaximizeButtonHint, true);
 
     // Raise and activate window
     setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
@@ -922,10 +929,12 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
             workshopItemWidget->setAuthor(workshopItem["submitter"].toObject()["username"].toString());
             workshopItemWidget->setTargetUrl(workshopItem["url"].toString());
 
-            // Set the size of the widget
-            // TODO: make this dynamic (as it doesn't look good with a bigger window)
-            workshopItemWidget->setMaximumWidth(250);
-            workshopItemWidget->setMaximumHeight(110);
+            // Height stays fixed -- these are fixed-content cards and stretching them
+            // vertically just pads them out. Width is left to the grid layout so the
+            // row fills the panel when the window grows, which is what the old
+            // hardcoded 250 prevented.
+            workshopItemWidget->setMinimumWidth(220);
+            workshopItemWidget->setFixedHeight(110);
 
             // Set image
             if (workshopItem["thumbnail"].isNull() == false) {
@@ -953,10 +962,11 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
                 newsArticleWidget->setExcerpt("");
             }
 
-            // Set the size of the widget
-            // TODO: make this dynamic (as it doesn't look good with a bigger window)
-            newsArticleWidget->setMaximumWidth(510);
-            newsArticleWidget->setMaximumHeight(110);
+            // As above: full width of the news column, fixed height. The cap of 510
+            // was the reason a wider window produced empty space beside the articles
+            // rather than wider articles.
+            newsArticleWidget->setMinimumWidth(420);
+            newsArticleWidget->setFixedHeight(110);
 
             // The API returns a default image for items without one so we can just pass it
             newsArticleWidget->setImagePixmap(pixmapMap[newsArticle["image"].toString()]);

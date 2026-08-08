@@ -13,7 +13,7 @@
     <height>500</height>
    </rect>
   </property>
-  <property name="maximumSize">
+  <property name="minimumSize">
    <size>
     <width>750</width>
     <height>500</height>
