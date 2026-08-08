@@ -93,7 +93,10 @@ LauncherMainWindow::LauncherMainWindow(QWidget *parent)
     //
     // The minimum is the original design size, so the layout can never be dragged
     // smaller than it was built for.
-    setMinimumSize(size());
+    // Minimum is the ORIGINAL design size, not the new default: the window now opens
+    // wide enough to show four workshop cards in a row (their layout fixes each at
+    // ~300px), but must still shrink to what the panels were designed for.
+    setMinimumSize(750, 500);
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);
 
     // Raise and activate window
@@ -931,12 +934,12 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
             workshopItemWidget->setAuthor(workshopItem["submitter"].toObject()["username"].toString());
             workshopItemWidget->setTargetUrl(workshopItem["url"].toString());
 
-            // A band, not a fixed width: narrow enough that a wide panel fits several
-            // per row, wide enough to stay legible. reflowWorkshopGrid() turns extra
-            // width into extra COLUMNS -- letting one card grow to 1200px instead
-            // would be no better than the empty margin it replaced.
-            workshopItemWidget->setMinimumWidth(220);
-            workshopItemWidget->setMaximumWidth(320);
+            // No minimum is imposed here: the card's own layout (an 80px thumbnail
+            // beside title/type/date/author) already fixes it at about 300px, and a
+            // smaller number was simply ignored -- which is why the grid collapsed to
+            // a single column. Only cap the upper end, so surplus width becomes extra
+            // COLUMNS via reflowWorkshopGrid() rather than absurdly wide cards.
+            workshopItemWidget->setMaximumWidth(340);
             workshopItemWidget->setFixedHeight(110);
 
             // Set image
@@ -1025,9 +1028,12 @@ void LauncherMainWindow::reflowWorkshopGrid()
         return;
     }
 
-    // How many fit across? Use the card's own minimum plus the spacing the layout
-    // will insert, so this stays right if either is retuned later.
-    const int cardWidth = cards.first()->minimumWidth();
+    // How many fit across? Use the card's EFFECTIVE minimum -- minimumSizeHint()
+    // reflects what its internal layout actually needs, which is what constrains
+    // the grid. minimumWidth() alone reports whatever was set on the widget and
+    // can be smaller than the card can honour.
+    const int cardWidth = qMax(cards.first()->minimumSizeHint().width(),
+                               cards.first()->minimumWidth());
     const int spacing = grid->horizontalSpacing() > 0 ? grid->horizontalSpacing() : 6;
     const int available = ui->KfxWorkshopItemList->width();
     int columns = (available + spacing) / (cardWidth + spacing);
