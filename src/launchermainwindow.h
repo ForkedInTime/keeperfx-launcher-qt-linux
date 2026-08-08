@@ -34,6 +34,8 @@ public:
 protected:
     // Extra width should become more workshop columns, not wider cards.
     void resizeEvent(QResizeEvent *event) override;
+    // Reflows the grid when the workshop panel itself changes width.
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void on_logFileButton_clicked();

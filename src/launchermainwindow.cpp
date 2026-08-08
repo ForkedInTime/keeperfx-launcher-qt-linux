@@ -5,7 +5,9 @@
 #include <QDesktopServices>
 #include <QFile>
 #include <QJsonArray>
+#include <QEvent>
 #include <QGridLayout>
+#include <QMargins>
 #include <QResizeEvent>
 #include <QMenu>
 #include <QMessageBox>
@@ -93,11 +95,23 @@ LauncherMainWindow::LauncherMainWindow(QWidget *parent)
     //
     // The minimum is the original design size, so the layout can never be dragged
     // smaller than it was built for.
-    // Minimum is the ORIGINAL design size, not the new default: the window now opens
-    // wide enough to show four workshop cards in a row (their layout fixes each at
-    // ~300px), but must still shrink to what the panels were designed for.
+    // The default (1100x700, set in the .ui) is the narrowest window that fits four
+    // workshop cards in one row: each is 209 logical px wide by its own layout, so a
+    // row of four needs an 870px panel beside the fixed 200px sidebar. Note these are
+    // LOGICAL pixels -- at 125% desktop scaling the window is ~1375 physical.
+    // The minimum stays lower so the window can still be squeezed onto a small screen;
+    // reflowWorkshopGrid() drops to fewer columns rather than clipping.
+    // setWindowFlag() re-creates the native window, which discards the size setupUi()
+    // applied from the .ui -- so the window came up narrower than designed and the
+    // grid had room for one column fewer than intended. Restore it afterwards.
+    const QSize designSize = size();
     setMinimumSize(750, 500);
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);
+    resize(designSize);
+
+    // See eventFilter(): the workshop grid must re-lay out when its panel changes
+    // width, which happens after the window has already been resized.
+    ui->KfxWorkshopItemList->installEventFilter(this);
 
     // Raise and activate window
     setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
@@ -1028,29 +1042,54 @@ void LauncherMainWindow::reflowWorkshopGrid()
         return;
     }
 
-    // How many fit across? Use the card's EFFECTIVE minimum -- minimumSizeHint()
-    // reflects what its internal layout actually needs, which is what constrains
-    // the grid. minimumWidth() alone reports whatever was set on the widget and
-    // can be smaller than the card can honour.
-    const int cardWidth = qMax(cards.first()->minimumSizeHint().width(),
-                               cards.first()->minimumWidth());
-    const int spacing = grid->horizontalSpacing() > 0 ? grid->horizontalSpacing() : 6;
-    const int available = ui->KfxWorkshopItemList->width();
+    // How many fit across, and how wide may each then be?
+    //
+    // Two values matter and they are not the same. sizeHint() is what a card wants
+    // (its thumbnail plus a readable text column); minimumSizeHint() is the least its
+    // internal layout will accept. Sizing the column count off the minimum -- as this
+    // first did -- packs in one card too many, and since the panel has its horizontal
+    // scrollbar disabled the surplus is silently CLIPPED rather than scrolled.
+    const QWidget *sample = cards.first();
+    const int cardWidth = qMax(sample->sizeHint().width(), sample->minimumSizeHint().width());
+    const int spacing = grid->horizontalSpacing() >= 0 ? grid->horizontalSpacing() : 3;
+    const QMargins margins = grid->contentsMargins();
+    const int available = ui->KfxWorkshopItemList->width() - margins.left() - margins.right();
+
     int columns = (available + spacing) / (cardWidth + spacing);
     columns = qBound(1, columns, cards.size());
+
+    // Then pin every card to exactly the column width. Without this they render at
+    // their own preferred size, which need not divide into the space available, and
+    // the last one in each row gets cut off at the panel edge.
+    const int columnWidth = (available - (columns - 1) * spacing) / columns;
+    for (QWidget *card : cards) {
+        card->setMaximumWidth(qMax(columnWidth, sample->minimumSizeHint().width()));
+    }
 
     for (int i = 0; i < cards.size(); ++i) {
         grid->addWidget(cards[i], i / columns, i % columns);
     }
-    // Absorb leftover width in a trailing spacer rather than in the cards, so a
-    // part-filled last row still lines up with the rows above it.
-    grid->setColumnStretch(columns, 1);
+    for (int c = 0; c < columns; ++c) {
+        grid->setColumnStretch(c, 1);
+    }
 }
 
 void LauncherMainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
     reflowWorkshopGrid();
+}
+
+bool LauncherMainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    // The window's own resizeEvent fires before the scroll area passes its viewport
+    // width down to this panel, so reflowing there alone measures a width that is
+    // still the .ui's design value -- which is why the grid collapsed to one column
+    // at any window size. Watch the panel itself and reflow when IT is resized.
+    if (watched == ui->KfxWorkshopItemList && event->type() == QEvent::Resize) {
+        reflowWorkshopGrid();
+    }
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void LauncherMainWindow::checkForNewLauncher()
