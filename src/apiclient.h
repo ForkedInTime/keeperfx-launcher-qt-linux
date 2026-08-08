@@ -32,6 +32,9 @@ public:
     // download URL for a given workshop item's primary file.
     static QJsonArray getWorkshopCatalog();
     static QUrl getWorkshopItemDownloadUrl(int itemId);
+    // Fallback for items the API publishes no files for; reads the link off the
+    // item's own web page. Host-checked before use.
+    static QUrl getWorkshopItemDownloadUrlFromWebsite(int itemId);
 
     static std::optional<QMap<QString, QString>> getGameFileList(KfxVersion::ReleaseType type, QString version);
 };

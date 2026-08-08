@@ -933,8 +933,18 @@ void WorkshopBrowserDialog::installItem(const QJsonObject &item)
 
     const QUrl downloadUrl = ApiClient::getWorkshopItemDownloadUrl(id);
     if (downloadUrl.isEmpty()) {
-        QMessageBox::warning(this, tr("Install failed"),
-                             tr("Could not get a download link for “%1”.").arg(name));
+        // Reaching here means BOTH the API and the item's own web page offered no
+        // file. The old message just said "could not get a download link", which
+        // reads as a fault in the launcher; say where the gap actually is and what
+        // the user can still do about it.
+        QMessageBox::warning(
+            this, tr("Install failed"),
+            tr("No download is published for “%1”.\n\n"
+               "The workshop's API lists no file for this item, and its page on "
+               "keeperfx.net does not offer one either. This is a gap on the "
+               "workshop's side, not a problem with your game.\n\n"
+               "Use “Open website” to check the item directly.")
+                .arg(name));
         return;
     }
 

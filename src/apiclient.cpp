@@ -443,6 +443,56 @@ QJsonArray ApiClient::getWorkshopCatalog()
     return jsonDoc.object()["workshop_items"].toArray();
 }
 
+// Read the download link off the workshop item's own web page.
+//
+// Strictly a fallback for when the API publishes no files -- see the caller. The
+// page carries the same link the site's Download button uses, in the stable form
+// /workshop/download/<itemId>/<fileId>/<filename>.
+//
+// The extracted URL is checked against a host allow-list before it is returned.
+// Following an arbitrary URL scraped out of someone else's HTML would turn a
+// convenience into a way to make the launcher download from anywhere.
+QUrl ApiClient::getWorkshopItemDownloadUrlFromWebsite(int itemId)
+{
+    const QString pageUrl = QString("https://keeperfx.net/workshop/item/%1").arg(itemId);
+    qDebug() << "ApiClient: GET (website fallback)" << pageUrl;
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request((QUrl(pageUrl)));
+    QNetworkReply *reply = manager.get(request);
+
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Workshop website fallback [ERROR]" << pageUrl << "->" << reply->errorString();
+        reply->deleteLater();
+        return QUrl();
+    }
+    const QString html = QString::fromUtf8(reply->readAll());
+    reply->deleteLater();
+
+    // Anchored to this item's id so a link to some other item on the same page
+    // cannot be picked up by mistake.
+    QRegularExpression re(QString("/workshop/download/%1/\\d+/[^\"'\\s>]+").arg(itemId));
+    QRegularExpressionMatch match = re.match(html);
+    if (!match.hasMatch()) {
+        qWarning() << "Workshop website fallback: no download link on the page for item" << itemId;
+        return QUrl();
+    }
+
+    const QUrl resolved("https://keeperfx.net" + match.captured(0));
+    static const QStringList allowedHosts = {"keeperfx.net", "cdn-cf1.keeperfx.net"};
+    if (!allowedHosts.contains(resolved.host())) {
+        qWarning() << "Workshop website fallback: refusing unexpected host" << resolved.host();
+        return QUrl();
+    }
+
+    qDebug() << "Workshop item" << itemId << "download URL (from website):" << resolved.toString();
+    return resolved;
+}
+
 QUrl ApiClient::getWorkshopItemDownloadUrl(int itemId)
 {
     QUrl url(QString("v1/workshop/item/%1").arg(itemId));
@@ -456,7 +506,18 @@ QUrl ApiClient::getWorkshopItemDownloadUrl(int itemId)
     const QJsonObject workshopItemObj = jsonDoc.object()["workshop_item"].toObject();
     const QJsonArray filesArray = workshopItemObj["files"].toArray();
     if (filesArray.isEmpty()) {
-        qWarning() << "Workshop item download URL: no files for item" << itemId;
+        // keeperfx.net publishes no files for items whose minimum version is "latest
+        // alpha patch" (minGameBuild -1), even though its own website serves them and
+        // people are downloading them. Ask the website directly rather than telling the
+        // user we could not get a link.
+        //
+        // The API stays authoritative whenever it does return files.
+        qWarning() << "Workshop item download URL: no files for item" << itemId
+                   << "- falling back to the website";
+        const QUrl fromSite = ApiClient::getWorkshopItemDownloadUrlFromWebsite(itemId);
+        if (!fromSite.isEmpty()) {
+            return fromSite;
+        }
         return QUrl();
     }
 
