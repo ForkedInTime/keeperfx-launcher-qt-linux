@@ -31,6 +31,10 @@ public:
     LauncherMainWindow(QWidget *parent = nullptr);
     ~LauncherMainWindow();
 
+protected:
+    // Extra width should become more workshop columns, not wider cards.
+    void resizeEvent(QResizeEvent *event) override;
+
 private slots:
     void on_logFileButton_clicked();
     void on_workshopButton_clicked();
@@ -61,6 +65,9 @@ private:
     void startGame(Game::StartType startType, QVariant data1 = QVariant(), QVariant data2 = QVariant(), QVariant data3 = QVariant());
 
     void setupPlayExtraMenu();
+
+    // Re-lays the workshop cards across as many columns as the panel can fit.
+    void reflowWorkshopGrid();
 
     QMenu *saveFilesMenu;
     void refreshSaveFilesMenu();

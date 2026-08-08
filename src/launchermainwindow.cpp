@@ -5,6 +5,8 @@
 #include <QDesktopServices>
 #include <QFile>
 #include <QJsonArray>
+#include <QGridLayout>
+#include <QResizeEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMovie>
@@ -929,11 +931,12 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
             workshopItemWidget->setAuthor(workshopItem["submitter"].toObject()["username"].toString());
             workshopItemWidget->setTargetUrl(workshopItem["url"].toString());
 
-            // Height stays fixed -- these are fixed-content cards and stretching them
-            // vertically just pads them out. Width is left to the grid layout so the
-            // row fills the panel when the window grows, which is what the old
-            // hardcoded 250 prevented.
+            // A band, not a fixed width: narrow enough that a wide panel fits several
+            // per row, wide enough to stay legible. reflowWorkshopGrid() turns extra
+            // width into extra COLUMNS -- letting one card grow to 1200px instead
+            // would be no better than the empty margin it replaced.
             workshopItemWidget->setMinimumWidth(220);
+            workshopItemWidget->setMaximumWidth(320);
             workshopItemWidget->setFixedHeight(110);
 
             // Set image
@@ -962,10 +965,12 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
                 newsArticleWidget->setExcerpt("");
             }
 
-            // As above: full width of the news column, fixed height. The cap of 510
-            // was the reason a wider window produced empty space beside the articles
-            // rather than wider articles.
+            // News cards are one per row and read as a headline plus an excerpt, so
+            // they take the panel width -- but only up to a point. Beyond roughly
+            // 900px the excerpt becomes a single unreadable line stretched across
+            // the screen, which is a different kind of bad layout.
             newsArticleWidget->setMinimumWidth(420);
+            newsArticleWidget->setMaximumWidth(900);
             newsArticleWidget->setFixedHeight(110);
 
             // The API returns a default image for items without one so we can just pass it
@@ -984,6 +989,10 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
     for (QWidget *widget : workshopItemWidgets) {
         ui->KfxWorkshopItemList->layout()->addWidget(widget);
     }
+    // QLayout::addWidget() drops every card into column 0 of the grid, so they end
+    // up in a single tall stack no matter how wide the panel is. Lay them out
+    // properly now that they all exist.
+    reflowWorkshopGrid();
 
     for (QWidget *widget : newsArticleWidgets) {
         ui->KfxNewsList->layout()->addWidget(widget);
@@ -995,6 +1004,47 @@ void LauncherMainWindow::onKfxNetImagesLoaded(QList<QJsonObject> workshopItemLis
 
     this->hideLoadingSpinner(true);
     isLoadingLatestFromKfxNet = false;
+}
+
+void LauncherMainWindow::reflowWorkshopGrid()
+{
+    QGridLayout *grid = qobject_cast<QGridLayout *>(ui->KfxWorkshopItemList->layout());
+    if (grid == nullptr) {
+        return;
+    }
+
+    // Collect the cards in their current order, without destroying them.
+    QList<QWidget *> cards;
+    while (QLayoutItem *item = grid->takeAt(0)) {
+        if (QWidget *w = item->widget()) {
+            cards.append(w);
+        }
+        delete item;
+    }
+    if (cards.isEmpty()) {
+        return;
+    }
+
+    // How many fit across? Use the card's own minimum plus the spacing the layout
+    // will insert, so this stays right if either is retuned later.
+    const int cardWidth = cards.first()->minimumWidth();
+    const int spacing = grid->horizontalSpacing() > 0 ? grid->horizontalSpacing() : 6;
+    const int available = ui->KfxWorkshopItemList->width();
+    int columns = (available + spacing) / (cardWidth + spacing);
+    columns = qBound(1, columns, cards.size());
+
+    for (int i = 0; i < cards.size(); ++i) {
+        grid->addWidget(cards[i], i / columns, i % columns);
+    }
+    // Absorb leftover width in a trailing spacer rather than in the cards, so a
+    // part-filled last row still lines up with the rows above it.
+    grid->setColumnStretch(columns, 1);
+}
+
+void LauncherMainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    reflowWorkshopGrid();
 }
 
 void LauncherMainWindow::checkForNewLauncher()
