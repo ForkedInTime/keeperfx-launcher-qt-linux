@@ -31,6 +31,9 @@ public:
     // Workshop browser: the full catalogue (client filters/sorts it) and the
     // download URL for a given workshop item's primary file.
     static QJsonArray getWorkshopCatalog();
+    // Our own releases, shaped like keeperfx.net news articles so the news panel
+    // can show them beside upstream's. Empty on failure -- never fatal.
+    static QJsonArray getTuxEditionNews(int maxItems = 2);
     static QUrl getWorkshopItemDownloadUrl(int itemId);
     // Fallback for items the API publishes no files for; reads the link off the
     // item's own web page. Host-checked before use.

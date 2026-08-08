@@ -493,6 +493,93 @@ QUrl ApiClient::getWorkshopItemDownloadUrlFromWebsite(int itemId)
     return resolved;
 }
 
+// Our own release announcements, shaped like a keeperfx.net news article so the
+// existing news pipeline can render them unchanged.
+//
+// Why this exists: the launcher's news panel reads keeperfx.net, which reports the
+// Windows project's releases. A Tux Edition user was therefore updated to our builds
+// while being told about somebody else's -- our stable and alpha releases appeared
+// nowhere in the launcher at all. We have no website to publish news on, but we do
+// publish release notes with every build, and that is a feed already.
+QJsonArray ApiClient::getTuxEditionNews(int maxItems)
+{
+    QNetworkAccessManager manager;
+    QNetworkRequest req(
+        QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-linux-alpha/releases?per_page=10"));
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
+    req.setRawHeader("Accept", "application/vnd.github+json");
+
+    QNetworkReply *reply = manager.get(req);
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        // Never fatal: the panel simply shows upstream's news alone, as before.
+        qWarning() << "Tux Edition news: fetch failed:" << reply->errorString();
+        reply->deleteLater();
+        return QJsonArray();
+    }
+    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    reply->deleteLater();
+    if (doc.isArray() == false) {
+        return QJsonArray();
+    }
+
+    // The repo's own icon, served raw from GitHub. Using something already in the
+    // repository avoids standing up hosting just to have a thumbnail.
+    const QString thumbnail = "https://raw.githubusercontent.com/ForkedInTime/"
+                              "keeperfx-linux-alpha/alpha/res/keeperfx_icon256-24bpp.png";
+
+    QJsonArray articles;
+    const QJsonArray releases = doc.array();
+    for (const QJsonValue &value : releases) {
+        if (articles.size() >= maxItems) {
+            break;
+        }
+        const QJsonObject release = value.toObject();
+        if (release["draft"].toBool()) {
+            continue;
+        }
+
+        // First meaningful line of the release notes, as a one-line excerpt. Release
+        // notes are Markdown, so drop heading/emphasis punctuation rather than showing
+        // it raw.
+        QString excerpt;
+        const QStringList bodyLines = release["body"].toString().split('\n');
+        for (const QString &line : bodyLines) {
+            QString candidate = line.trimmed();
+            candidate.remove(QRegularExpression("^#{1,6}\\s*"));
+            candidate.remove(QRegularExpression("[*_`]"));
+            if (candidate.isEmpty() == false) {
+                excerpt = candidate;
+                break;
+            }
+        }
+        if (excerpt.length() > 160) {
+            excerpt = excerpt.left(157) + "...";
+        }
+
+        QString title = release["name"].toString();
+        if (title.isEmpty()) {
+            title = release["tag_name"].toString();
+        }
+        // The panel shows this beside upstream's articles, so say whose release it is.
+        title = QString("Tux Edition — %1").arg(title);
+
+        QJsonObject article;
+        article["title"] = title;
+        article["created_timestamp"] = release["published_at"].toString();
+        article["url"] = release["html_url"].toString();
+        article["excerpt"] = excerpt;
+        article["image"] = thumbnail;
+        articles.append(article);
+    }
+
+    qDebug() << "Tux Edition news:" << articles.size() << "release(s)";
+    return articles;
+}
+
 QUrl ApiClient::getWorkshopItemDownloadUrl(int itemId)
 {
     QUrl url(QString("v1/workshop/item/%1").arg(itemId));

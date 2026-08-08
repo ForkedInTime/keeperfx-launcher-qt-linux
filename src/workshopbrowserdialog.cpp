@@ -1,6 +1,7 @@
 #include "workshopbrowserdialog.h"
 #include "addoninstaller.h"
 #include "apiclient.h"
+#include "logviewerdialog.h"
 #include "downloader.h"
 
 #include <QComboBox>
@@ -937,14 +938,23 @@ void WorkshopBrowserDialog::installItem(const QJsonObject &item)
         // file. The old message just said "could not get a download link", which
         // reads as a fault in the launcher; say where the gap actually is and what
         // the user can still do about it.
-        QMessageBox::warning(
-            this, tr("Install failed"),
-            tr("No download is published for “%1”.\n\n"
-               "The workshop's API lists no file for this item, and its page on "
-               "keeperfx.net does not offer one either. This is a gap on the "
-               "workshop's side, not a problem with your game.\n\n"
-               "Use “Open website” to check the item directly.")
-                .arg(name));
+        // A "Show log" button turns a dead end into something diagnosable: the log
+        // records which of the two lookups failed, and why.
+        QMessageBox box(this);
+        box.setIcon(QMessageBox::Warning);
+        box.setWindowTitle(tr("Install failed"));
+        box.setText(tr("No download is published for “%1”.\n\n"
+                       "The workshop's API lists no file for this item, and its page on "
+                       "keeperfx.net does not offer one either. This is a gap on the "
+                       "workshop's side, not a problem with your game.\n\n"
+                       "Use “Open website” to check the item directly.")
+                        .arg(name));
+        QPushButton *logButton = box.addButton(tr("Show log"), QMessageBox::ActionRole);
+        box.addButton(QMessageBox::Close);
+        box.exec();
+        if (box.clickedButton() == logButton) {
+            LogViewerDialog::showLauncherLog(this);
+        }
         return;
     }
 

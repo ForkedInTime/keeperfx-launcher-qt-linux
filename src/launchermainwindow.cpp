@@ -34,6 +34,7 @@
 #include "installkfxdialog.h"
 #include "kfxversion.h"
 #include "launcheroptions.h"
+#include "logviewerdialog.h"
 #include "modmanager.h"
 #include "modmanagerdialog.h"
 #include "workshopbrowserdialog.h"
@@ -48,7 +49,10 @@
 #include "workshopitemwidget.h"
 
 #define MAX_WORKSHOP_ITEMS_SHOWN 4
-#define MAX_NEWS_ARTICLES_SHOWN 3
+// Two of these are now our own releases, prepended to upstream's. At 3 the Tux
+// Edition entries would leave room for a single keeperfx.net article, which is not
+// a fair trade for news our players still want.
+#define MAX_NEWS_ARTICLES_SHOWN 5
 
 LauncherMainWindow::LauncherMainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -511,6 +515,13 @@ void LauncherMainWindow::setupPlayExtraMenu()
         });
     }
 
+    // View logs. Sits beside Heavylog because that is what a user has just switched on
+    // when they want to read one -- and until now there was no way to read either log
+    // from inside the launcher at all, only by knowing where the game directory is.
+    menu->addAction(tr("View logs", "Menu"), [this]() {
+        LogViewerDialog::showLauncherLog(this);
+    });
+
     // Download music action
     // Kept unconditional so a user whose music dir is empty always has a way to fix it.
     // Without this the download is only reachable via the '--download-music' argument or
@@ -766,14 +777,35 @@ void LauncherMainWindow::loadLatestFromKfxNet()
         // We use QtConcurrent so they are loaded in separate threads
         auto fetchWorkshopItems = QtConcurrent::run([this]() { return ApiClient::getJsonResponse(QUrl("/v1/workshop/latest")); });
         auto fetchLatestNews = QtConcurrent::run([this]() { return ApiClient::getJsonResponse(QUrl("/v1/news/latest")); });
+        // Our own releases. keeperfx.net carries the Windows project's news, so without
+        // this the panel never mentions a Tux Edition build at all -- even though the
+        // updater is installing them.
+        auto fetchTuxNews = QtConcurrent::run([]() { return ApiClient::getTuxEditionNews(); });
 
         // Wait for both threads to finish
         fetchWorkshopItems.waitForFinished();
         fetchLatestNews.waitForFinished();
+        fetchTuxNews.waitForFinished();
+
+        // Put our releases ahead of upstream's articles in the same array, so everything
+        // downstream -- thumbnail prefetch, widget construction -- handles both without
+        // knowing the difference. Upstream's news is kept rather than replaced: their
+        // engine changes reach our players too.
+        QJsonDocument mergedNews = fetchLatestNews.result();
+        const QJsonArray tuxArticles = fetchTuxNews.result();
+        if (tuxArticles.isEmpty() == false) {
+            QJsonObject newsObj = mergedNews.object();
+            QJsonArray combined = tuxArticles;
+            for (const QJsonValue &article : newsObj["articles"].toArray()) {
+                combined.append(article);
+            }
+            newsObj["articles"] = combined;
+            mergedNews = QJsonDocument(newsObj);
+        }
 
         // Emit a signal to pass the data to the main thread
         QMetaObject::invokeMethod(
-            this, [this, fetchWorkshopItems, fetchLatestNews]() { emit kfxNetRetrieval(fetchWorkshopItems.result(), fetchLatestNews.result()); }, Qt::QueuedConnection);
+            this, [this, fetchWorkshopItems, mergedNews]() { emit kfxNetRetrieval(fetchWorkshopItems.result(), mergedNews); }, Qt::QueuedConnection);
         
     })->start();
 }
