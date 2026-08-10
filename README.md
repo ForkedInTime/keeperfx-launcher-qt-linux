@@ -7,12 +7,16 @@ This is a **Linux-native fork** of the KeeperFX team's settings launcher
 **native Linux engine** (no Wine) and to install and update
 [KeeperFX Tux Edition](https://github.com/ForkedInTime/keeperfx-linux-alpha).
 
+![The KeeperFX Tux Edition launcher — workshop items, Tux Edition release news, and buttons for Mods, Browse
+Workshop and Map Editor](./docs/img/launcher_screenshot.png)
+
+Browse and install the whole [keeperfx.net](https://keeperfx.net) workshop without leaving the launcher, manage
+your mods, install the Unearth map editor, and update the game in place — all on native Linux.
+
 > ⚠️ **Unofficial — not affiliated with the KeeperFX team.** The launcher is *their* work; this fork only adds
 > the Linux-native changes below. The official launcher (and the official game) live at
 > [dkfans/keeperfx-launcher-qt](https://github.com/dkfans/keeperfx-launcher-qt) and
 > [dkfans/keeperfx](https://github.com/dkfans/keeperfx).
-
-![KeeperFX Launcher Screenshot](./docs/img/launcher_screenshot.png)
 
 ---
 
