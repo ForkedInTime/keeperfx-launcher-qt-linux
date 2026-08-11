@@ -41,6 +41,9 @@ void NewsArticleWidget::setExcerpt(QString excerpt)
     //ui->excerptLabel->setText(elidedText);
 
     ui->excerptLabel->setText(excerpt);
+    // An empty excerpt should cost no vertical space -- version-only entries
+    // (Tux Edition releases) would otherwise show a blank line under the title.
+    ui->excerptLabel->setVisible(excerpt.isEmpty() == false);
 }
 
 void NewsArticleWidget::setImagePixmap(QPixmap pixmap)

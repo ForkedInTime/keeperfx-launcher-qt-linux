@@ -576,36 +576,19 @@ QJsonArray ApiClient::getTuxEditionNews(int maxItems)
             continue;
         }
 
-        // First meaningful line of the release notes, as a one-line excerpt. Release
-        // notes are Markdown, so drop heading/emphasis punctuation rather than showing
-        // it raw.
-        QString excerpt;
-        const QStringList bodyLines = release["body"].toString().split('\n');
-        for (const QString &line : bodyLines) {
-            QString candidate = line.trimmed();
-            candidate.remove(QRegularExpression("^#{1,6}\\s*"));
-            candidate.remove(QRegularExpression("[*_`]"));
-            if (candidate.isEmpty() == false) {
-                excerpt = candidate;
-                break;
-            }
-        }
-        if (excerpt.length() > 160) {
-            excerpt = excerpt.left(157) + "...";
-        }
-
-        QString title = release["name"].toString();
-        if (title.isEmpty()) {
-            title = release["tag_name"].toString();
-        }
-        // The panel shows this beside upstream's articles, so say whose release it is.
-        title = QString("Tux Edition — %1").arg(title);
+        // Version only, like upstream's own entries ("KeeperFX 1.4.0 Released").
+        // These used to carry the full release title plus a notes excerpt, which
+        // overflowed the card and repeated what one click on the entry shows
+        // anyway -- the entry links to the release page, where the whole story is.
+        QString title = QString("Tux Edition %1 Released").arg(release["tag_name"].toString());
 
         QJsonObject article;
         article["title"] = title;
-        article["created_timestamp"] = release["published_at"].toString();
+        // Date only; the raw ISO timestamp read as machine output next to
+        // upstream's dated articles.
+        article["created_timestamp"] = release["published_at"].toString().left(10);
         article["url"] = release["html_url"].toString();
-        article["excerpt"] = excerpt;
+        article["excerpt"] = QString();
         article["image"] = thumbnail;
         articles.append(article);
     }
