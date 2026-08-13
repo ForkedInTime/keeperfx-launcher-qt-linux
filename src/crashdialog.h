@@ -2,6 +2,7 @@
 
 #include "savefile.h"
 
+#include <QDateTime>
 #include <QDialog>
 
 namespace Ui {
@@ -18,6 +19,12 @@ public:
 
     void setStdErrorString(QString stdErrorString);
 
+    /**
+     * The moment the game was launched. Without it, keeperfx.log cannot be
+     * attributed to this run and so is left out of the report entirely.
+     */
+    void setGameStartTime(QDateTime gameStartTime);
+
 private slots:
     void on_cancelButton_clicked();
     void on_sendButton_clicked();
@@ -26,4 +33,5 @@ private:
     Ui::CrashDialog *ui;
     QList<SaveFile *> saveFileList;
     QString stdErrorString;
+    QDateTime gameStartTime;
 };

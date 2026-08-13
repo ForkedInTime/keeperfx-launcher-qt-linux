@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDateTime>
 #include <QVariant>
 #include <QString>
 #include <QObject>
@@ -42,4 +43,7 @@ private:
     QWidget *parentWidget;
     QProcess *process;
     QString errorString;
+    // Stamped immediately before the process is launched, so a keeperfx.log
+    // left over from an earlier session can be told apart from this run's.
+    QDateTime processStartedAt;
 };

@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
+#include "crashcontext.h"
 #include "crashdialog.h"
 #include "kfxversion.h"
 #include "settings.h"
@@ -109,6 +110,11 @@ bool Game::start(StartType startType, QVariant data1, QVariant data2, QVariant d
         keeperfxBin = QApplication::applicationDirPath() + "/keeperfx.exe";
     }
 
+    // Stamp the launch before anything is started: the engine truncates
+    // keeperfx.log on startup, so this is what tells a log belonging to this
+    // run apart from one left behind by an earlier session.
+    this->processStartedAt = QDateTime::currentDateTime();
+
     // Start the process
     #ifdef Q_OS_WINDOWS
         qInfo() << "Starting game (Windows)";
@@ -153,6 +159,40 @@ void Game::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
     // Check for crash
     if (exitStatus == QProcess::ExitStatus::CrashExit || exitCode != 0) {
 
+        // Read whatever the process managed to say before dying. This drains
+        // the buffer, so it is read once here and reused below.
+        QString stdErrorString = this->process->readAllStandardError();
+        if (stdErrorString.isEmpty() == false) {
+            qDebug() << "Process StdError:" << stdErrorString;
+        }
+
+        // A dynamic-loader failure never reaches the engine's main(): nothing
+        // ran, so nothing crashed and nothing was logged. Sending it as a crash
+        // report attaches whichever keeperfx.log happens to be lying around --
+        // which is how a report once carried the previous day's session. The
+        // install simply no longer matches the libraries on the system, so say
+        // that instead.
+        if (CrashContext::isStartupFailure(exitCode, stdErrorString)) {
+
+            qWarning() << "Game did not start (library/installation problem);"
+                       << "not offering a crash report. Exit code:" << exitCode;
+
+            QMessageBox::critical(this->parentWidget,
+                tr("KeeperFX could not start", "MessageBox Title"),
+                tr("KeeperFX could not be started.\n\n"
+                   "This is not a game crash — the program stopped before it began "
+                   "running. That normally means this installation no longer matches "
+                   "the libraries on your system, which an update can cause. "
+                   "Reinstalling or rebuilding KeeperFX usually fixes it.\n\n"
+                   "Details:\n%1", "MessageBox Text")
+                    .arg(stdErrorString.trimmed().isEmpty()
+                             ? tr("The program exited immediately with code %1.").arg(exitCode)
+                             : stdErrorString.trimmed()));
+
+            emit gameEnded(exitCode, exitStatus);
+            return;
+        }
+
         // Check if crash reporting is enabled
         if(Settings::getLauncherSetting("CRASH_REPORTING_ENABLED").toBool() == true){
 
@@ -171,10 +211,12 @@ void Game::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
                 // Create Crash Report dialog
                 CrashDialog crashDialog(this->parentWidget);
 
+                // The dialog attaches keeperfx.log, and only the launch time
+                // can tell it whether that log is this run's or a leftover.
+                crashDialog.setGameStartTime(this->processStartedAt);
+
                 // Check if there is process output and add it to the dialog object
-                QString stdErrorString = this->process->readAllStandardError();
                 if (stdErrorString.isEmpty() == false) {
-                    qDebug() << "Process StdError:" << stdErrorString;
                     crashDialog.setStdErrorString(stdErrorString);
                 }
 

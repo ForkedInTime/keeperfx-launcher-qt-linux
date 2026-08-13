@@ -3,6 +3,7 @@
 
 #include "apiclient.h"
 #include "archiver.h"
+#include "crashcontext.h"
 #include "gzip.h"
 #include "savefile.h"
 #include "version.h"
@@ -10,6 +11,7 @@
 #include "launcheroptions.h"
 
 #include <QDir>
+#include <QFileInfo>
 #include <QMessageBox>
 
 #define COMPRESS_KEEPERFX_LOG_GZIP true
@@ -57,6 +59,11 @@ CrashDialog::~CrashDialog()
 void CrashDialog::setStdErrorString(QString stdError)
 {
     this->stdErrorString = stdError;
+}
+
+void CrashDialog::setGameStartTime(QDateTime startTime)
+{
+    this->gameStartTime = startTime;
 }
 
 void CrashDialog::on_cancelButton_clicked()
@@ -124,9 +131,28 @@ void CrashDialog::on_sendButton_clicked()
         kfxConfigFile.close();
     }
 
-    // keeperfx.log
+    // keeperfx.log -- but only if this run wrote it. The engine truncates the
+    // log as it starts, so a log older than the launch is a leftover from an
+    // earlier session: attaching it describes a run that did not fail and hides
+    // the fact that the failing run logged nothing at all.
     QFile kfxLogFile(QCoreApplication::applicationDirPath() + "/keeperfx.log");
-    if (kfxLogFile.exists() && kfxLogFile.open(QIODevice::ReadOnly)) {
+    const QDateTime kfxLogModified = QFileInfo(kfxLogFile).lastModified();
+
+    if (kfxLogFile.exists()
+        && CrashContext::shouldAttachLog(kfxLogModified, this->gameStartTime) == false) {
+
+        qWarning() << "Not attaching keeperfx.log to the crash report: last modified"
+                   << kfxLogModified.toString(Qt::ISODate)
+                   << "but the game was started at"
+                   << this->gameStartTime.toString(Qt::ISODate);
+
+        // Say so in the report itself, so nobody reads a missing log as a log
+        // that was empty.
+        jsonPostObject["game_log_missing"] =
+            QStringLiteral("The game produced no log for this run; any existing "
+                           "keeperfx.log predates it and was not attached.");
+
+    } else if (kfxLogFile.exists() && kfxLogFile.open(QIODevice::ReadOnly)) {
 
         // Check if logfile is reasonable size (<32MiB)
         if (kfxLogFile.size() > 32 * 1024LL * 1024LL) {

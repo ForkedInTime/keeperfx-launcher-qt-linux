@@ -38,3 +38,12 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_addonshape" "$ROOT_DIR/tests/test_addonshape.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_addonshape"
+
+# Crash-context decisions -- whether the log is from this run, and whether the
+# engine ever started (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_crashcontext" "$ROOT_DIR/tests/test_crashcontext.cpp" \
+	"$ROOT_DIR/src/crashcontext.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_crashcontext"
