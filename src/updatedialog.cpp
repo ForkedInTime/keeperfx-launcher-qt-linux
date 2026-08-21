@@ -11,6 +11,7 @@
 #include <QCloseEvent>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -19,6 +20,8 @@
 #include <QThread>
 #include <QThreadPool>
 #include <QTimer>
+
+#include <algorithm>
 
 #include <zlib.h>
 
@@ -219,6 +222,14 @@ void UpdateDialog::on_updateButton_clicked()
         }
     }
 
+    // Keep the engine those saves belong to. Done here rather than next to the
+    // extraction because there are two update paths -- the full archive and the
+    // per-file filemap, whose file list includes /keeperfx -- and both replace
+    // the engine. This is where they converge, so one call covers both. If the
+    // update later aborts, the copy is of the engine still installed and is
+    // simply correct rather than wasted.
+    stashCurrentEngine();
+
     // Check if we need a new stable version first
     if(updateToNewStableFirst) {
 
@@ -279,6 +290,89 @@ void UpdateDialog::backupSaves(QList<SaveFile *> saveFiles)
     // Backup all save files
     if (SaveFile::backupAll(saveFiles)) {
         emit appendLog("Savefiles have been backed up");
+    }
+}
+
+void UpdateDialog::stashCurrentEngine()
+{
+    // Keep the engine that is about to be replaced, so saved games written by it
+    // stay playable.
+    //
+    // A saved game is a raw dump of the engine's `struct Game`. Any field added
+    // anywhere inside it makes every existing save unreadable -- the bytes are
+    // intact, they simply mean something different to the new engine. That is
+    // not hypothetical: one 4-byte field added to `struct Thing` upstream,
+    // multiplied by the 12288 things the engine holds, moved the game-state
+    // block by 49KB between two releases and five saved campaigns stopped
+    // loading with no warning.
+    //
+    // Backing up the save FILES, which this dialog already does above, does not
+    // help on its own: the files were never the problem. What is needed is an
+    // engine that can still read them, and the only copy of it is the one about
+    // to be overwritten.
+    //
+    // Deliberately not gated on the BACKUP_SAVES setting. That preference is
+    // about the player's own save files, which they chose to keep or not. This
+    // guards against a change WE ship, which they cannot foresee and cannot
+    // undo, so it is not something they opted out of in advance.
+    const QString appDir = QCoreApplication::applicationDirPath();
+    const QString version = KfxVersion::currentVersion.version;
+
+    if (version.isEmpty() || version == "0.0.0") {
+        emit appendLog("Not keeping the current engine: its version is unknown");
+        return;
+    }
+
+    // The engine is keeperfx on Linux and keeperfx.exe on Windows; this dialog
+    // builds for both.
+    QString engineName;
+    for (const QString &candidate : {QStringLiteral("keeperfx"), QStringLiteral("keeperfx.exe")}) {
+        if (QFileInfo::exists(appDir + "/" + candidate)) {
+            engineName = candidate;
+            break;
+        }
+    }
+    if (engineName.isEmpty()) {
+        emit appendLog("Not keeping the current engine: no engine binary found");
+        return;
+    }
+
+    QDir previousDir(appDir + "/previous");
+    if (previousDir.exists() == false && QDir().mkpath(previousDir.absolutePath()) == false) {
+        emit appendLog("Not keeping the current engine: could not create the 'previous' directory");
+        return;
+    }
+
+    const QString target = previousDir.absolutePath() + "/" + engineName + "-" + version;
+    if (QFileInfo::exists(target) == false) {
+        // Copy, never move: the engine has to still be there for the extraction
+        // to overwrite, and for the player to keep playing if the update fails.
+        if (QFile::copy(appDir + "/" + engineName, target)) {
+            emit appendLog(QString("Kept engine %1 so its saved games stay playable").arg(version));
+        } else {
+            emit appendLog(QString("Could not keep a copy of engine %1").arg(version));
+            return;
+        }
+    }
+
+    // Three generations. One is not enough: a break can land in a release the
+    // player skipped, and then the engine that reads their save is two back.
+    const int keep = 3;
+    QStringList kept = previousDir.entryList(QStringList(engineName + "-*"), QDir::Files);
+    if (kept.length() <= keep) {
+        return;
+    }
+    // Oldest first, using the launcher's own version comparison rather than a
+    // string sort, which would order 1.4.0.999 after 1.4.0.1000.
+    std::sort(kept.begin(), kept.end(), [&engineName](const QString &a, const QString &b) {
+        const QString versionA = QString(a).remove(engineName + "-");
+        const QString versionB = QString(b).remove(engineName + "-");
+        return KfxVersion::isNewerVersion(versionB, versionA);
+    });
+    for (int i = 0; i < kept.length() - keep; i++) {
+        if (QFile::remove(previousDir.absolutePath() + "/" + kept.at(i))) {
+            emit appendLog(QString("Removed kept engine %1").arg(kept.at(i)));
+        }
     }
 }
 

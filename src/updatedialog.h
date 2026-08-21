@@ -69,4 +69,5 @@ private:
     QString originalTitleText;
 
     void backupSaves(QList<SaveFile *> saveFiles);
+    void stashCurrentEngine();
 };
