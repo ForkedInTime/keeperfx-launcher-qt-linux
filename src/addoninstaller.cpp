@@ -112,7 +112,13 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                                                            const QString &archiveName)
 {
     Result r;
-    r.ok = true; // extraction already succeeded by the time we get here
+    // Optimistic because extraction has already succeeded by the time we get here --
+    // but EVERY failure path below must clear it. They used to set r.error and return
+    // with ok still true, so the caller's "if (!result.ok)" never fired, the reason was
+    // thrown away, and the user was told "No installable content was found" about a
+    // destination the installer simply could not write to. The accurate message
+    // existed the whole time and was never once shown.
+    r.ok = true;
 
     // Case 1 — "extract into the game directory": the archive has one or more known
     // container folders at its root (campgns/, mods/, levels/, multiplayer/). This is
@@ -161,6 +167,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                                   "The folder may be read-only — on a package-managed "
                                   "install the game's data folders are owned by the "
                                   "package manager.").arg(kind);
+            r.ok = false;
             return r;
         }
         const int kept = merge.skipped;
@@ -208,7 +215,8 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                                           "The folder may be read-only — on a package-managed "
                                           "install the game's data folders are owned by the "
                                           "package manager.").arg(kindDir);
-                    return r;
+                    r.ok = false;
+            return r;
                 }
                 kept += m.skipped;
             }
@@ -257,7 +265,8 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                                       "The folder may be read-only — on a package-managed "
                                       "install the game's data folders are owned by the "
                                       "package manager.");
-                return r;
+                r.ok = false;
+            return r;
             }
             if (copied > 0) {
                 r.lines << QObject::tr("%n map(s) (added to Personal levels)", "", stems.size());
