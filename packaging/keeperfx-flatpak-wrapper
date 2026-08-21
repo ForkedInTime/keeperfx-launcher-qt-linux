@@ -10,9 +10,51 @@ export QT_QPA_PLATFORM_PLUGIN_PATH="/app/plugins/platforms"
 INSTALL="${XDG_DATA_HOME:-$HOME/.local/share}/keeperfx-alpha"
 mkdir -p "$INSTALL"
 
+# Keep the engine a Flatpak update is about to replace, so saved games written by
+# it stay playable.
+#
+# A saved game is a raw dump of the engine's struct Game, so a field added anywhere
+# inside it makes every existing save unreadable -- one 4-byte field added upstream,
+# multiplied by the 12288 things the engine holds, moved the save format by 49KB
+# between two releases and campaigns stopped loading. The engine that wrote a save
+# can always still read it; the problem is that the only copy of it is the one being
+# overwritten.
+#
+# This has to live here rather than in the launcher's updater. The launcher stashes
+# the engine when IT performs an update, but the copy below is a Flatpak update: the
+# bundle changed, and this wrapper overwrites the engine before the launcher ever
+# starts. Without this, that path replaces the engine with nothing kept.
+stash_current_engine() {
+    oldver="$(cat "$INSTALL/version.txt" 2>/dev/null || cat "$INSTALL/.bundled-version" 2>/dev/null)"
+    [ -f "$INSTALL/keeperfx" ] || return 0
+    [ -n "$oldver" ] || return 0
+
+    # version.txt reads like "1.4.0.5554 alpha"; keep just the version.
+    oldver="${oldver%% *}"
+    mkdir -p "$INSTALL/previous" || return 0
+    if [ ! -e "$INSTALL/previous/keeperfx-$oldver" ]; then
+        cp -f "$INSTALL/keeperfx" "$INSTALL/previous/keeperfx-$oldver.partial" 2>/dev/null \
+          && mv -f "$INSTALL/previous/keeperfx-$oldver.partial" "$INSTALL/previous/keeperfx-$oldver" \
+          && chmod +x "$INSTALL/previous/keeperfx-$oldver" \
+          && echo "Kept engine $oldver so its saved games stay playable ($INSTALL/previous)"
+        rm -f "$INSTALL/previous/keeperfx-$oldver.partial"
+    fi
+
+    # Three generations, oldest pruned first. One is not enough: a break can land in
+    # a release the player skipped. Sorted by version, not by name -- a plain sort
+    # puts 1.4.0.999 after 1.4.0.1000.
+    count=$(ls -1 "$INSTALL/previous/" 2>/dev/null | grep -c '^keeperfx-')
+    if [ "${count:-0}" -gt 3 ]; then
+        ls -1 "$INSTALL/previous/" 2>/dev/null | grep '^keeperfx-' | sed 's/^keeperfx-//' \
+          | sort -V | head -n "$((count - 3))" \
+          | while read -r victim; do rm -f "$INSTALL/previous/keeperfx-$victim"; done
+    fi
+}
+
 # Deploy the bundled game payload once (or when the version changes).
 NEWVER="$(cat /app/share/keeperfx/payload/version.txt 2>/dev/null)"
 if [ "$(cat "$INSTALL/.bundled-version" 2>/dev/null)" != "$NEWVER" ]; then
+    stash_current_engine
     cp -rf /app/share/keeperfx/payload/. "$INSTALL/"
     echo "$NEWVER" > "$INSTALL/.bundled-version"
 fi
