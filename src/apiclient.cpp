@@ -12,6 +12,7 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QThread>
 #include <QNetworkRequestFactory>
 #include <QRegularExpression>
 #include <QUrlQuery>
@@ -44,18 +45,41 @@ static QJsonObject getLatestLinuxAlphaRelease(KfxVersion::ReleaseType wantedType
     req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
     req.setRawHeader("Accept", "application/vnd.github+json");
 
-    QNetworkReply *reply = manager.get(req);
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+    // Retried, because one bad response used to mean "you are up to date".
+    //
+    // A single request was made and any failure returned nothing, which the caller
+    // cannot distinguish from "no newer release exists" -- so a momentary 502/503/504
+    // from GitHub, or a network blip, silently told the player they were current.
+    // Observed in testing: a 504 made both channels report no update, and the very
+    // next attempt succeeded.
+    //
+    // Three tries with a short backoff. Deliberately not more: this runs while the
+    // player waits at the launcher, and a service that is genuinely down should be
+    // reported quickly rather than hung on.
+    QJsonDocument doc;
+    for (int attempt = 1; attempt <= 3; ++attempt) {
+        QNetworkReply *reply = manager.get(req);
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
 
-    if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "Linux update check failed:" << reply->errorString();
+        const bool failed = (reply->error() != QNetworkReply::NoError);
+        const QString why = reply->errorString();
+        if (!failed) {
+            doc = QJsonDocument::fromJson(reply->readAll());
+        }
         reply->deleteLater();
-        return QJsonObject();
+
+        if (!failed && doc.isArray()) {
+            break;
+        }
+        qWarning() << "Linux update check attempt" << attempt << "of 3 failed:"
+                   << (failed ? why : QStringLiteral("response was not a release list"));
+        if (attempt == 3) {
+            return QJsonObject();
+        }
+        QThread::msleep(attempt * 750);
     }
-    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-    reply->deleteLater();
     if (doc.isArray() == false) {
         return QJsonObject();
     }
