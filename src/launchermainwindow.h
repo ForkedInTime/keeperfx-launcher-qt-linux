@@ -70,6 +70,12 @@ private:
 
     // Re-lays the workshop cards across as many columns as the panel can fit.
     void reflowWorkshopGrid();
+    // Re-entrancy guard: reflowWorkshopGrid() resizes the cards, which resizes the
+    // panel, which fires the resize filter that calls it again. The version that
+    // measured the panel's own width could not loop, because its answer never
+    // changed; measuring the viewport removes that accidental brake, so the guard
+    // supplies a deliberate one.
+    bool workshopReflowInProgress = false;
 
     QMenu *saveFilesMenu;
     void refreshSaveFilesMenu();

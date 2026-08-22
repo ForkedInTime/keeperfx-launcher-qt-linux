@@ -7,6 +7,7 @@
 #include <QJsonArray>
 #include <QEvent>
 #include <QGridLayout>
+#include <QScrollArea>
 #include <QMargins>
 #include <QResizeEvent>
 #include <QMenu>
@@ -1029,6 +1030,13 @@ void LauncherMainWindow::reflowWorkshopGrid()
     if (grid == nullptr) {
         return;
     }
+    // Resizing the cards below resizes the panel, which fires the resize filter that
+    // calls this again. Bail out of the nested call instead of recursing until the
+    // stack runs out.
+    if (workshopReflowInProgress) {
+        return;
+    }
+    workshopReflowInProgress = true;
 
     // Collect the cards in their current order, without destroying them.
     QList<QWidget *> cards;
@@ -1039,6 +1047,7 @@ void LauncherMainWindow::reflowWorkshopGrid()
         delete item;
     }
     if (cards.isEmpty()) {
+        workshopReflowInProgress = false;
         return;
     }
 
@@ -1053,7 +1062,30 @@ void LauncherMainWindow::reflowWorkshopGrid()
     const int cardWidth = qMax(sample->sizeHint().width(), sample->minimumSizeHint().width());
     const int spacing = grid->horizontalSpacing() >= 0 ? grid->horizontalSpacing() : 3;
     const QMargins margins = grid->contentsMargins();
-    const int available = ui->KfxWorkshopItemList->width() - margins.left() - margins.right();
+
+    // Measure against the scroll area's VIEWPORT, not this panel's own width.
+    //
+    // The panel's width is a consequence of the column count, not an input to it.
+    // The scroll area is widgetResizable with its horizontal scrollbar always off,
+    // so Qt never shrinks the panel below the grid's own minimum -- and at N columns
+    // that minimum is N cards wide. Measuring width() therefore reads back the
+    // answer from last time: once the grid reached four columns it reported four
+    // columns' worth at every window size, the count could never fall, and narrowing
+    // the window clipped the last card instead of wrapping it onto a second row.
+    // The viewport is the real constraint and does not move with the grid.
+    int panelWidth = ui->KfxWorkshopItemList->width();
+    if (const QScrollArea *area = findChild<QScrollArea *>()) {
+        if (const QWidget *viewport = area->viewport()) {
+            // The panel is inset from the viewport by the margins of everything
+            // between them; measure that rather than assuming it.
+            const QWidget *contents = area->widget();
+            const int inset = (contents != nullptr)
+                                  ? qMax(0, contents->width() - ui->KfxWorkshopItemList->width())
+                                  : 0;
+            panelWidth = qMin(panelWidth, viewport->width() - inset);
+        }
+    }
+    const int available = panelWidth - margins.left() - margins.right();
 
     int columns = (available + spacing) / (cardWidth + spacing);
     columns = qBound(1, columns, cards.size());
@@ -1072,6 +1104,8 @@ void LauncherMainWindow::reflowWorkshopGrid()
     for (int c = 0; c < columns; ++c) {
         grid->setColumnStretch(c, 1);
     }
+
+    workshopReflowInProgress = false;
 }
 
 void LauncherMainWindow::resizeEvent(QResizeEvent *event)
