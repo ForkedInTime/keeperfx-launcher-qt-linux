@@ -119,9 +119,34 @@ static QJsonObject getLatestLinuxAlphaRelease(KfxVersion::ReleaseType wantedType
             continue;
         }
 
+        // An update patch that starts from exactly the version installed here, if
+        // this release carries one. It holds only the files that changed, which is
+        // around 2% of the payload -- between releases almost nothing but the engine
+        // and launcher binaries moves.
+        //
+        // Matched on the exact installed version and nothing else. A patch is a set
+        // of files to lay over one specific starting point; applied to any other, it
+        // updates some files and silently leaves the rest at whatever they were,
+        // producing an install that matches no release. Better a large download than
+        // a wrong one, so anything short of an exact match falls through to
+        // downloadUrl.
+        QString patchUrl;
+        const QString installed = KfxVersion::currentVersion.version;
+        if (!installed.isEmpty() && installed != "0.0.0") {
+            const QString wanted = QStringLiteral("patch-from-%1.7z").arg(installed);
+            for (const QJsonValue &a : assets) {
+                const QString name = a.toObject()["name"].toString();
+                if (name.endsWith(wanted)) {
+                    patchUrl = a.toObject()["browser_download_url"].toString();
+                    break;
+                }
+            }
+        }
+
         QJsonObject out;
         out["version"] = m.captured(1);
         out["download_url"] = downloadUrl;
+        out["patch_url"] = patchUrl;
         return out;
     }
 

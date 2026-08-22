@@ -326,6 +326,7 @@ std::optional<KfxVersion::VersionInfo> KfxVersion::getLatestVersion(KfxVersion::
     // Variables
     QString version;
     QString downloadUrl;
+    QString patchUrl;
     QString fullVersionString;
 
     // Handle stable
@@ -339,6 +340,7 @@ std::optional<KfxVersion::VersionInfo> KfxVersion::getLatestVersion(KfxVersion::
         // Set vars
         version = stableRelease["version"].toString();
         downloadUrl = stableRelease["download_url"].toString();
+        patchUrl = stableRelease["patch_url"].toString();
         fullVersionString = version;
     }
 
@@ -353,6 +355,7 @@ std::optional<KfxVersion::VersionInfo> KfxVersion::getLatestVersion(KfxVersion::
         // Set vars
         version = alphaRelease["version"].toString();
         downloadUrl = alphaRelease["download_url"].toString();
+        patchUrl = alphaRelease["patch_url"].toString();
         fullVersionString = version + " Alpha";
     }
 
@@ -361,7 +364,8 @@ std::optional<KfxVersion::VersionInfo> KfxVersion::getLatestVersion(KfxVersion::
         .type = type,
         .version = version,
         .fullString = fullVersionString,
-        .downloadUrl = downloadUrl
+        .downloadUrl = downloadUrl,
+        .patchUrl = patchUrl
     };
 }
 

@@ -70,4 +70,16 @@ private:
 
     void backupSaves(QList<SaveFile *> saveFiles);
     void stashCurrentEngine();
+    // Set while downloading an update patch rather than the full payload, so a
+    // failed patch download can retry with the full one instead of stranding the
+    // player on an optimisation. The patch is a convenience; the full payload is
+    // the guarantee.
+    bool downloadingPatch = false;
+    // Where the archive actually landed. Three places used to rebuild this from
+    // currentUpdateVersionInfo.downloadUrl, which names the FULL payload -- so once
+    // a patch could be downloaded instead, they tested, extracted and deleted a
+    // different file than the one just fetched. With a stale full.7z.tmp lying in
+    // the game directory that meant extracting a months-old payload over the
+    // install. One value, set where the download starts.
+    QString downloadedArchivePath;
 };

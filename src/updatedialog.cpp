@@ -276,9 +276,23 @@ void UpdateDialog::update()
         emit appendLog(QString("Filemap with %1 files retrieved").arg(fileCount));
         // Update using filemap
         updateUsingFilemap(fileMap.value());
+    } else if (!currentUpdateVersionInfo.patchUrl.isEmpty()) {
+        // A patch that starts from exactly this installed version. It holds only
+        // the files that changed -- roughly 2% of the payload -- and is applied by
+        // extracting it over the install, exactly as the full payload is, so
+        // nothing downstream needs to know the difference.
+        //
+        // Only reached when the release actually carries a patch matching this
+        // version; ApiClient matches on the installed version and nothing else.
+        emit appendLog("No filemap found");
+        emit appendLog(QString("Update patch available for %1 — downloading only what changed")
+                           .arg(KfxVersion::currentVersion.version));
+        downloadingPatch = true;
+        updateUsingArchive(currentUpdateVersionInfo.patchUrl);
     } else {
         emit appendLog("No filemap found");
         // Update using download URL
+        downloadingPatch = false;
         updateUsingArchive(currentUpdateVersionInfo.downloadUrl);
     }
 }
@@ -524,6 +538,7 @@ void UpdateDialog::updateUsingArchive(QString downloadUrlString)
 
     // Get output file
     QString outputFilePath = QCoreApplication::applicationDirPath() + "/" + downloadUrl.fileName() + ".tmp";
+    downloadedArchivePath = outputFilePath;
     QFile *outputFile = new QFile(outputFilePath);
 
     Downloader *downloader = new Downloader(this);
@@ -536,6 +551,16 @@ void UpdateDialog::updateUsingArchive(QString downloadUrlString)
 void UpdateDialog::onArchiveDownloadFinished(bool success)
 {
     if (!success) {
+        // A failed PATCH download is recoverable: the full payload contains
+        // everything the patch does and is always attached. Fall back to it once
+        // rather than failing the update over a saving. Only once -- if the full
+        // download fails too, the problem is not the choice of archive.
+        if (downloadingPatch) {
+            downloadingPatch = false;
+            emit appendLog("Patch download failed — falling back to the full package");
+            updateUsingArchive(currentUpdateVersionInfo.downloadUrl);
+            return;
+        }
         emit appendLog("Archive download failed");
         emit setUpdateFailed(tr("Archive download failed.", "Failure Message"));
         return;
@@ -544,7 +569,7 @@ void UpdateDialog::onArchiveDownloadFinished(bool success)
     emit appendLog("Archive successfully downloaded");
     emit clearProgressBar();
 
-    QFile *outputFile = new QFile(QCoreApplication::applicationDirPath() + "/" + QUrl(currentUpdateVersionInfo.downloadUrl).fileName() + ".tmp");
+    QFile *outputFile = new QFile(downloadedArchivePath);
 
     // Test archive
     emit appendLog("Testing archive...");
@@ -556,7 +581,7 @@ void UpdateDialog::onArchiveDownloadFinished(bool success)
 
 void UpdateDialog::onArchiveTestComplete(int64_t archiveSize){
 
-    QFile *outputFile = new QFile(QCoreApplication::applicationDirPath() + "/" + QUrl(currentUpdateVersionInfo.downloadUrl).fileName() + ".tmp");
+    QFile *outputFile = new QFile(downloadedArchivePath);
 
     // Show total size
     double archiveSizeInMiB = static_cast<double>(archiveSize) / (1024 * 1024);
@@ -583,7 +608,7 @@ void UpdateDialog::onUpdateComplete()
 
     // Remove temp archive
     emit appendLog("Removing temporary archive...");
-    QFile *archiveFile = new QFile(QCoreApplication::applicationDirPath() + "/" + QUrl(currentUpdateVersionInfo.downloadUrl).fileName() + ".tmp");
+    QFile *archiveFile = new QFile(downloadedArchivePath);
     if (archiveFile->exists()) {
         archiveFile->remove();
     }

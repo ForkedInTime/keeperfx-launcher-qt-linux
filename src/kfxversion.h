@@ -30,6 +30,12 @@ public:
         QString version = "0.0.0";
         QString fullString = QString();
         QString downloadUrl = QString();
+        // An update archive holding only what changed since the INSTALLED version,
+        // present when the release carries one that starts from exactly it. Empty
+        // otherwise, and downloadUrl is then the only way forward. Roughly 2% the
+        // size of the full payload, because between releases almost nothing but the
+        // engine and launcher binaries moves.
+        QString patchUrl = QString();
     };
 
     static const QMap<QString, QString> versionFunctionaltyMap;
