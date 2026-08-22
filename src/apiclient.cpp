@@ -61,12 +61,25 @@ static QJsonObject getLatestLinuxAlphaRelease(KfxVersion::ReleaseType wantedType
     }
 
     // GitHub returns releases newest first, so the first tag matching the wanted
-    // channel is the one to offer. Drafts and prereleases are skipped: a draft is
-    // not published yet, and a prerelease is not part of either channel here.
+    // channel is the one to offer.
+    //
+    // Only drafts are skipped: a draft is not published and carries no assets.
+    //
+    // Prereleases are NOT skipped, and must not be. Every alpha this project
+    // publishes is a GitHub prerelease -- that is what keeps it out of
+    // /releases/latest, which the README's download button and the stable channel
+    // both depend on. Skipping prereleases here therefore skipped every alpha ever
+    // released: the alpha channel matched nothing, and no alpha user was ever told
+    // an update existed. Two decisions that were each correct alone -- mark alphas
+    // prerelease, ignore prereleases -- cancelled the feature out between them.
+    //
+    // The channel is decided by the TAG below, by the same code that classifies the
+    // installed version, so the two sides can never disagree. The prerelease flag is
+    // a publishing detail, not a channel marker.
     const QJsonArray releases = doc.array();
     for (const QJsonValue &r : releases) {
         const QJsonObject root = r.toObject();
-        if (root["draft"].toBool() || root["prerelease"].toBool()) {
+        if (root["draft"].toBool()) {
             continue;
         }
 
