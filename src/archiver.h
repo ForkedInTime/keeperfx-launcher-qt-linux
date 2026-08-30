@@ -19,6 +19,15 @@ public:
 
     static bool compressSingleFile(QFile *inputFile, std::string outputPath);
 
+    // True when the file is a RAR archive, judged by its signature.
+    //
+    // Worth asking separately because the 7-Zip library shipped beside the
+    // launcher can LIST a RAR but cannot decompress one: it carries the
+    // NArchive::NRar5 handler and no NCompress::NRar5 decoder, so extraction
+    // dies part-way with the opaque "Unsupported method". Callers use this to
+    // say something useful instead of repeating that.
+    static bool isRarArchive(const std::string &filePath);
+
     // Uncompressed total, or -1 when the archive fails its integrity test.
     static int64_t testArchiveAndGetSize(QFile *archiveFile);
 

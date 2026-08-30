@@ -97,7 +97,17 @@ AddonInstaller::Result AddonInstaller::installArchive(const QString &archivePath
         reader.extractTo(tmpPath.toStdString());
     } catch (const bit7z::BitException &ex) {
         qWarning() << "Add-on install: extract failed:" << ex.what();
-        r.error = QObject::tr("Could not extract the archive:\n%1").arg(ex.what());
+        // The bundled 7-Zip library lists RAR archives but cannot decompress
+        // them, so a RAR fails part-way through with "Unsupported method".
+        // Say what actually happened and what the player can do about it.
+        if (Archiver::isRarArchive(archivePath.toStdString())) {
+            r.error = QObject::tr(
+                "This add-on is packed as a RAR archive, which this build cannot extract.\n\n"
+                "Extract it yourself with an archive tool, then install the extracted "
+                "folder from the Installed tab.");
+        } else {
+            r.error = QObject::tr("Could not extract the archive:\n%1").arg(ex.what());
+        }
         tmpDir.removeRecursively();
         return r;
     }

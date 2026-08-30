@@ -4,8 +4,12 @@
 #include "helper.h" // For 64bit check on lib dll
 #endif
 
+#include <QByteArray>
 #include <QCoreApplication>
+#include <QFile>
 #include <QFileInfo>
+
+#include <cstring>
 
 #include <bit7z/bitextractor.hpp>
 #include <bit7z/bitabstractarchivehandler.hpp>
@@ -52,12 +56,66 @@ void Archiver::loadBit7zLib()
     }
 }
 
+// Identify the archive format from its leading bytes.
+//
+// The extension alone is not enough. Workshop items are packed by whoever
+// uploaded them -- .zip, .7z and .rar all occur (item 414 "Infernal Rift" is a
+// RAR5) -- and an extension can simply be wrong, which is common in
+// user-contributed content. Every format below announces itself in its header,
+// so read that and only fall back to the extension.
+//
+// bit7z's own BitFormat::Auto is not an option here: it exists only when the
+// library is compiled with BIT7Z_AUTO_FORMAT, which this build does not set.
+//
+// Returns nullptr when the signature is not recognised.
+static const bit7z::BitInFormat *formatFromSignature(const std::string &filePath)
+{
+    QFile f(QString::fromStdString(filePath));
+    if (!f.open(QIODevice::ReadOnly)) {
+        return nullptr;
+    }
+    // 265 bytes: enough for every signature below, including tar's "ustar",
+    // which sits at offset 257.
+    const QByteArray head = f.read(265);
+
+    auto startsWith = [&head](const char *sig, int len) {
+        return head.size() >= len && std::memcmp(head.constData(), sig, len) == 0;
+    };
+
+    if (startsWith("\x37\x7A\xBC\xAF\x27\x1C", 6)) return &bit7z::BitFormat::SevenZip;
+    // RAR5 extends the RAR4 signature by one byte, so test the longer one first.
+    if (startsWith("Rar!\x1A\x07\x01\x00", 8))     return &bit7z::BitFormat::Rar5;
+    if (startsWith("Rar!\x1A\x07\x00", 7))         return &bit7z::BitFormat::Rar;
+    // Zip: local header, plus the empty-archive and spanned variants.
+    if (startsWith("PK\x03\x04", 4)
+        || startsWith("PK\x05\x06", 4)
+        || startsWith("PK\x07\x08", 4))            return &bit7z::BitFormat::Zip;
+    if (startsWith("\xFD" "7zXZ\x00", 6))          return &bit7z::BitFormat::Xz;
+    if (startsWith("\x1F\x8B", 2))                 return &bit7z::BitFormat::GZip;
+    if (startsWith("BZh", 3))                      return &bit7z::BitFormat::BZip2;
+    if (head.size() >= 262 && std::memcmp(head.constData() + 257, "ustar", 5) == 0) {
+        return &bit7z::BitFormat::Tar;
+    }
+    return nullptr;
+}
+
+bool Archiver::isRarArchive(const std::string &filePath)
+{
+    const bit7z::BitInFormat *f = formatFromSignature(filePath);
+    return f == &bit7z::BitFormat::Rar || f == &bit7z::BitFormat::Rar5;
+}
+
 bit7z::BitArchiveReader Archiver::getReader(std::string filePath)
 {
     // Make sure library is loaded
     Archiver::loadBit7zLib();
 
-    // Pick the archive format based on the real file extension.
+    // Prefer what the file says it is over what it is named.
+    if (const bit7z::BitInFormat *detected = formatFromSignature(filePath)) {
+        return bit7z::BitArchiveReader{*lib, filePath, *detected};
+    }
+
+    // Unrecognised header: fall back to the file extension.
     // Downloads are saved as "<original-name>.tmp" (e.g. "foo.zip.tmp"),
     // so strip a trailing ".tmp" before inspecting the extension.
     QString path = QString::fromStdString(filePath);
@@ -67,6 +125,9 @@ bit7z::BitArchiveReader Archiver::getReader(std::string filePath)
 
     if (path.endsWith(".zip", Qt::CaseInsensitive)) {
         return bit7z::BitArchiveReader{*lib, filePath, bit7z::BitFormat::Zip};
+    }
+    if (path.endsWith(".rar", Qt::CaseInsensitive)) {
+        return bit7z::BitArchiveReader{*lib, filePath, bit7z::BitFormat::Rar5};
     }
 
     // Default: 7zip archive
