@@ -62,7 +62,8 @@ The fork has grown well past the porting patches. Everything below is ours, not 
   Restore** backed by a recycle bin.
 - **Mod Manager** (`modmanager*.cpp`) — list mods, enable/disable them, persist `mods/load_order.cfg`.
 - **Universal installer** (`addoninstaller.cpp`) — one code path that installs mods, campaigns, map packs and
-  loose maps from a `.7z`/`.zip`, coping with the several archive layouts the workshop actually ships.
+  loose maps from a `.7z`/`.zip`/`.rar`, detecting the format from the file rather than its name and
+  coping with the several archive layouts the workshop actually ships.
 - **Map Editor** (`downloadmapeditordialog.cpp`) — install and launch **Unearth** from the launcher, and get
   offered an update when a newer Unearth appears.
 - **Log viewer** (`logviewerdialog.cpp`) — read the engine and launcher logs without hunting for the files.
