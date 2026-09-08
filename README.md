@@ -30,7 +30,8 @@ Download one file, run it, and the only thing it ever asks for is your own *Dung
 launcher (this project) is bundled inside it — engine, libraries, game data and all. No `apt install`, nothing
 to set up. It works on any current 64-bit Linux distro (Ubuntu 24.04+/26.x, Fedora, Arch, Steam Deck).
 
-A **Flatpak** and Arch **AUR** packages are also published from the game repo — see its README for those.
+A **Flatpak** and an Arch **AUR** package are also published from the game repo — see its README for those.
+The AUR package builds this launcher from source, pinned to the same commit the release's AppImage was built from.
 
 ---
 
@@ -63,21 +64,30 @@ The fork has grown well past the porting patches. Everything below is ours, not 
 - **Mod Manager** (`modmanager*.cpp`) — list mods, enable/disable them, persist `mods/load_order.cfg`.
 - **Universal installer** (`addoninstaller.cpp`) — one code path that installs mods, campaigns, map packs and
   loose maps from a `.7z`/`.zip`/`.rar`, detecting the format from the file rather than its name and
-  coping with the several archive layouts the workshop actually ships.
+  coping with the several archive layouts the workshop actually ships. When an install fails it says why
+  (a read-only folder on a package-managed install, say) instead of "nothing to install".
 - **Map Editor** (`downloadmapeditordialog.cpp`) — install and launch **Unearth** from the launcher, and get
   offered an update when a newer Unearth appears.
 - **Log viewer** (`logviewerdialog.cpp`) — read the engine and launcher logs without hunting for the files.
 - **Music recovery** — detect an installation whose `music/` folder is empty, partial or non-standard and
   offer the download, instead of silently playing nothing.
-- **Update check** — compare the installed engine against this fork's latest release and update in place.
+- **Updates, on two channels** (`apiclient.cpp`, `updatedialog.cpp`) — a release-channel setting picks
+  **stable** or **alpha**, and the launcher only ever offers releases from the channel you chose (alphas are
+  GitHub prereleases; the stable channel never sees them). It downloads the release's small **update patch**
+  when one starts from the version you have and the full game package otherwise, and it **keeps the engine
+  it is about to replace** under `previous/` (three deep) so saved games written by it stay playable — the
+  Flatpak does the same when a bundle update overwrites the engine. A momentary network failure is retried
+  rather than read as "up to date".
+- **Crash reports carry the right log** (`crashcontext.cpp`) — a report is only sent with a log the failing
+  run actually wrote, never a stale one from an earlier session.
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
-- **UI scale** — a Comfortable (110%) step between Normal and Large.
+- **UI scale** — scale the whole launcher from 100% up to 200% (110 / 125 / 150 / 200) for readability.
 
 ### Tests
 
-`tests/run.sh` builds and runs the standalone logic tests (version parsing, archive-shape detection, tree
-copying, workshop URL handling) straight from source — no launcher build required. It exits non-zero on
-failure.
+`tests/run.sh` builds and runs the standalone logic tests (version parsing and channel classification,
+archive-shape detection, tree copying, workshop URL handling, crash-report context) straight from source — no
+launcher build required. It exits non-zero on failure.
 
 ### CI
 
