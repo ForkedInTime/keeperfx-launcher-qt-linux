@@ -83,6 +83,13 @@ The fork has grown well past the porting patches. Everything below is ours, not 
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
 - **UI scale** — scale the whole launcher from 100% up to 200% (110 / 125 / 150 / 200) for readability.
 
+### Kept in step with upstream
+
+The team's own launcher work is taken as it lands, so the fork never lags the stock launcher on the
+settings dialog: most recently the **Rotate around cursor** control, the zoom-to-cursor values the
+engine actually accepts (`ON`/`OFF`/`WHEEL`), case-insensitive on/off parsing for every boolean game
+setting, and sliders that enable Save when moved.
+
 ### Tests
 
 `tests/run.sh` builds and runs the standalone logic tests (version parsing and channel classification,
