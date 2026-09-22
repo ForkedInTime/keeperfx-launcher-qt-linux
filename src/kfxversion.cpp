@@ -32,6 +32,8 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"mouse_sensitivity_no_multiplier", "1.3.2.5120"},
     {"zoom_towards_mouse", "1.4.0.4323"},
     {"rotate_around_mouse", "1.4.0.4323"},
+    {"opengl_renderer", "1.4.0.5649"},
+    {"map_fade_animation", "1.4.0.5702"},
 
     // Absolute Config path is temporary disabled because we still want support for multiple KFX installations
     {"absolute_config_path", "999.999.999"}, // '-config' absolute path was added in 1.2.0.4408
