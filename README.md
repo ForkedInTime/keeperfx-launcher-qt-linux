@@ -86,9 +86,12 @@ The fork has grown well past the porting patches. Everything below is ours, not 
 ### Kept in step with upstream
 
 The team's own launcher work is taken as it lands, so the fork never lags the stock launcher on the
-settings dialog: most recently the **Rotate around cursor** control, the zoom-to-cursor values the
-engine actually accepts (`ON`/`OFF`/`WHEEL`), case-insensitive on/off parsing for every boolean game
-setting, and sliders that enable Save when moved.
+settings dialog: most recently the **Renderer** dropdown (software or OpenGL) and the **Fade when
+opening the map** checkbox on the Graphics tab, the **Rotate around cursor** control, the
+zoom-to-cursor values the engine actually accepts (`ON`/`OFF`/`WHEEL`), case-insensitive on/off
+parsing for every boolean game setting, and sliders that enable Save when moved. The launcher binary
+also carries its version in an ELF section, so a crash report or a package script can read it
+without running it.
 
 ### Tests
 
