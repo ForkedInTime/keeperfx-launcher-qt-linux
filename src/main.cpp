@@ -27,7 +27,10 @@ using namespace Qt::StringLiterals;
 
 void setDarkTheme()
 {
+    // Set the app to the Fusion theme style
     qApp->setStyle(QStyleFactory::create("Fusion"));
+
+    // Create a palette with our color scheme
     QPalette darkPalette;
     darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
     darkPalette.setColor(QPalette::WindowText, Qt::white);
@@ -45,6 +48,13 @@ void setDarkTheme()
     darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(110, 110, 110));
     darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(100, 100, 100));
     darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(100, 100, 100));
+
+    // 3D bevel and line colors
+    darkPalette.setColor(QPalette::Light, QColor(70, 70, 70));
+    darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
+    darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+
+    // Set application to use the new pallete
     qApp->setPalette(darkPalette);
 
     qApp->setStyleSheet(R"(
@@ -54,6 +64,9 @@ void setDarkTheme()
             border: 1px solid rgb(80, 80, 80);
             padding: 6px;
             font-size: 11pt;
+        }
+        Line {
+            border-bottom: 5px;
         }
     )");
 }
