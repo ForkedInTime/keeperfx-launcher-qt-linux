@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>870</width>
-    <height>635</height>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -549,6 +549,22 @@ height: 35px;
        </property>
        <property name="text">
         <string comment="Checkbox Toggle">Fade when opening the map</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxVSync">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>540</y>
+         <width>361</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">Lock the frame rate to the monitor to remove tearing. Off uncaps the present rate.</string>
+       </property>
+       <property name="text">
+        <string comment="Checkbox Toggle">Enable VSync</string>
        </property>
       </widget>
       <widget class="QLabel" name="labelCreatureFlowerSize">
@@ -1104,6 +1120,22 @@ height: 35px;
         <string comment="Checkbox Toggle">Enable tag mode toggle (Right-click)</string>
        </property>
       </widget>
+      <widget class="QCheckBox" name="checkBoxRelativeMouseMode">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>150</y>
+         <width>391</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">How the game locks the mouse. Relative mode reads movement instead of moving the cursor; try it if the cursor jumps or escapes the window.</string>
+       </property>
+       <property name="text">
+        <string comment="Checkbox Toggle">Relative mouse mode</string>
+       </property>
+      </widget>
       <widget class="QComboBox" name="comboBoxDefaultTagMode">
        <property name="geometry">
         <rect>
@@ -1165,31 +1197,87 @@ height: 35px;
       <attribute name="title">
        <string comment="Tab Title">Multiplayer</string>
       </attribute>
-      <widget class="QLineEdit" name="lineEditMasterServer">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>40</y>
-         <width>271</width>
-         <height>25</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="labelMasterServer">
+      <widget class="QCheckBox" name="checkBoxMatchmaking">
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>43</y>
-         <width>161</width>
+         <y>40</y>
+         <width>361</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">Advertise and find games through the matchmaking server. Off keeps multiplayer to direct connections.</string>
+       </property>
+       <property name="text">
+        <string comment="Checkbox Toggle">Enable matchmaking</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelMatchmakingServer">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>93</y>
+         <width>171</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string comment="Textinput Title Label">Masterserver</string>
+        <string comment="Textinput Title Label">Matchmaking server</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMatchmakingServer">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>90</y>
+         <width>331</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="anchorMatchmakingDefaultServer">
+       <property name="geometry">
+        <rect>
+         <x>550</x>
+         <y>93</y>
+         <width>261</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Link"></string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelMultiplayerPort">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>143</y>
+         <width>171</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">The UDP port the game listens on for other players. Must differ from the API port when the API is enabled.</string>
+       </property>
+       <property name="text">
+        <string comment="Textinput Title Label">Multiplayer port</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMultiplayerPort">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>140</y>
+         <width>101</width>
+         <height>25</height>
+        </rect>
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab6_launcher">
+     
+<widget class="QWidget" name="tab6_launcher">
       <attribute name="title">
        <string comment="Tab Title">Launcher</string>
       </attribute>

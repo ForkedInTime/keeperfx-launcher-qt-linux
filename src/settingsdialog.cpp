@@ -9,6 +9,8 @@
 #include "cdn.h"
 #include "helper.h"
 
+#define MATCHMAKING_DEFAULT_SERVER "matchmaking.keeperfx.workers.dev"
+
 #include <QDesktopServices>
 #include <QEvent>
 #include <QFontDatabase>
@@ -28,9 +30,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setFixedSize(size());
     setWindowFlag(Qt::WindowMaximizeButtonHint, false);
     setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
-
-    // Hide 'Multiplayer' tab until a future update requires it
-    ui->tabWidget->tabBar()->setTabVisible(4, false);
 
     // Reset setting has changed variable
     settingHasChanged = false;
@@ -159,6 +158,31 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     // Parchment map fade
     if (KfxVersion::hasFunctionality("map_fade_animation") == false) {
         ui->checkBoxParchmentMapFade->setDisabled(true);
+    }
+
+    // VSync
+    if (KfxVersion::hasFunctionality("vsync") == false) {
+        ui->checkBoxVSync->setDisabled(true);
+    }
+
+    // Relative mouse mode
+    if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == false) {
+        ui->checkBoxRelativeMouseMode->setDisabled(true);
+    }
+
+    // Multiplayer port
+    if (KfxVersion::hasFunctionality("multiplayer_port") == false) {
+        ui->labelMultiplayerPort->setDisabled(true);
+        ui->lineEditMultiplayerPort->setDisabled(true);
+    }
+    ui->lineEditMultiplayerPort->setValidator(new QIntValidator(0, 65535, this));
+
+    // Matchmaking server
+    if (KfxVersion::hasFunctionality("matchmaking_server") == false) {
+        ui->checkBoxMatchmaking->setDisabled(true);
+        ui->labelMatchmakingServer->setDisabled(true);
+        ui->lineEditMatchmakingServer->setDisabled(true);
+        ui->anchorMatchmakingDefaultServer->setDisabled(true);
     }
 
     // Rotate around cursor
@@ -406,6 +430,22 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         bool isChecked = ui->checkBoxAltInput->isChecked();
         ui->checkBoxUnlockCursorWhenPaused->setEnabled(!isChecked); // When alt input is DISABLED
         ui->checkBoxLockCursorPossession->setEnabled(isChecked); // When alt input is ENABLED
+    });
+
+    // Connect the matchmaking checkbox: the server field only matters when it is on
+    connect(ui->checkBoxMatchmaking, &QCheckBox::checkStateChanged, this, [this]() {
+        bool isChecked = ui->checkBoxMatchmaking->isChecked();
+        ui->labelMatchmakingServer->setDisabled(!isChecked);
+        ui->lineEditMatchmakingServer->setDisabled(!isChecked);
+        ui->anchorMatchmakingDefaultServer->setDisabled(!isChecked);
+    });
+
+    // The 'Set to default server' link
+    ui->anchorMatchmakingDefaultServer->setText("<a href='#' style='color: #AAA'>" + tr("Set to default server", "Link") + "</a>");
+    connect(ui->anchorMatchmakingDefaultServer, &QLabel::linkActivated, this, [this]() {
+        if (ui->anchorMatchmakingDefaultServer->isEnabled()) {
+            ui->lineEditMatchmakingServer->setText(MATCHMAKING_DEFAULT_SERVER);
+        }
     });
 
     // Add handler to remember when a setting has changed
@@ -802,13 +842,18 @@ void SettingsDialog::loadSettings()
         ui->labelMouseSensPercentage->setText(QString::number(mouseSens) + "%");
     }
 
-    ui->checkBoxAltInput->setChecked(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == true);
+    // Engines with the CAPTURE_CURSOR config key are told through it; older ones still get -altinput
+    if (KfxVersion::hasFunctionality("capture_cursor_config_option") == true) {
+        ui->checkBoxAltInput->setChecked(Settings::getKfxSetting("CAPTURE_CURSOR") == false);
+    } else {
+        ui->checkBoxAltInput->setChecked(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == true);
+    }
     ui->checkBoxUnlockCursorWhenPaused->setChecked(Settings::getKfxSetting("UNLOCK_CURSOR_WHEN_GAME_PAUSED") == true);
     ui->checkBoxLockCursorPossession->setChecked(Settings::getKfxSetting("LOCK_CURSOR_IN_POSSESSION") == true);
     ui->checkBoxScreenEdgePanning->setChecked(Settings::getKfxSetting("CURSOR_EDGE_CAMERA_PANNING") == true);
 
-    ui->checkBoxUnlockCursorWhenPaused->setEnabled(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == false); // When alt input is DISABLED
-    ui->checkBoxLockCursorPossession->setEnabled(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == true); // When alt input is ENABLED
+    ui->checkBoxUnlockCursorWhenPaused->setEnabled(ui->checkBoxAltInput->isChecked() == false); // cursor captured
+    ui->checkBoxLockCursorPossession->setEnabled(ui->checkBoxAltInput->isChecked() == true); // cursor unlocked
 
     ui->comboBoxZoomToMouse->setCurrentIndex(ui->comboBoxZoomToMouse->findData(Settings::getKfxSetting("ZOOM_TO_MOUSE").toString()));
     ui->comboBoxRotateAroundMouse->setCurrentIndex(ui->comboBoxRotateAroundMouse->findData(Settings::getKfxSetting("ROTATE_AROUND_MOUSE").toString()));
@@ -826,15 +871,38 @@ void SettingsDialog::loadSettings()
     if (KfxVersion::hasFunctionality("map_fade_animation") == true) {
         ui->checkBoxParchmentMapFade->setChecked(Settings::getKfxSetting("PARCHMENT_MAP_FADE") == true);
     }
+    if (KfxVersion::hasFunctionality("vsync") == true) {
+        ui->checkBoxVSync->setChecked(Settings::getKfxSetting("VSYNC") == true);
+    }
 
-    ui->checkBoxEnableTagModeToggle->setChecked(Settings::getKfxSetting("TAG_MODE_TOGGLING") == true);
-    ui->comboBoxDefaultTagMode->setCurrentIndex(ui->comboBoxDefaultTagMode->findData(Settings::getKfxSetting("DEFAULT_TAG_MODE").toString()));
+    if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
+        ui->checkBoxRelativeMouseMode->setChecked(Settings::getKfxSetting("RELATIVE_MOUSE_MODE") == true);
+    }
+    if (KfxVersion::hasFunctionality("tag_mode") == true) {
+        ui->checkBoxEnableTagModeToggle->setChecked(Settings::getKfxSetting("TAG_MODE_TOGGLING") == true);
+        ui->comboBoxDefaultTagMode->setCurrentIndex(ui->comboBoxDefaultTagMode->findData(Settings::getKfxSetting("DEFAULT_TAG_MODE").toString()));
+    }
 
     // ===============================================================================
     // ================================ MULTIPLAYER ==================================
     // ===============================================================================
 
-    //ui->lineEditMasterServer->setText(Settings::getKfxSetting("MASTERSERVER_HOST").toString());
+    if (KfxVersion::hasFunctionality("matchmaking_server") == true) {
+        QString matchmakingServer = Settings::getKfxSetting("MATCHMAKING_SERVER").toString();
+        ui->checkBoxMatchmaking->setChecked(matchmakingServer != "OFF");
+        ui->labelMatchmakingServer->setDisabled(matchmakingServer == "OFF");
+        ui->lineEditMatchmakingServer->setDisabled(matchmakingServer == "OFF");
+        // A config from before the key existed has no server at all; show the default rather than
+        // an empty field that would be written back as an empty server
+        if (matchmakingServer.isEmpty()) {
+            matchmakingServer = MATCHMAKING_DEFAULT_SERVER;
+        }
+        ui->lineEditMatchmakingServer->setText(matchmakingServer != "OFF" ? matchmakingServer : "");
+        ui->anchorMatchmakingDefaultServer->setDisabled(matchmakingServer == "OFF");
+    }
+    if (KfxVersion::hasFunctionality("multiplayer_port") == true) {
+        ui->lineEditMultiplayerPort->setText(Settings::getKfxSetting("MULTIPLAYER_PORT").toString());
+    }
 
     // =======================================================================
     // ================================ API ==================================
@@ -880,6 +948,19 @@ void SettingsDialog::loadSettings()
 
 void SettingsDialog::saveSettings()
 {
+    // Refuse combinations the engine cannot run with, before anything is written
+    QStringList errors;
+    if (ui->checkBoxEnableAPI->isChecked() && ui->lineEditMultiplayerPort->isEnabled()
+        && ui->lineEditMultiplayerPort->text() == ui->lineEditApiPort->text()) {
+        errors.append(tr("Multiplayer port and API port must be different when API is enabled", "MessageBox Text"));
+    }
+    if (!errors.isEmpty()) {
+        QMessageBox::warning(this,
+            tr("Invalid Settings", "MessageBox Title"),
+            tr("Cannot save settings due to the following errors:", "MessageBox Text") + "\n\n- " + errors.join("\n- "));
+        return;
+    }
+
 
     // ========================================================================
     // ================================ GAME ==================================
@@ -1069,6 +1150,9 @@ void SettingsDialog::saveSettings()
     }
 
     Settings::setLauncherSetting("GAME_PARAM_ALT_INPUT", ui->checkBoxAltInput->isChecked() == true);
+    if (KfxVersion::hasFunctionality("capture_cursor_config_option") == true) {
+        Settings::setKfxSetting("CAPTURE_CURSOR", ui->checkBoxAltInput->isChecked() == false);
+    }
     Settings::setKfxSetting("UNLOCK_CURSOR_WHEN_GAME_PAUSED", ui->checkBoxUnlockCursorWhenPaused->isChecked() == true);
     Settings::setKfxSetting("LOCK_CURSOR_IN_POSSESSION", ui->checkBoxLockCursorPossession->isChecked() == true);
     Settings::setKfxSetting("CURSOR_EDGE_CAMERA_PANNING", ui->checkBoxScreenEdgePanning->isChecked() == true);
@@ -1082,15 +1166,29 @@ void SettingsDialog::saveSettings()
     if (KfxVersion::hasFunctionality("map_fade_animation") == true) {
         Settings::setKfxSetting("PARCHMENT_MAP_FADE", ui->checkBoxParchmentMapFade->isChecked() == true);
     }
+    if (KfxVersion::hasFunctionality("vsync") == true) {
+        Settings::setKfxSetting("VSYNC", ui->checkBoxVSync->isChecked());
+    }
 
-    Settings::setKfxSetting("TAG_MODE_TOGGLING", ui->checkBoxEnableTagModeToggle->isChecked() == true);
-    Settings::setKfxSetting("DEFAULT_TAG_MODE", ui->comboBoxDefaultTagMode->currentData().toString());
+    if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
+        Settings::setKfxSetting("RELATIVE_MOUSE_MODE", ui->checkBoxRelativeMouseMode->isChecked() == true);
+    }
+    if (KfxVersion::hasFunctionality("tag_mode") == true) {
+        Settings::setKfxSetting("TAG_MODE_TOGGLING", ui->checkBoxEnableTagModeToggle->isChecked() == true);
+        Settings::setKfxSetting("DEFAULT_TAG_MODE", ui->comboBoxDefaultTagMode->currentData().toString());
+    }
 
     // ===============================================================================
     // ================================ MULTIPLAYER ==================================
     // ===============================================================================
 
-    //Settings::setKfxSetting("MASTERSERVER_HOST", ui->lineEditMasterServer->text());
+    if (KfxVersion::hasFunctionality("matchmaking_server") == true) {
+        Settings::setKfxSetting("MATCHMAKING_SERVER",
+            ui->checkBoxMatchmaking->isChecked() ? ui->lineEditMatchmakingServer->text() : "OFF");
+    }
+    if (KfxVersion::hasFunctionality("multiplayer_port") == true && !ui->lineEditMultiplayerPort->text().isEmpty()) {
+        Settings::setKfxSetting("MULTIPLAYER_PORT", ui->lineEditMultiplayerPort->text());
+    }
 
     // =======================================================================
     // ================================ API ==================================

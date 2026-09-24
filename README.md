@@ -86,10 +86,14 @@ The fork has grown well past the porting patches. Everything below is ours, not 
 ### Kept in step with upstream
 
 The team's own launcher work is taken as it lands, so the fork never lags the stock launcher on the
-settings dialog: most recently the **Renderer** dropdown (software or OpenGL) and the **Fade when
-opening the map** checkbox on the Graphics tab, the **Rotate around cursor** control, the
-zoom-to-cursor values the engine actually accepts (`ON`/`OFF`/`WHEEL`), case-insensitive on/off
-parsing for every boolean game setting, and sliders that enable Save when moved. The launcher binary
+settings dialog: most recently **VSync**, **Relative mouse mode**, the **Multiplayer** tab with the
+matchmaking server and the multiplayer port (refused when it clashes with the API port), the
+cursor-capture switch written to the game config instead of a command-line flag on engines that
+understand it, the **Renderer** dropdown (software or OpenGL) and the **Fade when opening the map**
+checkbox on the Graphics tab, the **Rotate around cursor** control, the zoom-to-cursor values the
+engine actually accepts (`ON`/`OFF`/`WHEEL`), case-insensitive on/off parsing for every boolean game
+setting, and sliders that enable Save when moved. Every control is greyed out on an engine that
+predates its setting, and only settings the running engine understands are written back. The launcher binary
 also carries its version in an ELF section, so a crash report or a package script can read it
 without running it.
 
