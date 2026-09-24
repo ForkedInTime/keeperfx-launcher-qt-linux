@@ -34,6 +34,11 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"rotate_around_mouse", "1.4.0.4323"},
     {"opengl_renderer", "1.4.0.5649"},
     {"map_fade_animation", "1.4.0.5702"},
+    {"vsync", "1.4.0.5295"},
+    {"relative_mouse_mode_toggle", "1.4.0.5300"},
+    {"capture_cursor_config_option", "1.4.0.5332"},
+    {"matchmaking_server", "1.4.0.5339"},
+    {"multiplayer_port", "1.4.0.5350"},
 
     // Absolute Config path is temporary disabled because we still want support for multiple KFX installations
     {"absolute_config_path", "999.999.999"}, // '-config' absolute path was added in 1.2.0.4408
