@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>870</width>
-    <height>635</height>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -150,29 +150,6 @@ height: 35px;
         </rect>
        </property>
       </widget>
-      <widget class="QLabel" name="labelCommandChar">
-       <property name="geometry">
-        <rect>
-         <x>430</x>
-         <y>43</y>
-         <width>161</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string comment="Textinput Title Label">Command character</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEditCommandChar">
-       <property name="geometry">
-        <rect>
-         <x>610</x>
-         <y>40</y>
-         <width>41</width>
-         <height>25</height>
-        </rect>
-       </property>
-      </widget>
       <widget class="QCheckBox" name="checkBoxDisplaySplashScreens">
        <property name="geometry">
         <rect>
@@ -244,6 +221,79 @@ height: 35px;
          <x>670</x>
          <y>230</y>
          <width>141</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelReplayMaxSize">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>43</y>
+         <width>171</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Textinput Title Label">Max. replay size (kB)</string>
+       </property>
+       <property name="toolTip">
+        <string>Largest replay file the game will write, in kB. 0 means no limit.</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditReplayMaxSize">
+       <property name="geometry">
+        <rect>
+         <x>610</x>
+         <y>40</y>
+         <width>91</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelMaxReplays">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>446</y>
+         <width>241</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Textinput Title Label">Keep replays
+(campaign / free play / multi)</string>
+       </property>
+       <property name="toolTip">
+        <string>Every game is recorded as a replay under replays/. How many to keep per kind; the oldest are removed first. 0 turns recording off for that kind.</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMaxReplaysCampaign">
+       <property name="geometry">
+        <rect>
+         <x>670</x>
+         <y>450</y>
+         <width>41</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMaxReplaysFreeplay">
+       <property name="geometry">
+        <rect>
+         <x>720</x>
+         <y>450</y>
+         <width>41</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMaxReplaysMultiplayer">
+       <property name="geometry">
+        <rect>
+         <x>770</x>
+         <y>450</y>
+         <width>41</width>
          <height>25</height>
         </rect>
        </property>
@@ -549,6 +599,48 @@ height: 35px;
        </property>
        <property name="text">
         <string comment="Checkbox Toggle">Fade when opening the map</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxVSync">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>540</y>
+         <width>361</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">Lock the frame rate to the monitor to remove tearing. Off uncaps the present rate.</string>
+       </property>
+       <property name="text">
+        <string comment="Checkbox Toggle">Enable VSync</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelViewportMode">
+       <property name="geometry">
+        <rect>
+         <x>440</x>
+         <y>544</y>
+         <width>171</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Dropdown Title Label">Viewport mode</string>
+       </property>
+       <property name="toolTip">
+        <string>How the 3D view fills the window. Original keeps the classic frame; Full uses the whole window; Full (Letterbox) keeps the aspect ratio with bars.</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBoxViewportMode">
+       <property name="geometry">
+        <rect>
+         <x>620</x>
+         <y>540</y>
+         <width>191</width>
+         <height>25</height>
+        </rect>
        </property>
       </widget>
       <widget class="QLabel" name="labelCreatureFlowerSize">
@@ -1104,6 +1196,22 @@ height: 35px;
         <string comment="Checkbox Toggle">Enable tag mode toggle (Right-click)</string>
        </property>
       </widget>
+      <widget class="QCheckBox" name="checkBoxRelativeMouseMode">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>150</y>
+         <width>391</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">How the game locks the mouse. Relative mode reads movement instead of moving the cursor; try it if the cursor jumps or escapes the window.</string>
+       </property>
+       <property name="text">
+        <string comment="Checkbox Toggle">Relative mouse mode</string>
+       </property>
+      </widget>
       <widget class="QComboBox" name="comboBoxDefaultTagMode">
        <property name="geometry">
         <rect>
@@ -1160,36 +1268,137 @@ height: 35px;
         </rect>
        </property>
       </widget>
+      <widget class="QLabel" name="labelMaxZoom">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>404</y>
+         <width>151</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Slider Title Label">Max. zoom distance</string>
+       </property>
+       <property name="toolTip">
+        <string>How far the camera can zoom out [0 - 100]. 0 is the original Dungeon Keeper limit, 100 the KeeperFX limit.</string>
+       </property>
+      </widget>
+      <widget class="QSlider" name="horizontalSliderMaxZoom">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>400</y>
+         <width>191</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelMaxZoomNumber">
+       <property name="geometry">
+        <rect>
+         <x>380</x>
+         <y>400</y>
+         <width>61</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Slider Value Label">0</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab5_mp">
       <attribute name="title">
        <string comment="Tab Title">Multiplayer</string>
       </attribute>
-      <widget class="QLineEdit" name="lineEditMasterServer">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>40</y>
-         <width>271</width>
-         <height>25</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="labelMasterServer">
+      <widget class="QCheckBox" name="checkBoxMatchmaking">
        <property name="geometry">
         <rect>
          <x>30</x>
-         <y>43</y>
-         <width>161</width>
+         <y>40</y>
+         <width>361</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">Advertise and find games through the matchmaking server. Off keeps multiplayer to direct connections.</string>
+       </property>
+       <property name="text">
+        <string comment="Checkbox Toggle">Enable matchmaking</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelMatchmakingServer">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>93</y>
+         <width>171</width>
          <height>17</height>
         </rect>
        </property>
        <property name="text">
-        <string comment="Textinput Title Label">Masterserver</string>
+        <string comment="Textinput Title Label">Matchmaking server</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMatchmakingServer">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>90</y>
+         <width>331</width>
+         <height>25</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="anchorMatchmakingDefaultServer">
+       <property name="geometry">
+        <rect>
+         <x>550</x>
+         <y>93</y>
+         <width>261</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string comment="Link"></string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelMultiplayerPort">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>143</y>
+         <width>171</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">The UDP port the game listens on for other players. Must differ from the API port when the API is enabled.</string>
+       </property>
+       <property name="text">
+        <string comment="Textinput Title Label">Multiplayer port</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditMultiplayerPort">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>140</y>
+         <width>101</width>
+         <height>25</height>
+        </rect>
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab6_launcher">
+     
+<widget class="QWidget" name="tab6_launcher">
       <attribute name="title">
        <string comment="Tab Title">Launcher</string>
       </attribute>

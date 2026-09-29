@@ -101,13 +101,32 @@ bool Translator::loadPoFile(const QString &poFilePath)
         translationsLoaded++;
     }
 
-    // Fix translations that contain newlines
-    for (const QString &msgIdString : translations.keys()) {
-        if (msgIdString.contains("\\n")) {
-            QString newMsgId = msgIdString;
-            newMsgId.replace("\\n", "\n");
-            translations[newMsgId] = translations.value(msgIdString).replace("\\n", "\n");
-            translationsLoaded++;
+    // Unescape ALL translations
+    for (auto it = translations.begin(); it != translations.end(); ) {
+        QString msgId = it.key();
+        QString msgStr = it.value();
+
+        // Escape sequences to replace
+        static const QMap<QString, QString> escapeSequences = {
+            {"\\\\", "\\"},
+            {"\\\"", "\""},
+            {"\\n", "\n"},
+            {"\\t", "\t"},
+        };
+
+        // Apply all replacements to both msgId and msgStr
+        for (auto it = escapeSequences.constBegin(); it != escapeSequences.constEnd(); ++it) {
+            msgId.replace(it.key(), it.value());
+            msgStr.replace(it.key(), it.value());
+        }
+
+        // Update the map if the key changed
+        if (msgId != it.key()) {
+            it = translations.erase(it);
+            translations.insert(msgId, msgStr);
+        } else {
+            it.value() = msgStr;
+            ++it;
         }
     }
 

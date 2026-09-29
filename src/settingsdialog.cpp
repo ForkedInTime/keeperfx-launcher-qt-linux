@@ -9,6 +9,8 @@
 #include "cdn.h"
 #include "helper.h"
 
+#define MATCHMAKING_DEFAULT_SERVER "matchmaking.keeperfx.workers.dev"
+
 #include <QDesktopServices>
 #include <QEvent>
 #include <QFontDatabase>
@@ -28,9 +30,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setFixedSize(size());
     setWindowFlag(Qt::WindowMaximizeButtonHint, false);
     setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
-
-    // Hide 'Multiplayer' tab until a future update requires it
-    ui->tabWidget->tabBar()->setTabVisible(4, false);
 
     // Reset setting has changed variable
     settingHasChanged = false;
@@ -161,6 +160,71 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->checkBoxParchmentMapFade->setDisabled(true);
     }
 
+    // VSync
+    if (KfxVersion::hasFunctionality("vsync") == false) {
+        ui->checkBoxVSync->setDisabled(true);
+    }
+
+    // Relative mouse mode
+    if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == false) {
+        ui->checkBoxRelativeMouseMode->setDisabled(true);
+    }
+
+    // Viewport mode
+    if (KfxVersion::hasFunctionality("viewport_mode") == true) {
+        ui->comboBoxViewportMode->addItem(tr("Original", "Viewport Mode Dropdown"), "ORIGINAL");
+        ui->comboBoxViewportMode->addItem(tr("Full", "Viewport Mode Dropdown"), "FULL");
+        ui->comboBoxViewportMode->addItem(tr("Full (Letterbox)", "Viewport Mode Dropdown"), "FULL_LETTERBOX");
+    } else {
+        ui->comboBoxViewportMode->setDisabled(true);
+        ui->labelViewportMode->setDisabled(true);
+    }
+
+    // Max. zoom distance
+    if (KfxVersion::hasFunctionality("max_zoom_distance") == false) {
+        ui->labelMaxZoom->setDisabled(true);
+        ui->horizontalSliderMaxZoom->setDisabled(true);
+        ui->labelMaxZoomNumber->setDisabled(true);
+    }
+    connect(ui->horizontalSliderMaxZoom, &QSlider::valueChanged, this, [this](int value) {
+        ui->labelMaxZoomNumber->setText(QString::number(value));
+    });
+
+    // Replays. The size cap arrived as PACKETSAVE_MAX_SIZE (manual packet saves
+    // only) and was renamed REPLAY_MAX_SIZE a week later when every game started
+    // being recorded; MAX_REPLAYS came with the rename. One field serves both
+    // names; the per-kind counts only exist on the newer engines.
+    ui->lineEditReplayMaxSize->setValidator(new QIntValidator(0, INT_MAX, this));
+    for (QLineEdit *edit : {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer}) {
+        edit->setValidator(new QIntValidator(0, 9999, this));
+    }
+    if (KfxVersion::hasFunctionality("packetsave_max_filesize") == false
+        && KfxVersion::hasFunctionality("replay_autosave") == false) {
+        ui->labelReplayMaxSize->setDisabled(true);
+        ui->lineEditReplayMaxSize->setDisabled(true);
+    }
+    if (KfxVersion::hasFunctionality("replay_autosave") == false) {
+        ui->labelMaxReplays->setDisabled(true);
+        for (QLineEdit *edit : {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer}) {
+            edit->setDisabled(true);
+        }
+    }
+
+    // Multiplayer port
+    if (KfxVersion::hasFunctionality("multiplayer_port") == false) {
+        ui->labelMultiplayerPort->setDisabled(true);
+        ui->lineEditMultiplayerPort->setDisabled(true);
+    }
+    ui->lineEditMultiplayerPort->setValidator(new QIntValidator(0, 65535, this));
+
+    // Matchmaking server
+    if (KfxVersion::hasFunctionality("matchmaking_server") == false) {
+        ui->checkBoxMatchmaking->setDisabled(true);
+        ui->labelMatchmakingServer->setDisabled(true);
+        ui->lineEditMatchmakingServer->setDisabled(true);
+        ui->anchorMatchmakingDefaultServer->setDisabled(true);
+    }
+
     // Rotate around cursor
     if (KfxVersion::hasFunctionality("rotate_around_mouse") == true) {
         // Add cursor rotate dropdown options
@@ -247,8 +311,8 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->comboBoxResizeMovies->addItem(tr("Stretch", "Resize Movies Dropdown"), "STRETCH");
     ui->comboBoxResizeMovies->addItem(tr("Crop", "Resize Movies Dropdown"), "CROP");
     ui->comboBoxResizeMovies->addItem(tr("Pixel perfect", "Resize Movies Dropdown"), "PIXELPERFECT");
-    ui->comboBoxResizeMovies->addItem("4BY3", "4BY3");
-    ui->comboBoxResizeMovies->addItem("4BY3PP", "4BY3PP");
+    ui->comboBoxResizeMovies->addItem("4:3", "4BY3");
+    ui->comboBoxResizeMovies->addItem("4:3 " + tr("Pixel perfect", "Resize Movies Dropdown"), "4BY3PP");
 
     // Map: Resolutions
     QMap<QString, QString> resolutionsMap = {
@@ -347,11 +411,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->lineEditNeutralFlashRate->setValidator(new QIntValidator(0, 65535, this));
     ui->lineEditUpdateInterval->setValidator(new QIntValidator(0, 365, this));
 
-    // Set other input masks
-    ui->lineEditCommandChar->setValidator(
-        // Matches any printable ASCII character (from space to tilde)
-        new QRegularExpressionValidator(QRegularExpression("[ -~]"), this));
-
     // Connect the raw mouse input checkbox
     connect(ui->checkBoxRawMouseInput, &QCheckBox::checkStateChanged, this, [this]() {
         bool isChecked = ui->checkBoxRawMouseInput->isChecked();
@@ -406,6 +465,22 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         bool isChecked = ui->checkBoxAltInput->isChecked();
         ui->checkBoxUnlockCursorWhenPaused->setEnabled(!isChecked); // When alt input is DISABLED
         ui->checkBoxLockCursorPossession->setEnabled(isChecked); // When alt input is ENABLED
+    });
+
+    // Connect the matchmaking checkbox: the server field only matters when it is on
+    connect(ui->checkBoxMatchmaking, &QCheckBox::checkStateChanged, this, [this]() {
+        bool isChecked = ui->checkBoxMatchmaking->isChecked();
+        ui->labelMatchmakingServer->setDisabled(!isChecked);
+        ui->lineEditMatchmakingServer->setDisabled(!isChecked);
+        ui->anchorMatchmakingDefaultServer->setDisabled(!isChecked);
+    });
+
+    // The 'Set to default server' link
+    ui->anchorMatchmakingDefaultServer->setText("<a href='#' style='color: #AAA'>" + tr("Set to default server", "Link") + "</a>");
+    connect(ui->anchorMatchmakingDefaultServer, &QLabel::linkActivated, this, [this]() {
+        if (ui->anchorMatchmakingDefaultServer->isEnabled()) {
+            ui->lineEditMatchmakingServer->setText(MATCHMAKING_DEFAULT_SERVER);
+        }
     });
 
     // Add handler to remember when a setting has changed
@@ -541,7 +616,6 @@ void SettingsDialog::loadSettings()
     ui->comboBoxScreenshots->setCurrentIndex(
         ui->comboBoxScreenshots->findData(Settings::getKfxSetting("SCREENSHOT").toString()));
     ui->lineEditGameturns->setText(Settings::getLauncherSetting("GAME_PARAM_FPS").toString());
-    ui->lineEditCommandChar->setText(Settings::getKfxSetting("COMMAND_CHAR").toString());
     ui->checkBoxDeltaTime->setChecked(Settings::getKfxSetting("DELTA_TIME") == true);
     ui->checkBoxFreezeGameNoFocus->setChecked(Settings::getKfxSetting("FREEZE_GAME_ON_FOCUS_LOST")
                                               == true);
@@ -802,13 +876,18 @@ void SettingsDialog::loadSettings()
         ui->labelMouseSensPercentage->setText(QString::number(mouseSens) + "%");
     }
 
-    ui->checkBoxAltInput->setChecked(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == true);
+    // Engines with the CAPTURE_CURSOR config key are told through it; older ones still get -altinput
+    if (KfxVersion::hasFunctionality("capture_cursor_config_option") == true) {
+        ui->checkBoxAltInput->setChecked(Settings::getKfxSetting("CAPTURE_CURSOR") == false);
+    } else {
+        ui->checkBoxAltInput->setChecked(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == true);
+    }
     ui->checkBoxUnlockCursorWhenPaused->setChecked(Settings::getKfxSetting("UNLOCK_CURSOR_WHEN_GAME_PAUSED") == true);
     ui->checkBoxLockCursorPossession->setChecked(Settings::getKfxSetting("LOCK_CURSOR_IN_POSSESSION") == true);
     ui->checkBoxScreenEdgePanning->setChecked(Settings::getKfxSetting("CURSOR_EDGE_CAMERA_PANNING") == true);
 
-    ui->checkBoxUnlockCursorWhenPaused->setEnabled(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == false); // When alt input is DISABLED
-    ui->checkBoxLockCursorPossession->setEnabled(Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT") == true); // When alt input is ENABLED
+    ui->checkBoxUnlockCursorWhenPaused->setEnabled(ui->checkBoxAltInput->isChecked() == false); // cursor captured
+    ui->checkBoxLockCursorPossession->setEnabled(ui->checkBoxAltInput->isChecked() == true); // cursor unlocked
 
     ui->comboBoxZoomToMouse->setCurrentIndex(ui->comboBoxZoomToMouse->findData(Settings::getKfxSetting("ZOOM_TO_MOUSE").toString()));
     ui->comboBoxRotateAroundMouse->setCurrentIndex(ui->comboBoxRotateAroundMouse->findData(Settings::getKfxSetting("ROTATE_AROUND_MOUSE").toString()));
@@ -826,15 +905,69 @@ void SettingsDialog::loadSettings()
     if (KfxVersion::hasFunctionality("map_fade_animation") == true) {
         ui->checkBoxParchmentMapFade->setChecked(Settings::getKfxSetting("PARCHMENT_MAP_FADE") == true);
     }
+    if (KfxVersion::hasFunctionality("vsync") == true) {
+        ui->checkBoxVSync->setChecked(Settings::getKfxSetting("VSYNC") == true);
+    }
 
-    ui->checkBoxEnableTagModeToggle->setChecked(Settings::getKfxSetting("TAG_MODE_TOGGLING") == true);
-    ui->comboBoxDefaultTagMode->setCurrentIndex(ui->comboBoxDefaultTagMode->findData(Settings::getKfxSetting("DEFAULT_TAG_MODE").toString()));
+    if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
+        ui->checkBoxRelativeMouseMode->setChecked(Settings::getKfxSetting("RELATIVE_MOUSE_MODE") == true);
+    }
+    if (KfxVersion::hasFunctionality("viewport_mode") == true) {
+        int viewportIndex = ui->comboBoxViewportMode->findData(Settings::getKfxSetting("VIEWPORT_MODE").toString().toUpper());
+        if (viewportIndex < 0) {
+            viewportIndex = ui->comboBoxViewportMode->findData("ORIGINAL"); // a config without the line means the engine default
+        }
+        ui->comboBoxViewportMode->setCurrentIndex(viewportIndex);
+    }
+    if (KfxVersion::hasFunctionality("max_zoom_distance") == true) {
+        int maxZoomDistance = Settings::getKfxSetting("MAX_ZOOM_DISTANCE").toInt();
+        ui->horizontalSliderMaxZoom->setValue(maxZoomDistance);
+        ui->labelMaxZoomNumber->setText(QString::number(maxZoomDistance));
+    }
+    if (KfxVersion::hasFunctionality("replay_autosave") == true) {
+        // A config written before these keys existed has no line for them; show
+        // the engine's own defaults then, so a Save does not write zeros and
+        // silently switch recording off.
+        QString maxSize = Settings::getKfxSetting("REPLAY_MAX_SIZE").toString();
+        ui->lineEditReplayMaxSize->setText(maxSize.isEmpty() ? QStringLiteral("32768") : maxSize);
+        // MAX_REPLAYS is one line with three numbers: campaign, free play, multiplayer
+        QStringList counts = Settings::getKfxSetting("MAX_REPLAYS").toString().simplified().split(' ', Qt::SkipEmptyParts);
+        if (counts.size() != 3) {
+            counts = {"5", "5", "10"};
+        }
+        QList<QLineEdit *> edits = {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer};
+        for (int i = 0; i < edits.size(); i++) {
+            edits[i]->setText(counts[i]);
+        }
+    } else if (KfxVersion::hasFunctionality("packetsave_max_filesize") == true) {
+        QString maxSize = Settings::getKfxSetting("PACKETSAVE_MAX_SIZE").toString();
+        ui->lineEditReplayMaxSize->setText(maxSize.isEmpty() ? QStringLiteral("32768") : maxSize);
+    }
+    if (KfxVersion::hasFunctionality("tag_mode") == true) {
+        ui->checkBoxEnableTagModeToggle->setChecked(Settings::getKfxSetting("TAG_MODE_TOGGLING") == true);
+        ui->comboBoxDefaultTagMode->setCurrentIndex(ui->comboBoxDefaultTagMode->findData(Settings::getKfxSetting("DEFAULT_TAG_MODE").toString()));
+    }
 
     // ===============================================================================
     // ================================ MULTIPLAYER ==================================
     // ===============================================================================
 
-    //ui->lineEditMasterServer->setText(Settings::getKfxSetting("MASTERSERVER_HOST").toString());
+    if (KfxVersion::hasFunctionality("matchmaking_server") == true) {
+        QString matchmakingServer = Settings::getKfxSetting("MATCHMAKING_SERVER").toString();
+        ui->checkBoxMatchmaking->setChecked(matchmakingServer != "OFF");
+        ui->labelMatchmakingServer->setDisabled(matchmakingServer == "OFF");
+        ui->lineEditMatchmakingServer->setDisabled(matchmakingServer == "OFF");
+        // A config from before the key existed has no server at all; show the default rather than
+        // an empty field that would be written back as an empty server
+        if (matchmakingServer.isEmpty()) {
+            matchmakingServer = MATCHMAKING_DEFAULT_SERVER;
+        }
+        ui->lineEditMatchmakingServer->setText(matchmakingServer != "OFF" ? matchmakingServer : "");
+        ui->anchorMatchmakingDefaultServer->setDisabled(matchmakingServer == "OFF");
+    }
+    if (KfxVersion::hasFunctionality("multiplayer_port") == true) {
+        ui->lineEditMultiplayerPort->setText(Settings::getKfxSetting("MULTIPLAYER_PORT").toString());
+    }
 
     // =======================================================================
     // ================================ API ==================================
@@ -880,6 +1013,19 @@ void SettingsDialog::loadSettings()
 
 void SettingsDialog::saveSettings()
 {
+    // Refuse combinations the engine cannot run with, before anything is written
+    QStringList errors;
+    if (ui->checkBoxEnableAPI->isChecked() && ui->lineEditMultiplayerPort->isEnabled()
+        && ui->lineEditMultiplayerPort->text() == ui->lineEditApiPort->text()) {
+        errors.append(tr("Multiplayer port and API port must be different when API is enabled", "MessageBox Text"));
+    }
+    if (!errors.isEmpty()) {
+        QMessageBox::warning(this,
+            tr("Invalid Settings", "MessageBox Title"),
+            tr("Cannot save settings due to the following errors:", "MessageBox Text") + "\n\n- " + errors.join("\n- "));
+        return;
+    }
+
 
     // ========================================================================
     // ================================ GAME ==================================
@@ -919,12 +1065,6 @@ void SettingsDialog::saveSettings()
         Settings::setLauncherSetting("GAME_PARAM_NO_INTRO", ui->checkBoxDisplayIntro->isChecked() == false);
         Settings::setKfxSetting("DISABLE_SPLASH_SCREENS", ui->checkBoxDisplaySplashScreens->isChecked() == false);
     }
-
-    // Make sure command char is not empty
-    if(ui->lineEditCommandChar->text().isEmpty() == true){
-        ui->lineEditCommandChar->setText("!");
-    }
-    Settings::setKfxSetting("COMMAND_CHAR", ui->lineEditCommandChar->text());
 
     // Packet save
     QString packetSaveFileName = ui->lineEditPackSaveFileName->text();
@@ -1069,6 +1209,9 @@ void SettingsDialog::saveSettings()
     }
 
     Settings::setLauncherSetting("GAME_PARAM_ALT_INPUT", ui->checkBoxAltInput->isChecked() == true);
+    if (KfxVersion::hasFunctionality("capture_cursor_config_option") == true) {
+        Settings::setKfxSetting("CAPTURE_CURSOR", ui->checkBoxAltInput->isChecked() == false);
+    }
     Settings::setKfxSetting("UNLOCK_CURSOR_WHEN_GAME_PAUSED", ui->checkBoxUnlockCursorWhenPaused->isChecked() == true);
     Settings::setKfxSetting("LOCK_CURSOR_IN_POSSESSION", ui->checkBoxLockCursorPossession->isChecked() == true);
     Settings::setKfxSetting("CURSOR_EDGE_CAMERA_PANNING", ui->checkBoxScreenEdgePanning->isChecked() == true);
@@ -1082,15 +1225,49 @@ void SettingsDialog::saveSettings()
     if (KfxVersion::hasFunctionality("map_fade_animation") == true) {
         Settings::setKfxSetting("PARCHMENT_MAP_FADE", ui->checkBoxParchmentMapFade->isChecked() == true);
     }
+    if (KfxVersion::hasFunctionality("vsync") == true) {
+        Settings::setKfxSetting("VSYNC", ui->checkBoxVSync->isChecked());
+    }
 
-    Settings::setKfxSetting("TAG_MODE_TOGGLING", ui->checkBoxEnableTagModeToggle->isChecked() == true);
-    Settings::setKfxSetting("DEFAULT_TAG_MODE", ui->comboBoxDefaultTagMode->currentData().toString());
+    if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
+        Settings::setKfxSetting("RELATIVE_MOUSE_MODE", ui->checkBoxRelativeMouseMode->isChecked() == true);
+    }
+    if (KfxVersion::hasFunctionality("viewport_mode") == true) {
+        Settings::setKfxSetting("VIEWPORT_MODE", ui->comboBoxViewportMode->currentData().toString());
+    }
+    if (KfxVersion::hasFunctionality("max_zoom_distance") == true) {
+        Settings::setKfxSetting("MAX_ZOOM_DISTANCE", ui->horizontalSliderMaxZoom->value());
+    }
+    if (KfxVersion::hasFunctionality("replay_autosave") == true) {
+        if (ui->lineEditReplayMaxSize->text().isEmpty() == false) {
+            Settings::setKfxSetting("REPLAY_MAX_SIZE", ui->lineEditReplayMaxSize->text());
+        }
+        QStringList counts;
+        for (QLineEdit *edit : {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer}) {
+            counts << (edit->text().isEmpty() ? QStringLiteral("0") : edit->text());
+        }
+        Settings::setKfxSetting("MAX_REPLAYS", counts.join(' '));
+    } else if (KfxVersion::hasFunctionality("packetsave_max_filesize") == true) {
+        if (ui->lineEditReplayMaxSize->text().isEmpty() == false) {
+            Settings::setKfxSetting("PACKETSAVE_MAX_SIZE", ui->lineEditReplayMaxSize->text());
+        }
+    }
+    if (KfxVersion::hasFunctionality("tag_mode") == true) {
+        Settings::setKfxSetting("TAG_MODE_TOGGLING", ui->checkBoxEnableTagModeToggle->isChecked() == true);
+        Settings::setKfxSetting("DEFAULT_TAG_MODE", ui->comboBoxDefaultTagMode->currentData().toString());
+    }
 
     // ===============================================================================
     // ================================ MULTIPLAYER ==================================
     // ===============================================================================
 
-    //Settings::setKfxSetting("MASTERSERVER_HOST", ui->lineEditMasterServer->text());
+    if (KfxVersion::hasFunctionality("matchmaking_server") == true) {
+        Settings::setKfxSetting("MATCHMAKING_SERVER",
+            ui->checkBoxMatchmaking->isChecked() ? ui->lineEditMatchmakingServer->text() : "OFF");
+    }
+    if (KfxVersion::hasFunctionality("multiplayer_port") == true && !ui->lineEditMultiplayerPort->text().isEmpty()) {
+        Settings::setKfxSetting("MULTIPLAYER_PORT", ui->lineEditMultiplayerPort->text());
+    }
 
     // =======================================================================
     // ================================ API ==================================

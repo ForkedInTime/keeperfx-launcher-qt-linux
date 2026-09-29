@@ -181,11 +181,9 @@ void UpdateDialog::on_updateButton_clicked()
 
 #if defined(Q_OS_WIN)
     // Check for locked KeeperFX binaries on Windows
-    QFile fileKfx(QCoreApplication::applicationDirPath() + "/keeperfx.exe");
-    QFile fileKfxHvlog(QCoreApplication::applicationDirPath() + "/keeperfx_hvlog.exe");
     if (
-        (fileKfx.exists() && fileKfx.open(QIODevice::WriteOnly) == false) ||
-        fileKfxHvlog.exists() && fileKfxHvlog.open(QIODevice::WriteOnly) == false
+        Helper::isFileLocked(QCoreApplication::applicationDirPath() + "/keeperfx.exe") ||
+        Helper::isFileLocked(QCoreApplication::applicationDirPath() + "/keeperfx_hvlog.exe")
     ) {
         onAppendLog("KeeperFX binary seems to have a file lock");
         QMessageBox::warning(this,
@@ -200,8 +198,7 @@ void UpdateDialog::on_updateButton_clicked()
     }
 
     // Check for locked legacy launcher binary on Windows
-    QFile fileLegacyLauncher(QCoreApplication::applicationDirPath() + "/keeperfx-launcher-legacy.exe");
-    if (fileLegacyLauncher.exists() && fileLegacyLauncher.open(QIODevice::WriteOnly) == false) {
+    if (Helper::isFileLocked(QCoreApplication::applicationDirPath() + "/keeperfx-launcher-legacy.exe")) {
         onAppendLog("Legacy launcher binary seems to have a file lock");
         QMessageBox::warning(this,
             tr("Update failed", "MessageBox Title"),

@@ -60,7 +60,7 @@ QMap<QString, QString> Settings::gameSettingsParameterMap = {
     {"GAME_PARAM_USE_CD_MUSIC", "-cd"},
     {"GAME_PARAM_ALEX", "-alex"},
     {"GAME_PARAM_VID_SMOOTH", "-vidsmooth"},
-    {"GAME_PARAM_ALT_INPUT", "-altinput"},
+    // {"GAME_PARAM_ALT_INPUT", "-altinput"}, // Hardcoded: engines with CAPTURE_CURSOR read the config instead
     // {"GAME_PARAM_FPS", "-fps %d"}, // Hardcoded
     // {"GAME_PARAM_HUMAN_PLAYER", "-human %d"}, // Hardcoded
     // {"GAME_PARAM_PACKET_SAVE_FILE_NAME", "-packetsave %s"}, // Hardcoded
@@ -313,6 +313,15 @@ QStringList Settings::getGameSettingsParameters()
     if (KfxVersion::hasFunctionality("startup_config_option") == false) {
         if (Settings::getLauncherSetting("GAME_PARAM_NO_INTRO").toBool() == true) {
             paramList << "-nointro";
+        }
+    }
+
+    // Add alt input
+    // Engines with the CAPTURE_CURSOR config key are told through it (the settings dialog
+    // writes it); older ones only understand the command line switch
+    if (KfxVersion::hasFunctionality("capture_cursor_config_option") == false) {
+        if (Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT").toBool() == true) {
+            paramList << "-altinput";
         }
     }
 

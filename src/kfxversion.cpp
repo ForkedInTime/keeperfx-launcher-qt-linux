@@ -34,6 +34,17 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"rotate_around_mouse", "1.4.0.4323"},
     {"opengl_renderer", "1.4.0.5649"},
     {"map_fade_animation", "1.4.0.5702"},
+    {"vsync", "1.4.0.5295"},
+    {"relative_mouse_mode_toggle", "1.4.0.5300"},
+    {"capture_cursor_config_option", "1.4.0.5332"},
+    // The four below are gated on FORK build numbers (git rev-list --count of the
+    // alpha merge that brought the engine key in), not upstream's counts.
+    {"viewport_mode", "1.4.0.5694"},           // VIEWPORT_MODE, 2026-09-16 sync
+    {"max_zoom_distance", "1.4.0.4410"},       // MAX_ZOOM_DISTANCE predates this fork (upstream, March 2025)
+    {"packetsave_max_filesize", "1.4.0.5728"}, // PACKETSAVE_MAX_SIZE, 2026-09-21 sync; renamed a week later:
+    {"replay_autosave", "1.4.0.5748"},         // REPLAY_MAX_SIZE + MAX_REPLAYS, 2026-09-28 sync
+    {"matchmaking_server", "1.4.0.5339"},
+    {"multiplayer_port", "1.4.0.5350"},
 
     // Absolute Config path is temporary disabled because we still want support for multiple KFX installations
     {"absolute_config_path", "999.999.999"}, // '-config' absolute path was added in 1.2.0.4408

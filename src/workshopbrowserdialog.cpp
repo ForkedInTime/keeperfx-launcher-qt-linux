@@ -8,6 +8,7 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDesktopServices>
+#include "helper.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QEventLoop>
@@ -340,7 +341,7 @@ WorkshopBrowserDialog::WorkshopBrowserDialog(QWidget *parent)
     bottom->addWidget(statusLabel, 1);
     auto *websiteButton = new QPushButton(tr("Open website"), this);
     connect(websiteButton, &QPushButton::clicked, this,
-            []() { QDesktopServices::openUrl(QUrl("https://keeperfx.net/workshop")); });
+            []() { Helper::openUrl(QUrl("https://keeperfx.net/workshop")); });
     bottom->addWidget(websiteButton);
     auto *closeButton = new QPushButton(tr("Close"), this);
     connect(closeButton, &QPushButton::clicked, this, &QDialog::accept);
@@ -603,7 +604,7 @@ void WorkshopBrowserDialog::applyFilter()
         detailsButton->setToolTip(tr("Open this item's page on keeperfx.net"));
         const int itemId = item["id"].toInt();
         connect(detailsButton, &QPushButton::clicked, this, [itemId]() {
-            QDesktopServices::openUrl(
+            Helper::openUrl(
                 QUrl(QString("https://keeperfx.net/workshop/item/%1").arg(itemId)));
         });
         rowLayout->addWidget(detailsButton);
