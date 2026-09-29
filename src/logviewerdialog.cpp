@@ -4,6 +4,7 @@
 #include <QClipboard>
 #include <QCoreApplication>
 #include <QDesktopServices>
+#include "helper.h"
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QFile>
@@ -152,7 +153,7 @@ void LogViewerDialog::copyCurrentToClipboard()
 
 void LogViewerDialog::openContainingFolder()
 {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(gameDirectory()));
+    Helper::openUrl(QUrl::fromLocalFile(gameDirectory()));
 }
 
 void LogViewerDialog::showLauncherLog(QWidget *parent)

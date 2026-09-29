@@ -90,7 +90,10 @@ settings dialog: most recently **VSync**, **Relative mouse mode**, the **Multipl
 matchmaking server and the multiplayer port (refused when it clashes with the API port), the
 cursor-capture switch written to the game config instead of a command-line flag on engines that
 understand it, the **Renderer** dropdown (software or OpenGL) and the **Fade when opening the map**
-checkbox on the Graphics tab, the **Rotate around cursor** control, the zoom-to-cursor values the
+checkbox on the Graphics tab, the **Viewport mode** dropdown, the **Max. zoom distance** slider, the
+replay controls (**Max. replay size** and **Keep replays** per campaign, free play and multiplayer,
+written under whichever key names the running engine uses), the retired *Command character* field
+removed, the **Rotate around cursor** control, the zoom-to-cursor values the
 engine actually accepts (`ON`/`OFF`/`WHEEL`), case-insensitive on/off parsing for every boolean game
 setting, and sliders that enable Save when moved. Every control is greyed out on an engine that
 predates its setting, and only settings the running engine understands are written back. The launcher binary

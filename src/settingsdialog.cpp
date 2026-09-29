@@ -170,6 +170,46 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->checkBoxRelativeMouseMode->setDisabled(true);
     }
 
+    // Viewport mode
+    if (KfxVersion::hasFunctionality("viewport_mode") == true) {
+        ui->comboBoxViewportMode->addItem(tr("Original", "Viewport Mode Dropdown"), "ORIGINAL");
+        ui->comboBoxViewportMode->addItem(tr("Full", "Viewport Mode Dropdown"), "FULL");
+        ui->comboBoxViewportMode->addItem(tr("Full (Letterbox)", "Viewport Mode Dropdown"), "FULL_LETTERBOX");
+    } else {
+        ui->comboBoxViewportMode->setDisabled(true);
+        ui->labelViewportMode->setDisabled(true);
+    }
+
+    // Max. zoom distance
+    if (KfxVersion::hasFunctionality("max_zoom_distance") == false) {
+        ui->labelMaxZoom->setDisabled(true);
+        ui->horizontalSliderMaxZoom->setDisabled(true);
+        ui->labelMaxZoomNumber->setDisabled(true);
+    }
+    connect(ui->horizontalSliderMaxZoom, &QSlider::valueChanged, this, [this](int value) {
+        ui->labelMaxZoomNumber->setText(QString::number(value));
+    });
+
+    // Replays. The size cap arrived as PACKETSAVE_MAX_SIZE (manual packet saves
+    // only) and was renamed REPLAY_MAX_SIZE a week later when every game started
+    // being recorded; MAX_REPLAYS came with the rename. One field serves both
+    // names; the per-kind counts only exist on the newer engines.
+    ui->lineEditReplayMaxSize->setValidator(new QIntValidator(0, INT_MAX, this));
+    for (QLineEdit *edit : {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer}) {
+        edit->setValidator(new QIntValidator(0, 9999, this));
+    }
+    if (KfxVersion::hasFunctionality("packetsave_max_filesize") == false
+        && KfxVersion::hasFunctionality("replay_autosave") == false) {
+        ui->labelReplayMaxSize->setDisabled(true);
+        ui->lineEditReplayMaxSize->setDisabled(true);
+    }
+    if (KfxVersion::hasFunctionality("replay_autosave") == false) {
+        ui->labelMaxReplays->setDisabled(true);
+        for (QLineEdit *edit : {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer}) {
+            edit->setDisabled(true);
+        }
+    }
+
     // Multiplayer port
     if (KfxVersion::hasFunctionality("multiplayer_port") == false) {
         ui->labelMultiplayerPort->setDisabled(true);
@@ -370,11 +410,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     ui->lineEditGuiBlinkRate->setValidator(new QIntValidator(0, 65535, this));
     ui->lineEditNeutralFlashRate->setValidator(new QIntValidator(0, 65535, this));
     ui->lineEditUpdateInterval->setValidator(new QIntValidator(0, 365, this));
-
-    // Set other input masks
-    ui->lineEditCommandChar->setValidator(
-        // Matches any printable ASCII character (from space to tilde)
-        new QRegularExpressionValidator(QRegularExpression("[ -~]"), this));
 
     // Connect the raw mouse input checkbox
     connect(ui->checkBoxRawMouseInput, &QCheckBox::checkStateChanged, this, [this]() {
@@ -581,7 +616,6 @@ void SettingsDialog::loadSettings()
     ui->comboBoxScreenshots->setCurrentIndex(
         ui->comboBoxScreenshots->findData(Settings::getKfxSetting("SCREENSHOT").toString()));
     ui->lineEditGameturns->setText(Settings::getLauncherSetting("GAME_PARAM_FPS").toString());
-    ui->lineEditCommandChar->setText(Settings::getKfxSetting("COMMAND_CHAR").toString());
     ui->checkBoxDeltaTime->setChecked(Settings::getKfxSetting("DELTA_TIME") == true);
     ui->checkBoxFreezeGameNoFocus->setChecked(Settings::getKfxSetting("FREEZE_GAME_ON_FOCUS_LOST")
                                               == true);
@@ -878,6 +912,37 @@ void SettingsDialog::loadSettings()
     if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
         ui->checkBoxRelativeMouseMode->setChecked(Settings::getKfxSetting("RELATIVE_MOUSE_MODE") == true);
     }
+    if (KfxVersion::hasFunctionality("viewport_mode") == true) {
+        int viewportIndex = ui->comboBoxViewportMode->findData(Settings::getKfxSetting("VIEWPORT_MODE").toString().toUpper());
+        if (viewportIndex < 0) {
+            viewportIndex = ui->comboBoxViewportMode->findData("ORIGINAL"); // a config without the line means the engine default
+        }
+        ui->comboBoxViewportMode->setCurrentIndex(viewportIndex);
+    }
+    if (KfxVersion::hasFunctionality("max_zoom_distance") == true) {
+        int maxZoomDistance = Settings::getKfxSetting("MAX_ZOOM_DISTANCE").toInt();
+        ui->horizontalSliderMaxZoom->setValue(maxZoomDistance);
+        ui->labelMaxZoomNumber->setText(QString::number(maxZoomDistance));
+    }
+    if (KfxVersion::hasFunctionality("replay_autosave") == true) {
+        // A config written before these keys existed has no line for them; show
+        // the engine's own defaults then, so a Save does not write zeros and
+        // silently switch recording off.
+        QString maxSize = Settings::getKfxSetting("REPLAY_MAX_SIZE").toString();
+        ui->lineEditReplayMaxSize->setText(maxSize.isEmpty() ? QStringLiteral("32768") : maxSize);
+        // MAX_REPLAYS is one line with three numbers: campaign, free play, multiplayer
+        QStringList counts = Settings::getKfxSetting("MAX_REPLAYS").toString().simplified().split(' ', Qt::SkipEmptyParts);
+        if (counts.size() != 3) {
+            counts = {"5", "5", "10"};
+        }
+        QList<QLineEdit *> edits = {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer};
+        for (int i = 0; i < edits.size(); i++) {
+            edits[i]->setText(counts[i]);
+        }
+    } else if (KfxVersion::hasFunctionality("packetsave_max_filesize") == true) {
+        QString maxSize = Settings::getKfxSetting("PACKETSAVE_MAX_SIZE").toString();
+        ui->lineEditReplayMaxSize->setText(maxSize.isEmpty() ? QStringLiteral("32768") : maxSize);
+    }
     if (KfxVersion::hasFunctionality("tag_mode") == true) {
         ui->checkBoxEnableTagModeToggle->setChecked(Settings::getKfxSetting("TAG_MODE_TOGGLING") == true);
         ui->comboBoxDefaultTagMode->setCurrentIndex(ui->comboBoxDefaultTagMode->findData(Settings::getKfxSetting("DEFAULT_TAG_MODE").toString()));
@@ -1000,12 +1065,6 @@ void SettingsDialog::saveSettings()
         Settings::setLauncherSetting("GAME_PARAM_NO_INTRO", ui->checkBoxDisplayIntro->isChecked() == false);
         Settings::setKfxSetting("DISABLE_SPLASH_SCREENS", ui->checkBoxDisplaySplashScreens->isChecked() == false);
     }
-
-    // Make sure command char is not empty
-    if(ui->lineEditCommandChar->text().isEmpty() == true){
-        ui->lineEditCommandChar->setText("!");
-    }
-    Settings::setKfxSetting("COMMAND_CHAR", ui->lineEditCommandChar->text());
 
     // Packet save
     QString packetSaveFileName = ui->lineEditPackSaveFileName->text();
@@ -1172,6 +1231,26 @@ void SettingsDialog::saveSettings()
 
     if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
         Settings::setKfxSetting("RELATIVE_MOUSE_MODE", ui->checkBoxRelativeMouseMode->isChecked() == true);
+    }
+    if (KfxVersion::hasFunctionality("viewport_mode") == true) {
+        Settings::setKfxSetting("VIEWPORT_MODE", ui->comboBoxViewportMode->currentData().toString());
+    }
+    if (KfxVersion::hasFunctionality("max_zoom_distance") == true) {
+        Settings::setKfxSetting("MAX_ZOOM_DISTANCE", ui->horizontalSliderMaxZoom->value());
+    }
+    if (KfxVersion::hasFunctionality("replay_autosave") == true) {
+        if (ui->lineEditReplayMaxSize->text().isEmpty() == false) {
+            Settings::setKfxSetting("REPLAY_MAX_SIZE", ui->lineEditReplayMaxSize->text());
+        }
+        QStringList counts;
+        for (QLineEdit *edit : {ui->lineEditMaxReplaysCampaign, ui->lineEditMaxReplaysFreeplay, ui->lineEditMaxReplaysMultiplayer}) {
+            counts << (edit->text().isEmpty() ? QStringLiteral("0") : edit->text());
+        }
+        Settings::setKfxSetting("MAX_REPLAYS", counts.join(' '));
+    } else if (KfxVersion::hasFunctionality("packetsave_max_filesize") == true) {
+        if (ui->lineEditReplayMaxSize->text().isEmpty() == false) {
+            Settings::setKfxSetting("PACKETSAVE_MAX_SIZE", ui->lineEditReplayMaxSize->text());
+        }
     }
     if (KfxVersion::hasFunctionality("tag_mode") == true) {
         Settings::setKfxSetting("TAG_MODE_TOGGLING", ui->checkBoxEnableTagModeToggle->isChecked() == true);
