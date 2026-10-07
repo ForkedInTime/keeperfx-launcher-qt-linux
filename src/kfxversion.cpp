@@ -32,13 +32,15 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"mouse_sensitivity_no_multiplier", "1.3.2.5120"},
     {"zoom_towards_mouse", "1.4.0.4323"},
     {"rotate_around_mouse", "1.4.0.4323"},
-    {"opengl_renderer", "1.4.0.5649"},
-    {"map_fade_animation", "1.4.0.5702"},
     {"vsync", "1.4.0.5295"},
     {"relative_mouse_mode_toggle", "1.4.0.5300"},
     {"capture_cursor_config_option", "1.4.0.5332"},
-    // The four below are gated on FORK build numbers (git rev-list --count of the
+    // The six below are gated on FORK build numbers (git rev-list --count of the
     // alpha merge that brought the engine key in), not upstream's counts.
+    // Stable hotfixes count up from their own tag (5652, 5653, 5656, ...), so a
+    // gate set too low opens a control on a stable engine that lacks the key.
+    {"opengl_renderer", "1.4.0.5694"},         // RENDERER, 2026-09-16 sync
+    {"map_fade_animation", "1.4.0.5728"},      // PARCHMENT_MAP_FADE, 2026-09-21 sync
     {"viewport_mode", "1.4.0.5694"},           // VIEWPORT_MODE, 2026-09-16 sync
     {"max_zoom_distance", "1.4.0.4410"},       // MAX_ZOOM_DISTANCE predates this fork (upstream, March 2025)
     {"packetsave_max_filesize", "1.4.0.5728"}, // PACKETSAVE_MAX_SIZE, 2026-09-21 sync; renamed a week later:
