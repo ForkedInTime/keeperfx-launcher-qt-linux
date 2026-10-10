@@ -301,6 +301,10 @@ void UpdateDialog::backupSaves(QList<SaveFile *> saveFiles)
     // Backup all save files
     if (SaveFile::backupAll(saveFiles)) {
         emit appendLog("Savefiles have been backed up");
+    } else {
+        // The update goes ahead -- it never touches save files -- but say so
+        // rather than leave an incomplete backup looking like a complete one.
+        emit appendLog("Warning: the save backup failed; your saves are untouched but were not backed up");
     }
 }
 

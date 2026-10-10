@@ -94,7 +94,8 @@ AddonInstaller::Result AddonInstaller::installArchive(const QString &archivePath
 
     try {
         bit7z::BitArchiveReader reader = Archiver::getReader(archivePath.toStdString());
-        reader.extractTo(tmpPath.toStdString());
+        // Workshop archives are user-uploaded: never restore a link from one
+        Archiver::extractWithoutLinks(reader, tmpPath.toStdString());
     } catch (const bit7z::BitException &ex) {
         qWarning() << "Add-on install: extract failed:" << ex.what();
         // The bundled 7-Zip library lists RAR archives but cannot decompress

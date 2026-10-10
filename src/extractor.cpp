@@ -35,8 +35,8 @@ void Extractor::extract(QFile *archiveFile, QString outputDir)
                 return true; // Continue processing
             });
 
-            // Extract it
-            archive.extractTo(outputDir.toStdString());
+            // Extract it (links are skipped: see Archiver::extractWithoutLinks)
+            Archiver::extractWithoutLinks(archive, outputDir.toStdString());
 
             emit extractComplete();
 
