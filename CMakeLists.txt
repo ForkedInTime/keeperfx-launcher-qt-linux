@@ -15,25 +15,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# MinGW/GCC Release flags
-# NOTE: -static is WIN32-only. On Linux, statically linking the Qt6 .so libs
-# fails ("attempted static link of dynamic object libQt6Widgets.so"); the
-# native build links Qt dynamically like every other Linux Qt app.
+# Release flags. Linux only: Qt is linked dynamically, like every other
+# Linux Qt app (statically linking the Qt6 .so libs fails outright).
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if(WIN32)
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -static -Os -s")
-    else()
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -s")
-    endif()
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -s")
 endif()
 
-if(MSVC)
-    set(DEP_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
-    set(DEP_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0")
-else()
-    set(DEP_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-    set(DEP_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-endif()
+set(DEP_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+set(DEP_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 
 include("cmake/CPM.cmake")
 CPMFindPackage(
@@ -145,23 +134,12 @@ find_package(bit7z REQUIRED)
 file(GLOB PROJECT_SOURCES src/*.cpp src/*.h)
 file(GLOB UI_FILES ui/*.ui)
 
-if(WIN32)
-    qt_add_executable(keeperfx-launcher-qt
-        MANUAL_FINALIZATION
-        WIN32
-        ${PROJECT_SOURCES}
-        ${UI_FILES}
-        resources.qrc
-        app.rc
-    )
-else()
-    qt_add_executable(keeperfx-launcher-qt
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        ${UI_FILES}
-        resources.qrc
-    )
-endif()
+qt_add_executable(keeperfx-launcher-qt
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+    ${UI_FILES}
+    resources.qrc
+)
 
 # Link libraries
 target_link_libraries(keeperfx-launcher-qt PRIVATE
@@ -198,14 +176,6 @@ target_link_libraries(keeperfx-launcher-qt PRIVATE
 #    endif()
 #endif()
 
-# Set target properties
-set_target_properties(keeperfx-launcher-qt PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
-
 # Installation settings
 #include(GNUInstallDirs)
 #install(TARGETS keeperfx-launcher-qt
@@ -217,12 +187,8 @@ set_target_properties(keeperfx-launcher-qt PROPERTIES
 # Finalize executable
 qt_finalize_executable(keeperfx-launcher-qt)
 
-# Copy pre-compiled libraries
-if (UNIX)
-    file(GLOB COMPILED_LIBS "${CMAKE_SOURCE_DIR}/ext/*.so")
-elseif (WIN32)
-    file(GLOB COMPILED_LIBS "${CMAKE_SOURCE_DIR}/ext/*.dll")
-endif()
+# Copy pre-compiled libraries (the 7-Zip library bit7z loads at runtime)
+file(GLOB COMPILED_LIBS "${CMAKE_SOURCE_DIR}/ext/*.so")
 foreach(LIB ${COMPILED_LIBS})
     add_custom_command(TARGET keeperfx-launcher-qt POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy "${LIB}" $<TARGET_FILE_DIR:keeperfx-launcher-qt>
