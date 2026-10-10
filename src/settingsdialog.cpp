@@ -903,7 +903,11 @@ void SettingsDialog::loadSettings()
         ui->comboBoxRenderer->setCurrentIndex(rendererIndex);
     }
     if (KfxVersion::hasFunctionality("map_fade_animation") == true) {
-        ui->checkBoxParchmentMapFade->setChecked(Settings::getKfxSetting("PARCHMENT_MAP_FADE") == true);
+        // The engine takes OFF, ON (the quick fade) and ORIGINAL (the original
+        // game's slower one); the box shows either kind of fade as on
+        const QVariant mapFade = Settings::getKfxSetting("PARCHMENT_MAP_FADE");
+        ui->checkBoxParchmentMapFade->setChecked(mapFade == true
+            || mapFade.toString().compare("ORIGINAL", Qt::CaseInsensitive) == 0);
     }
     if (KfxVersion::hasFunctionality("vsync") == true) {
         ui->checkBoxVSync->setChecked(Settings::getKfxSetting("VSYNC") == true);
@@ -1223,7 +1227,15 @@ void SettingsDialog::saveSettings()
         Settings::setKfxSetting("RENDERER", ui->comboBoxRenderer->currentData().toString());
     }
     if (KfxVersion::hasFunctionality("map_fade_animation") == true) {
-        Settings::setKfxSetting("PARCHMENT_MAP_FADE", ui->checkBoxParchmentMapFade->isChecked() == true);
+        // Keep ORIGINAL when the box was left on: writing ON over it would
+        // quietly swap the player's original-length fade for the quick one
+        const bool originalFade = Settings::getKfxSetting("PARCHMENT_MAP_FADE").toString()
+            .compare("ORIGINAL", Qt::CaseInsensitive) == 0;
+        if (ui->checkBoxParchmentMapFade->isChecked() && originalFade) {
+            Settings::setKfxSetting("PARCHMENT_MAP_FADE", QString("ORIGINAL"));
+        } else {
+            Settings::setKfxSetting("PARCHMENT_MAP_FADE", ui->checkBoxParchmentMapFade->isChecked() == true);
+        }
     }
     if (KfxVersion::hasFunctionality("vsync") == true) {
         Settings::setKfxSetting("VSYNC", ui->checkBoxVSync->isChecked());
