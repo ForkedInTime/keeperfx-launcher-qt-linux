@@ -170,13 +170,13 @@ bool SaveFile::backupAll(QList<SaveFile *> saveFiles)
     qDebug() << "Save backup archive path:" << archiveFilePath;
     qDebug().noquote() << QString("Archiving %1 save(s)").arg(saveFiles.length()).toStdString();
 
-    // Archive all saves
+    // Archive all saves in one pass: compressing them one at a time onto the
+    // same archive kept only the first (see Archiver::compressFiles)
+    QStringList paths;
     for (SaveFile *saveFile : saveFiles) {
         qDebug() << "Archiving:" << saveFile->saveName;
-        if (Archiver::compressSingleFile(&saveFile->file, archiveFilePath.toStdString()) == false) {
-            return false;
-        }
+        paths << saveFile->file.fileName();
     }
 
-    return true;
+    return Archiver::compressFiles(paths, archiveFilePath.toStdString());
 }

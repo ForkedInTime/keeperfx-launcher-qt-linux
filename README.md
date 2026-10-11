@@ -42,13 +42,26 @@ The AUR package builds this launcher from source, pinned to the same commit the 
 The team's launcher compiles cross-platform, but it was written Windows-first — it launched the game through
 **Wine** and read the version from a Windows `.exe`. This fork makes it drive the **native** engine:
 
-- **`game.cpp`** — launch the native `keeperfx` ELF directly (no Wine) when present
+- **`game.cpp`** — launch the native `keeperfx` ELF directly (no Wine) when present; the team's Wine path
+  is still compiled in, but only as a fallback for an install with no native engine
 - **`helper.h`** — detect the native binary (not just `keeperfx.exe`) as "installed", and open external links
   in a way that survives the AppImage's sandboxed environment
 - **`kfxversion.cpp`** — read the engine version from `version.txt` (a native ELF has no PE resources)
 - **`apiclient.cpp`** — install and self-update from this fork's GitHub releases, and show this fork's release
   notes in the news panel (the stock panel only knows about the Windows project)
-- **`CMakeLists.txt`** — the `-static` link flag is Windows-only (Linux links Qt dynamically)
+- **`CMakeLists.txt`** — Linux only: Qt linked dynamically, no Windows or macOS build branches
+
+### Linux only — what was removed, and what was left on purpose
+
+The Windows build files are gone: the MinGW cross-build (`Dockerfile.win64s`, `compile-win64s.sh`), the
+InnoSetup installer (`windows-installer.iss`), the Win32 resource and its icon (`app.rc`, `res/icon.ico`)
+and the Windows 7-Zip library (`ext/7za.dll`). Nothing built or shipped them; every release launcher is
+built for Linux by the game repo.
+
+The Windows code inside `src/` (`#ifdef Q_OS_WINDOWS`, the Windows-executable and Wine helpers) stays.
+It is compiled out on Linux or never reached there, and the team's launcher fixes are taken into this fork
+by cherry-pick, often touching exactly those blocks — removing them would turn every such cherry-pick
+into a conflict. A cherry-pick that touches one of the removed files conflicts once; `git rm` settles it.
 
 ### Features added on top
 
@@ -66,6 +79,11 @@ The fork has grown well past the porting patches. Everything below is ours, not 
   loose maps from a `.7z`/`.zip`/`.rar`, detecting the format from the file rather than its name and
   coping with the several archive layouts the workshop actually ships. When an install fails it says why
   (a read-only folder on a package-managed install, say) instead of "nothing to install".
+- **Safe extraction** (`archiver.cpp`) — no archive the launcher opens, Workshop item or game update, can
+  write outside its folder: symbolic links are never restored from an archive. (The 7-Zip library checks a
+  link's target only as text, so a chain of links in a hostile Workshop item could otherwise reach your home
+  folder.) A corrupt or truncated download is reported as one instead of closing the launcher, and the
+  pre-update save backup holds every save, not just the first.
 - **Map Editor** (`downloadmapeditordialog.cpp`) — install and launch **Unearth** from the launcher, and get
   offered an update when a newer Unearth appears.
 - **Log viewer** (`logviewerdialog.cpp`) — read the engine and launcher logs without hunting for the files.
@@ -132,6 +150,10 @@ cmake --build build -j"$(nproc)"
 This produces `build/keeperfx-launcher-qt`. The launcher expects to live in the game's install directory
 (it reads/writes config and finds the engine there); the AppImage's `AppRun` handles that by running it from a
 writable install dir.
+
+The 7-Zip library committed here, `ext/7z.so`, can list a RAR archive but not extract one. Released builds
+replace it with a RAR-capable build made by the game repo (`packaging/ci/build-7zip-lib.sh`), so a launcher
+built from this repo alone will refuse RAR Workshop items — with a message saying so.
 
 > ⚠️ **Do not drop a locally built binary into an AppImage install.** The AppImage bundles Qt 6.8.3, so a
 > binary built against a newer distro Qt dies with `libQt6Core.so.6: version 'Qt_6.x' not found`. Run your

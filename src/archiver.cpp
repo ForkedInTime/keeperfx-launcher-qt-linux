@@ -175,17 +175,52 @@ bool Archiver::compressSingleFile(QFile *inputFile, std::string outputPath)
     return false;
 }
 
+bool Archiver::compressFiles(const QStringList &inputFiles, std::string outputPath)
+{
+    std::vector<std::string> paths;
+    paths.reserve(inputFiles.size());
+    for (const QString &file : inputFiles) {
+        paths.push_back(file.toStdString());
+    }
+
+    try {
+        bit7z::BitFileCompressor compressor = Archiver::getCompressor();
+        compressor.compress(paths, outputPath);
+        return true;
+
+    } catch (const bit7z::BitException &ex) {
+
+        qWarning() << "Failed to compress" << inputFiles.size() << "files:" << ex.what();
+    }
+
+    return false;
+}
+
+void Archiver::extractWithoutLinks(const bit7z::BitArchiveReader &reader, const std::string &outputDir)
+{
+    reader.extractTo(outputDir, [](const bit7z::BitArchiveItem &item) -> bit7z::FilterResult {
+        if (item.isSymLink()) {
+            qWarning() << "Skipping symbolic link in archive:" << QString::fromStdString(item.path());
+            return bit7z::FilterResult::SkipItem;
+        }
+        return bit7z::FilterResult::ProcessItem;
+    });
+}
+
 int64_t Archiver::testArchiveAndGetSize(QFile *archiveFile)
 {
     // Get file info for the archive file
     QFileInfo archiveFileInfo(archiveFile->filesystemFileName());
 
-    // Get archive reader
-    bit7z::BitArchiveReader archive = Archiver::getReader(
-        archiveFileInfo.absoluteFilePath().toStdString()
-    );
-
     try{
+
+        // Get archive reader. Inside the try: the constructor itself throws
+        // when the file is not an archive at all -- a truncated download, or an
+        // error page saved under the archive's name -- and this runs on a
+        // thread-pool worker, where an escaping exception ends the launcher.
+        bit7z::BitArchiveReader archive = Archiver::getReader(
+            archiveFileInfo.absoluteFilePath().toStdString()
+        );
 
         // Test the archive
         // Throws a BitException when it is invalid
