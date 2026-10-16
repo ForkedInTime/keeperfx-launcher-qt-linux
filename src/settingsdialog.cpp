@@ -20,6 +20,30 @@
 #include <QPushButton>
 #include <QScreen>
 
+// Selects the ZOOM_TO_MOUSE / ROTATE_AROUND_MOUSE entry that keeperfx.cfg's value means to the
+// engine, which reads one word in any case and takes ON, TRUE, YES and ENABLED as on. Earlier
+// launchers wrote "ON MOVEMENT_KEYS" / "ON ROTATION_KEYS"; those keep the choice they were made
+// as. Anything else, or no line at all, is what the engine does with it: off.
+static void selectCursorOption(QComboBox *box, const QString &value)
+{
+    const QStringList words = value.simplified().toUpper().split(' ', Qt::SkipEmptyParts);
+    QString option = "OFF";
+    if (!words.isEmpty()) {
+        const QString &first = words.first();
+        const QString &last = words.last();
+        if (last == "MOVEMENT_KEYS" || last == "ROTATION_KEYS" || last == "WHEEL") {
+            option = last;
+        } else if (first == "ON" || first == "TRUE" || first == "YES" || first == "ENABLED") {
+            option = "ON";
+        }
+    }
+    int index = box->findData(option);
+    if (index < 0) {
+        index = box->findData("OFF");
+    }
+    box->setCurrentIndex(index);
+}
+
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::SettingsDialog)
@@ -230,8 +254,9 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         // Add cursor rotate dropdown options
         ui->comboBoxRotateAroundMouse->addItem(tr("Never", "Rotate Around Cursor Dropdown"), "OFF");
         ui->comboBoxRotateAroundMouse->addItem(tr("Always", "Rotate Around Cursor Dropdown"), "ON");
-        ui->comboBoxRotateAroundMouse->addItem(tr("Movement Keys Only (While holding Ctrl)", "Rotate Around Cursor Dropdown"), "ON MOVEMENT_KEYS");
-        ui->comboBoxRotateAroundMouse->addItem(tr("Rotation Keys Only", "Rotate Around Cursor Dropdown"), "ON ROTATION_KEYS");
+        // The engine reads one word: "ON MOVEMENT_KEYS" was read as ON, i.e. Always.
+        ui->comboBoxRotateAroundMouse->addItem(tr("Movement Keys Only (While holding Ctrl)", "Rotate Around Cursor Dropdown"), "MOVEMENT_KEYS");
+        ui->comboBoxRotateAroundMouse->addItem(tr("Rotation Keys Only", "Rotate Around Cursor Dropdown"), "ROTATION_KEYS");
     } else {
         // Disable
         ui->comboBoxRotateAroundMouse->setDisabled(true);
@@ -889,8 +914,15 @@ void SettingsDialog::loadSettings()
     ui->checkBoxUnlockCursorWhenPaused->setEnabled(ui->checkBoxAltInput->isChecked() == false); // cursor captured
     ui->checkBoxLockCursorPossession->setEnabled(ui->checkBoxAltInput->isChecked() == true); // cursor unlocked
 
-    ui->comboBoxZoomToMouse->setCurrentIndex(ui->comboBoxZoomToMouse->findData(Settings::getKfxSetting("ZOOM_TO_MOUSE").toString()));
-    ui->comboBoxRotateAroundMouse->setCurrentIndex(ui->comboBoxRotateAroundMouse->findData(Settings::getKfxSetting("ROTATE_AROUND_MOUSE").toString()));
+    // keeperfx.cfg may spell these any way the engine accepts (ON, TRUE, YES or ENABLED, in any
+    // case), or not have them at all. An exact match left the box empty for anything else, and
+    // Save then wrote an empty value, which the engine reads as Never.
+    if (KfxVersion::hasFunctionality("zoom_towards_mouse") == true) {
+        selectCursorOption(ui->comboBoxZoomToMouse, Settings::getKfxSetting("ZOOM_TO_MOUSE").toString());
+    }
+    if (KfxVersion::hasFunctionality("rotate_around_mouse") == true) {
+        selectCursorOption(ui->comboBoxRotateAroundMouse, Settings::getKfxSetting("ROTATE_AROUND_MOUSE").toString());
+    }
 
     // Graphics: renderer backend and the parchment map fade (both live in keeperfx.cfg)
     if (KfxVersion::hasFunctionality("opengl_renderer") == true) {
@@ -1219,8 +1251,13 @@ void SettingsDialog::saveSettings()
     Settings::setKfxSetting("UNLOCK_CURSOR_WHEN_GAME_PAUSED", ui->checkBoxUnlockCursorWhenPaused->isChecked() == true);
     Settings::setKfxSetting("LOCK_CURSOR_IN_POSSESSION", ui->checkBoxLockCursorPossession->isChecked() == true);
     Settings::setKfxSetting("CURSOR_EDGE_CAMERA_PANNING", ui->checkBoxScreenEdgePanning->isChecked() == true);
-    Settings::setKfxSetting("ZOOM_TO_MOUSE", ui->comboBoxZoomToMouse->currentData().toString());
-    Settings::setKfxSetting("ROTATE_AROUND_MOUSE", ui->comboBoxRotateAroundMouse->currentData().toString());
+    // An engine without these options has no entries to save: write nothing rather than an empty value
+    if (KfxVersion::hasFunctionality("zoom_towards_mouse") == true) {
+        Settings::setKfxSetting("ZOOM_TO_MOUSE", ui->comboBoxZoomToMouse->currentData().toString());
+    }
+    if (KfxVersion::hasFunctionality("rotate_around_mouse") == true) {
+        Settings::setKfxSetting("ROTATE_AROUND_MOUSE", ui->comboBoxRotateAroundMouse->currentData().toString());
+    }
 
     // Graphics: renderer backend and the parchment map fade
     if (KfxVersion::hasFunctionality("opengl_renderer") == true) {
