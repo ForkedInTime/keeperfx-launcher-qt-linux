@@ -100,12 +100,16 @@ The fork has grown well past the porting patches. Everything below is ours, not 
   run actually wrote, never a stale one from an earlier session.
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
 - **UI scale** — scale the whole launcher from 100% up to 200% (110 / 125 / 150 / 200) for readability.
+- **Camera settings that survive Save** (`settingsdialog.cpp`) — *Zoom to cursor* and *Rotate around cursor*
+  read the config the way the engine does (one word, any case; `ON`, `TRUE`, `YES`, `ENABLED` are on), so an
+  unlisted spelling no longer shows empty and is saved as *Never*; the two *keys only* rotate choices write
+  `MOVEMENT_KEYS` / `ROTATION_KEYS`, where upstream writes `ON MOVEMENT_KEYS` / `ON ROTATION_KEYS`, which the
+  engine reads as *Always*.
 
 ### Kept in step with upstream
 
-The team's own launcher work is taken as it lands, so the fork never lags the stock launcher on the
-settings dialog: most recently **VSync**, **Relative mouse mode**, the **Multiplayer** tab with the
-matchmaking server and the multiplayer port (refused when it clashes with the API port), the
+The team's own launcher work is taken in batches. On the settings dialog that has brought, most
+recently, **VSync**, **Relative mouse mode**, the **Multiplayer** tab with the matchmaking server and the multiplayer port (refused when it clashes with the API port), the
 cursor-capture switch written to the game config instead of a command-line flag on engines that
 understand it, the **Renderer** dropdown (software or OpenGL) and the **Fade when opening the map**
 checkbox on the Graphics tab, the **Viewport mode** dropdown, the **Max. zoom distance** slider, the
@@ -117,6 +121,9 @@ setting, and sliders that enable Save when moved. Every control is greyed out on
 predates its setting, and only settings the running engine understands are written back. The launcher binary
 also carries its version in an ELF section, so a crash report or a package script can read it
 without running it.
+Their October work is not in yet: the replay browser that replaces *Run packetfile* (the engine still
+accepts the `-packetload` that *Run packetfile* passes), the launcher/game version-mismatch notice, and a settings-dialog
+layout fix.
 
 ### Tests
 
