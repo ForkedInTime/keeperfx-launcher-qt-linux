@@ -622,10 +622,13 @@ QJsonArray ApiClient::getTuxEditionNews(int maxItems)
         return QJsonArray();
     }
 
-    // The repo's own icon, served raw from GitHub. Using something already in the
-    // repository avoids standing up hosting just to have a thumbnail.
+    // The repo's own icons, served raw from GitHub. Using something already in the
+    // repository avoids standing up hosting just to have a thumbnail. Alphas get the
+    // red keeper and stable releases the golden one, so the channels read apart.
     const QString thumbnail = "https://raw.githubusercontent.com/ForkedInTime/"
                               "keeperfx-tux-edition/alpha/res/keeperfx_icon256-24bpp.png";
+    const QString stableThumbnail = "https://raw.githubusercontent.com/ForkedInTime/"
+                                    "keeperfx-tux-edition/alpha/res/keeperfx_icon256-stable.png";
 
     QJsonArray articles;
     const QJsonArray releases = doc.array();
@@ -651,7 +654,8 @@ QJsonArray ApiClient::getTuxEditionNews(int maxItems)
         article["created_timestamp"] = release["published_at"].toString().left(10);
         article["url"] = release["html_url"].toString();
         article["excerpt"] = QString();
-        article["image"] = thumbnail;
+        // Alphas are GitHub prereleases; everything else this repo publishes is a stable.
+        article["image"] = release["prerelease"].toBool() ? thumbnail : stableThumbnail;
         articles.append(article);
     }
 
