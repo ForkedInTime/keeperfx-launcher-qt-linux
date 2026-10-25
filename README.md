@@ -1,11 +1,11 @@
 # KeeperFX Launcher — Tux Edition
 
-![KeeperFX Linux Alpha](docs/img/linux-alpha-banner.png)
+![KeeperFX Tux Edition](docs/img/tux-edition-banner.png)
 
 This is a **Linux-native fork** of the KeeperFX team's settings launcher
 ([dkfans/keeperfx-launcher-qt](https://github.com/dkfans/keeperfx-launcher-qt)), patched to drive the
 **native Linux engine** (no Wine) and to install and update
-[KeeperFX Tux Edition](https://github.com/ForkedInTime/keeperfx-linux-alpha).
+[KeeperFX Tux Edition](https://github.com/ForkedInTime/keeperfx-tux-edition).
 
 ![The KeeperFX Tux Edition launcher — workshop items, Tux Edition release news, and buttons for Mods, Browse
 Workshop and Map Editor](./docs/img/launcher-tux-edition.png)
@@ -24,13 +24,14 @@ your mods, install the Unearth map editor, and update the game in place — all 
 
 **Just want to play?** Don't build anything here. Grab the single self-contained **AppImage** from the game repo:
 
-→ **[github.com/ForkedInTime/keeperfx-linux-alpha → Releases](https://github.com/ForkedInTime/keeperfx-linux-alpha/releases)**
+→ **[github.com/ForkedInTime/keeperfx-tux-edition → Releases](https://github.com/ForkedInTime/keeperfx-tux-edition/releases)**
 
 Download one file, run it, and the only thing it ever asks for is your own *Dungeon Keeper* files. The
 launcher (this project) is bundled inside it — engine, libraries, game data and all. No `apt install`, nothing
 to set up. It works on any current 64-bit Linux distro (Ubuntu 24.04+/26.x, Fedora, Arch, Steam Deck).
 
-A **Flatpak** and an Arch **AUR** package are also published from the game repo — see its README for those.
+A **Flatpak** and an Arch **AUR** package are also published from the game repo — see its
+[install guide](https://github.com/ForkedInTime/keeperfx-tux-edition/blob/alpha/docs/install.md) for those.
 The AUR package builds this launcher from source, pinned to the same commit the release's AppImage was built from.
 
 ---
@@ -65,7 +66,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ### Features added on top
 
-The fork has grown well past the porting patches: 107 commits on top of the team's `master`, 88 of them this
+The fork has grown well past the porting patches: 109 commits on top of the team's `master`, 90 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -137,7 +138,7 @@ launcher build required. It exits non-zero on failure.
 ### CI
 
 The release AppImage and Flatpak are built by **`build-appimage.yml` and `build-flatpak.yml` in the
-[game repo](https://github.com/ForkedInTime/keeperfx-linux-alpha)**, which clone this repo's **`alpha`**
+[game repo](https://github.com/ForkedInTime/keeperfx-tux-edition)**, which clone this repo's **`alpha`**
 branch. They live there because a workflow can only be triggered by, and attach assets to, a release in its
 own repository. This repo keeps a manual-dispatch copy of
 [`build-appimage.yml`](.github/workflows/build-appimage.yml) for launcher-side debugging: it builds a working
