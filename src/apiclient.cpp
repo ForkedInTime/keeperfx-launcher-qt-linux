@@ -23,7 +23,7 @@
 #define API_ENDPOINT "https://keeperfx.net/api"
 
 #ifndef Q_OS_WINDOWS
-// keeperfx-linux-alpha: the launcher's "is there a newer version?" check should look at
+// Tux Edition: the launcher's "is there a newer version?" check should look at
 // OUR GitHub releases, not keeperfx.net. This returns the newest release OF THE REQUESTED
 // CHANNEL, shaped like the keeperfx.net response the updater expects:
 // { "version": "1.3.2.5200", "download_url": ... }.
@@ -41,7 +41,7 @@ static QJsonObject getLatestLinuxAlphaRelease(KfxVersion::ReleaseType wantedType
     QNetworkAccessManager manager;
     // The list endpoint, newest first. per_page is small because only the first
     // match of each channel is ever needed.
-    QNetworkRequest req(QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-linux-alpha/releases?per_page=30"));
+    QNetworkRequest req(QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-tux-edition/releases?per_page=30"));
     req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
     req.setRawHeader("Accept", "application/vnd.github+json");
 
@@ -332,20 +332,20 @@ QJsonObject ApiClient::getLatestAlpha(){
 #endif
 }
 
-// keeperfx-linux-alpha: the complete native-Linux package lives on our GitHub
+// Tux Edition: the complete native-Linux package lives on our GitHub
 // releases, not keeperfx.net. GitHub's "latest release" download URL always
 // resolves to the newest release's asset, so no API call/parsing is needed.
 #ifndef Q_OS_WINDOWS
 static const char *KFX_LINUX_ALPHA_PACKAGE_URL =
-    "https://github.com/ForkedInTime/keeperfx-linux-alpha/releases/latest/download/"
-    "keeperfx-linux-alpha-x86_64-full.7z";
+    "https://github.com/ForkedInTime/keeperfx-tux-edition/releases/latest/download/"
+    "keeperfx-linux-alpha-x86_64-full.7z";   // keeps its first name: launchers already installed ask for it
 #endif
 
 QUrl ApiClient::getDownloadUrlStable()
 {
 #ifndef Q_OS_WINDOWS
     // Native Linux build always installs our complete alpha package.
-    qDebug() << "Linux alpha package URL:" << KFX_LINUX_ALPHA_PACKAGE_URL;
+    qDebug() << "Tux Edition package URL:" << KFX_LINUX_ALPHA_PACKAGE_URL;
     return QUrl(KFX_LINUX_ALPHA_PACKAGE_URL);
 #else
     // Get JSON object from API
@@ -367,7 +367,7 @@ QUrl ApiClient::getDownloadUrlAlpha()
 {
 #ifndef Q_OS_WINDOWS
     // Native Linux build: one package for both channels.
-    qDebug() << "Linux alpha package URL:" << KFX_LINUX_ALPHA_PACKAGE_URL;
+    qDebug() << "Tux Edition package URL:" << KFX_LINUX_ALPHA_PACKAGE_URL;
     return QUrl(KFX_LINUX_ALPHA_PACKAGE_URL);
 #else
     // Get JSON object from API
@@ -601,7 +601,7 @@ QJsonArray ApiClient::getTuxEditionNews(int maxItems)
 {
     QNetworkAccessManager manager;
     QNetworkRequest req(
-        QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-linux-alpha/releases?per_page=10"));
+        QUrl("https://api.github.com/repos/ForkedInTime/keeperfx-tux-edition/releases?per_page=10"));
     req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
     req.setRawHeader("Accept", "application/vnd.github+json");
 
@@ -625,7 +625,7 @@ QJsonArray ApiClient::getTuxEditionNews(int maxItems)
     // The repo's own icon, served raw from GitHub. Using something already in the
     // repository avoids standing up hosting just to have a thumbnail.
     const QString thumbnail = "https://raw.githubusercontent.com/ForkedInTime/"
-                              "keeperfx-linux-alpha/alpha/res/keeperfx_icon256-24bpp.png";
+                              "keeperfx-tux-edition/alpha/res/keeperfx_icon256-24bpp.png";
 
     QJsonArray articles;
     const QJsonArray releases = doc.array();

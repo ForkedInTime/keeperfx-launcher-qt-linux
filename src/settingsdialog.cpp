@@ -320,7 +320,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->comboBoxCDN->addItem(info.name, key);
     }
 #ifndef Q_OS_WINDOWS
-    // The Linux alpha downloads from our GitHub releases (served by GitHub's own
+    // The Tux Edition downloads from our GitHub releases (served by GitHub's own
     // worldwide CDN), so the keeperfx.net/Cloudflare picker does nothing here — hide it.
     ui->comboBoxCDN->setVisible(false);
     ui->labelCDN->setVisible(false);
