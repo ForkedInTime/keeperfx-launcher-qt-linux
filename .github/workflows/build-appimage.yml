@@ -1,4 +1,4 @@
-# Builds the COMPLETE, self-contained KeeperFX Linux Alpha AppImage on Ubuntu 24.04:
+# Builds the COMPLETE, self-contained KeeperFX Tux Edition AppImage on Ubuntu 24.04:
 # launcher + engine + every library + the free game data, all in one file. The user
 # downloads it, runs it, and the only thing it ever needs is their own Dungeon Keeper
 # files. Runs on GitHub's servers.
@@ -88,7 +88,7 @@ jobs:
 
       - name: Build the engine on 24.04 (the released Arch engine won't run on Ubuntu)
         run: |
-          git clone https://github.com/ForkedInTime/keeperfx-linux-alpha.git engine
+          git clone https://github.com/ForkedInTime/keeperfx-tux-edition.git engine
           cd engine
           make -f linux.mk deps/centijson/include/json.h deps/astronomy/include/astronomy.h \
                            deps/enet6/include/enet6/enet.h deps/libcurl/lib/libcurl.a
@@ -130,7 +130,7 @@ jobs:
           # movies are the original 320x200 Smacker files where ours are the H.264
           # 1280x800 re-encodes the truecolor playback path exists for. So ours is the
           # base and upstream is layered over it, with our movies restored afterwards.
-          wget -q https://github.com/ForkedInTime/keeperfx-linux-alpha/releases/latest/download/keeperfx-linux-alpha-x86_64-full.7z
+          wget -q https://github.com/ForkedInTime/keeperfx-tux-edition/releases/latest/download/keeperfx-linux-alpha-x86_64-full.7z
           7z x -bso0 keeperfx-linux-alpha-x86_64-full.7z -opkg
 
           UP_URL=$(curl -fsSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -288,14 +288,14 @@ jobs:
           APPIMAGE_EXTRACT_AND_RUN: 1
           ARCH: x86_64
         run: |
-          ./appimagetool-x86_64.AppImage AppDir KeeperFX-Linux-Alpha-x86_64.AppImage
-          ls -la KeeperFX-Linux-Alpha-x86_64.AppImage
+          ./appimagetool-x86_64.AppImage AppDir KeeperFX-Tux-Edition-x86_64.AppImage
+          ls -la KeeperFX-Tux-Edition-x86_64.AppImage
 
       - name: Upload the AppImage (downloadable from this CI run)
         uses: actions/upload-artifact@v4
         with:
-          name: KeeperFX-Linux-Alpha-AppImage
-          path: KeeperFX-Linux-Alpha-x86_64.AppImage
+          name: KeeperFX-Tux-Edition-AppImage
+          path: KeeperFX-Tux-Edition-x86_64.AppImage
 
       - name: Upload the full.7z update package (downloadable from this CI run)
         uses: actions/upload-artifact@v4
@@ -308,5 +308,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            KeeperFX-Linux-Alpha-x86_64.AppImage
+            KeeperFX-Tux-Edition-x86_64.AppImage
             keeperfx-linux-alpha-x86_64-full.7z
