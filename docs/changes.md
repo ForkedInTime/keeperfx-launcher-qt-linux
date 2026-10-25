@@ -13,7 +13,8 @@ The team's launcher compiles cross-platform, but it was written Windows-first �
   in a way that survives the AppImage's sandboxed environment
 - **`kfxversion.cpp`** — read the engine version from `version.txt` (a native ELF has no PE resources)
 - **`apiclient.cpp`** — install and self-update from this fork's GitHub releases, and show this fork's release
-  notes in the news panel (the stock panel only knows about the Windows project)
+  notes in the news panel (the stock panel only knows about the Windows project): stable releases with a
+  golden keeper, alphas with the red one
 - **`CMakeLists.txt`** — Linux only: Qt linked dynamically, no Windows or macOS build branches
 
 ## Linux only — what was removed, and what was left on purpose
@@ -30,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 112 commits on top of the team's `master`, 93 of them this
+The fork has grown well past the porting patches: 113 commits on top of the team's `master`, 94 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
