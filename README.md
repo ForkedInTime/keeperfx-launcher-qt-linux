@@ -7,8 +7,10 @@ This is a **Linux-native fork** of the KeeperFX team's settings launcher
 **native Linux engine** (no Wine) and to install and update
 [KeeperFX Tux Edition](https://github.com/ForkedInTime/keeperfx-tux-edition).
 
-![The KeeperFX Tux Edition launcher — workshop items, Tux Edition release news, and buttons for Mods, Browse
-Workshop and Map Editor](./docs/img/launcher-tux-edition.png)
+![The KeeperFX Tux Edition launcher — the latest workshop items, Tux Edition release news, and buttons for
+Settings, Mods, Workshop, Browse Workshop and Map Editor](./docs/img/launcher-1.4.0.6021.png)
+
+<sub>The launcher as of 1.4.0.6021 (October 2026). This picture is replaced whenever the launcher changes.</sub>
 
 > ⚠️ **Unofficial — not affiliated with the KeeperFX team.** The launcher is *their* work; this fork only adds
 > the Linux-native changes below. The official launcher (and the official game) live at
@@ -34,7 +36,7 @@ everything in it, or the Arch package or Flatpak
 - 🧰 **And** a log viewer, the Unearth map editor, music recovery, crash reports with the right log,
   a single-instance lock and UI scaling.
 
-110 commits on top of the team's `master`, 91 of them this fork's.
+111 commits on top of the team's `master`, 92 of them this fork's.
 **[Everything this fork changes »](docs/changes.md)**
 
 ## 🛠️ Build from source
