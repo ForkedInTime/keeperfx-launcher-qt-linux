@@ -65,7 +65,10 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ### Features added on top
 
-The fork has grown well past the porting patches. Everything below is ours, not upstream's:
+The fork has grown well past the porting patches: 107 commits on top of the team's `master`, 88 of them this
+fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
+`git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
+Everything below is ours, not upstream's:
 
 - **Workshop browser** (`workshopbrowserdialog.cpp`) — browse the full [keeperfx.net](https://keeperfx.net)
   catalogue in-launcher with thumbnails, categories, search and ratings; install with one click. Thumbnails
@@ -122,8 +125,8 @@ predates its setting, and only settings the running engine understands are writt
 also carries its version in an ELF section, so a crash report or a package script can read it
 without running it.
 Their October work is not in yet: the replay browser that replaces *Run packetfile* (the engine still
-accepts the `-packetload` that *Run packetfile* passes), the launcher/game version-mismatch notice, and a settings-dialog
-layout fix.
+accepts the `-packetload` that *Run packetfile* passes), the launcher/game version-mismatch notice, a settings-dialog
+layout fix, the restyled main-window scroll area, and most of their translation updates since September.
 
 ### Tests
 
