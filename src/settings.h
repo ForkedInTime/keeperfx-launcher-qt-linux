@@ -31,6 +31,7 @@ private:
     static QMap<QString, QString> gameSettingsParameterMap;
     static QMap<QString, QString> localeToGameLanguageMap;
 
+    static QMap<QString, QString> engineDefaultKfxSettingsMap;
     static QStringList forceStringKfxSettings;
     static QStringList trueStrings;
     static QStringList falseStrings;

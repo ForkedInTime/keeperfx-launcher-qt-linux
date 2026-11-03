@@ -104,11 +104,42 @@ QStringList Settings::forceStringKfxSettings =
     "ROTATE_AROUND_MOUSE",
 };
 
+// The engine's built-in default for a key that keeperfx.cfg has no line for (a cfg older than the
+// key). Read as "off" or empty, Save wrote that back and changed the game: VSync and relative mouse
+// mode off, sizes and ports written empty (which the engine reads as 0). An empty value counts as
+// missing, so a "KEY=" left by an earlier Save reads the same way.
+QMap<QString, QString> Settings::engineDefaultKfxSettingsMap = {
+    {"VSYNC", "ON"},                         // bflib_video.c: vsync_enabled = 1
+    {"RELATIVE_MOUSE_MODE", "ON"},           // main.cpp sets Ft_RelativeMouseMode before reading the cfg
+    {"CAPTURE_CURSOR", "ON"},                // bflib_mouse.cpp: lbMouseGrab = true
+    {"DELTA_TIME", "ON"},
+    {"LOCK_CURSOR_IN_POSSESSION", "ON"},
+    {"CURSOR_EDGE_CAMERA_PANNING", "ON"},
+    {"STARTUP", "LEGAL FX INTRO"},
+    {"MAX_ZOOM_DISTANCE", "100"},            // no line: the isometric view zooms out as far as 100 allows
+    {"CREATURE_STATUS_SIZE", "16"},
+    {"LINE_BOX_SIZE", "150"},
+    {"HAND_SIZE", "100"},
+    {"GUI_BLINK_RATE", "1"},
+    {"NEUTRAL_FLASH_RATE", "1"},
+    {"MULTIPLAYER_PORT", "5556"},
+    {"API_PORT", "5599"},
+};
+
 QVariant Settings::getKfxSetting(QAnyStringView key)
 {
     // Get value as a string
     QVariant value = kfxSettings->value(key);
     QString valueString = value.toString();
+
+    // No line (or an empty one): read what the engine falls back to
+    if (valueString.trimmed().isEmpty()) {
+        auto engineDefault = Settings::engineDefaultKfxSettingsMap.constFind(key.toString());
+        if (engineDefault != Settings::engineDefaultKfxSettingsMap.constEnd()) {
+            valueString = engineDefault.value();
+            value = valueString;
+        }
+    }
 
     // Fix for specific KeeperFX settings that use "ON"/"OFF" but should remain strings
     if (Settings::forceStringKfxSettings.contains(key)) {
