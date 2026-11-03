@@ -74,6 +74,12 @@ Everything below is ours, not upstream's:
   unlisted spelling no longer shows empty and is saved as *Never*; the two *keys only* rotate choices write
   `MOVEMENT_KEYS` / `ROTATION_KEYS`, where upstream writes `ON MOVEMENT_KEYS` / `ON ROTATION_KEYS`, which the
   engine reads as *Always*.
+- **Save keeps the game's defaults** (`settings.cpp`) — a setting the config file has no line for (a config
+  older than the setting) shows what the engine does without one, and Save writes that. It used to show off or
+  empty and write it back: *VSync* and *Relative mouse mode* switched off (on Wayland the cursor jumped), edge
+  panning, delta time and the possession cursor lock off, the startup screens and the zoom-out limit gone, and
+  the creature flower, select box and hand sizes and the API port saved empty, which the engine reads as 0. An
+  empty value left by such a Save reads the same way.
 
 ## Kept in step with upstream
 
