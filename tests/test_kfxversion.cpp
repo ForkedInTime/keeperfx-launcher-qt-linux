@@ -110,6 +110,34 @@ int main(int argc, char **argv)
 			"an alpha install IS offered a newer build");
 	}
 
+	// --- Which channel's release is offered -------------------------------------
+	// Right after a promotion the stable (6062) is newer than the latest alpha
+	// (6013). A launcher on the alpha channel running that stable was offered the
+	// alpha anyway, because the channel differed from the installed build: a
+	// downgrade. Switching back to stable stays an explicit choice and is offered.
+	{
+		using RT = KfxVersion::ReleaseType;
+		auto v = [](const char *s) { return KfxVersion::getVersionFromString(QString(s)); };
+		expect(!KfxVersion::isUpdateOffered(RT::ALPHA, v("1.4.0.6013 alpha"), v("1.4.0.6062")),
+			"alpha channel on a newer stable is NOT offered an older alpha");
+		expect(KfxVersion::isUpdateOffered(RT::ALPHA, v("1.4.0.6070 alpha"), v("1.4.0.6062")),
+			"alpha channel on a stable IS offered a newer alpha");
+		expect(!KfxVersion::isUpdateOffered(RT::ALPHA, v("1.4.0.6062 alpha"), v("1.4.0.6062")),
+			"alpha channel on a stable is NOT offered an alpha of the same build");
+		expect(KfxVersion::isUpdateOffered(RT::ALPHA, v("1.4.0.6013 alpha"), v("1.4.0.5488 alpha")),
+			"alpha channel on an older alpha IS offered the newer alpha");
+		expect(!KfxVersion::isUpdateOffered(RT::ALPHA, v("1.4.0.6013 alpha"), v("1.4.0.6013 alpha")),
+			"alpha channel on the latest alpha is NOT offered it again");
+		expect(KfxVersion::isUpdateOffered(RT::STABLE, v("1.4.0.6062"), v("1.4.0.6070 alpha")),
+			"stable channel on a newer alpha IS offered the stable (switching back)");
+		expect(KfxVersion::isUpdateOffered(RT::STABLE, v("1.4.0.6062"), v("1.4.0.6013 alpha")),
+			"stable channel on an older alpha IS offered the stable");
+		expect(KfxVersion::isUpdateOffered(RT::STABLE, v("1.4.0.6062"), v("1.4.0.5660")),
+			"stable channel on an older stable IS offered the stable");
+		expect(!KfxVersion::isUpdateOffered(RT::STABLE, v("1.4.0.6062"), v("1.4.0.6062")),
+			"stable channel on the latest stable is NOT offered it again");
+	}
+
 	if (g_failures > 0) {
 		std::printf("\n%d version test(s) FAILED.\n", g_failures);
 		return 1;

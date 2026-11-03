@@ -1437,10 +1437,8 @@ void LauncherMainWindow::checkForKfxUpdate(bool ignoreInterval, bool showMessage
         // Check if the latest version was found
         if (latestVersionInfo) {
 
-            // Check if type of release is different or version is newer
-            if (type != KfxVersion::currentVersion.type
-                || KfxVersion::isNewerVersion(latestVersionInfo->version,
-                                              KfxVersion::currentVersion.version)) {
+            // Check if the version is newer, or the channel switches back to stable
+            if (KfxVersion::isUpdateOffered(type, latestVersionInfo.value(), KfxVersion::currentVersion)) {
                 qDebug() << "Update found:" << latestVersionInfo->version;
 
                 // Emit signal for update

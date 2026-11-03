@@ -314,6 +314,21 @@ bool KfxVersion::isNewerVersion(const QString &version1, const QString &version2
     return false;
 }
 
+bool KfxVersion::isUpdateOffered(ReleaseType channel, const VersionInfo &latest, const VersionInfo &installed)
+{
+    // A newer release on the chosen channel is always offered
+    if (isNewerVersion(latest.version, installed.version)) {
+        return true;
+    }
+
+    // Switching back to stable is an explicit choice, so the stable is offered even when the
+    // installed alpha is newer. Switching to alpha is not: here every stable is promoted from the
+    // alpha line, so an alpha no newer than the installed stable holds nothing it lacks, and right
+    // after a promotion the latest alpha (6013) is older than the stable (6062). Offering it then
+    // was a downgrade.
+    return channel == ReleaseType::STABLE && installed.type != ReleaseType::STABLE;
+}
+
 bool KfxVersion::checkIfAlphaUpdateNeedsNewStable(const QString &version1, const QString &version2)
 {
     // Split versions

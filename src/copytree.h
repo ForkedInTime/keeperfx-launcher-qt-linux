@@ -30,10 +30,34 @@ inline bool copytree_is_junk_entry(const QString & name)
 // skipped, and the caller announced a successful install. On a packaged install
 // campgns/ and levels/ resolved into root-owned /usr trees, so every add-on
 // install "succeeded" while writing nothing at all.
+//
+// `created` lists the destination files this merge wrote. `keptSame` lists the files
+// it kept that are byte-identical to the archive's copy and are not links: what an
+// earlier install of the same add-on left, before the launcher kept an install record
+// (installrecord.h), so a Reinstall can register it. Any other kept file belongs to
+// whatever put it there (a stock map, another add-on) and is in neither list, or
+// uninstalling the add-on would take it away; a package install's stock files are
+// links, so they never count.
 struct CopyTreeOutcome {
-	int  skipped = 0;
-	bool ok      = true;
+	int         skipped = 0;
+	bool        ok      = true;
+	QStringList created;
+	QStringList keptSame;
 };
+
+inline bool copytree_same_content(const QString & a, const QString & b)
+{
+	QFile fa(a), fb(b);
+	if (fa.size() != fb.size() || !fa.open(QIODevice::ReadOnly) || !fb.open(QIODevice::ReadOnly)) {
+		return false;
+	}
+	while (!fa.atEnd()) {
+		if (fa.read(1 << 16) != fb.read(1 << 16)) {
+			return false;
+		}
+	}
+	return true;
+}
 
 // Merge src into dst without ever overwriting an existing destination file, so a
 // careless or crafted archive cannot clobber stock campaigns, maps, or another
@@ -56,6 +80,8 @@ inline CopyTreeOutcome copy_tree_no_clobber(const QString & src, const QString &
 			}
 			const CopyTreeOutcome child = copy_tree_no_clobber(src + "/" + entry, dst + "/" + entry);
 			out.skipped += child.skipped;
+			out.created += child.created;
+			out.keptSame += child.keptSame;
 			// Keep going so the caller learns the full picture, but remember the failure.
 			out.ok = out.ok && child.ok;
 		}
@@ -64,9 +90,15 @@ inline CopyTreeOutcome copy_tree_no_clobber(const QString & src, const QString &
 
 	if (QFileInfo::exists(dst)) {
 		out.skipped = 1; // already present -- keep it, don't overwrite
+		if (!QFileInfo(dst).isSymLink() && copytree_same_content(src, dst)) {
+			out.keptSame << dst;
+		}
 		return out;
 	}
 	out.ok = QFile::copy(src, dst);
+	if (out.ok) {
+		out.created << dst;
+	}
 	return out;
 }
 

@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include <QJsonObject>
+#include <QSet>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -70,6 +71,9 @@ private:
     QVBoxLayout *installedListLayout = nullptr;
     QVector<InstalledEntry> installedCache;
     QVector<BackupEntry> backupCache;
+    QSet<QString> installedIds; // Workshop ids the install record shows as installed
+    QStringList browseInstalledKey; // installedStateKey() when Browse was last built
+    QStringList installedStateKey() const;
 
     QVector<QJsonObject> catalog;
     bool loaded = false;

@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 115 commits on top of the team's `master`, 96 of them this
+The fork has grown well past the porting patches: 119 commits on top of the team's `master`, 100 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -42,7 +42,12 @@ Everything below is ours, not upstream's:
   the API publishes no file.
 - **Installed manager** — a second tab listing what you actually have across `campgns/`, `levels/`,
   `personal/` and `mods/`, distinguishing stock content from your own, with a reversible **Uninstall →
-  Restore** backed by a recycle bin.
+  Restore** backed by a recycle bin. The launcher records what each install created (`installrecord.h`), so
+  a Workshop map that adds itself to a stock pack (`levels/standard/mapNNNNN.*`, the usual way single maps
+  ship) is listed and uninstalled on its own, and Browse marks an item installed by its id, not by guessing
+  from its name; before, such a map never appeared here and Browse kept offering *Install*. One installed by an
+  earlier launcher is registered by a *Reinstall*: files already there that are identical to the archive's
+  count as the item's, and a package install's stock files, which are links, never do.
 - **Mod Manager** (`modmanager*.cpp`) — list mods, enable/disable them, persist `mods/load_order.cfg`.
 - **Universal installer** (`addoninstaller.cpp`) — one code path that installs mods, campaigns, map packs and
   loose maps from a `.7z`/`.zip`/`.rar`, detecting the format from the file rather than its name and
@@ -64,7 +69,10 @@ Everything below is ours, not upstream's:
   when one starts from the version you have and the full game package otherwise, and it **keeps the engine
   it is about to replace** under `previous/` (three deep) so saved games written by it stay playable — the
   Flatpak does the same when a bundle update overwrites the engine. A momentary network failure is retried
-  rather than read as "up to date".
+  rather than read as "up to date". Switching to the alpha channel never offers an alpha older than the
+  stable you have (`kfxversion.cpp`): every stable is promoted from the alpha line, so right after a promotion
+  the newest alpha is behind it, and the team's rule (offer the other channel's release whenever the channel
+  differs) offered 1.4.0.6013-alpha to 1.4.0.6062. Switching back to stable is still offered either way.
 - **Crash reports carry the right log** (`crashcontext.cpp`) — a report is only sent with a log the failing
   run actually wrote, never a stale one from an earlier session.
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
