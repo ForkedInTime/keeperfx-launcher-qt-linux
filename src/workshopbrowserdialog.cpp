@@ -1,5 +1,6 @@
 #include "workshopbrowserdialog.h"
 #include "addoninstaller.h"
+#include "installrecord.h"
 #include "apiclient.h"
 #include "logviewerdialog.h"
 #include "downloader.h"
@@ -9,6 +10,7 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include "helper.h"
+#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QEventLoop>
@@ -205,6 +207,37 @@ QVector<InstalledEntry> scanInstalled(const QString &gameRoot)
         out << e;
     }
 
+    // What the scans above cannot see: an add-on that added files to something else,
+    // above all a Workshop map, which ships as levels/standard/mapNNNNN.* -- an
+    // addition to the stock Standard pack, not a pack, campaign, personal map or mod
+    // of its own. The install record names the files each install created; those no
+    // add-on entry above already covers are the item, listed under its Workshop name.
+    // Stock entries do not count: the Standard pack's entry names all of
+    // levels/standard, the very folder such a map was added to.
+    QStringList covered;
+    for (const InstalledEntry &e : std::as_const(out)) {
+        if (!e.stock) {
+            covered << e.relPaths;
+        }
+    }
+    for (const InstallRecord &rec : load_install_records(gameRoot)) {
+        QStringList own;
+        for (const QString &rel : install_record_present(gameRoot, rec)) {
+            if (!install_record_covered(rel, covered)) {
+                own << rel;
+            }
+        }
+        if (own.isEmpty()) {
+            continue;
+        }
+        InstalledEntry e;
+        e.kind = "Map";
+        e.stock = false;
+        e.name = rec.name;
+        e.relPaths = own;
+        out << e;
+    }
+
     return out;
 }
 
@@ -332,6 +365,11 @@ WorkshopBrowserDialog::WorkshopBrowserDialog(QWidget *parent)
     connect(tabs, &QTabWidget::currentChanged, this, [this](int index) {
         if (index == 1) {
             rescanInstalled();
+        } else if (index == 0 && loaded && installedStateKey() != browseInstalledKey) {
+            // An Uninstall or Restore on the Installed tab changed what is installed,
+            // and Browse still shows the old marks. Rebuilt only then, so switching
+            // tabs does not lose the scroll position for nothing.
+            applyFilter();
         }
     });
 
@@ -547,16 +585,20 @@ void WorkshopBrowserDialog::applyFilter()
     const int kMaxRows = 150;
     const int shown = qMin(filtered.size(), kMaxRows);
 
-    // Best-effort "already installed" detection by normalised name.
+    // An item the launcher installed is known by its id while any file it created is
+    // still there (installrecord.h). Anything else -- installed by hand, or by a
+    // launcher older than the record -- falls back to the best-effort match by
+    // normalised name.
     QStringList installedNorms;
     for (const InstalledEntry &e : std::as_const(installedCache)) {
         installedNorms << normName(e.name);
     }
+    browseInstalledKey = installedStateKey();
 
     for (int i = 0; i < shown; ++i) {
         const QJsonObject item = filtered.at(i);
         const QString itemNorm = normName(item["name"].toString());
-        bool isInstalled = false;
+        bool isInstalled = installedIds.contains(QString::number(item["id"].toInt()));
         for (const QString &n : std::as_const(installedNorms)) {
             if (!n.isEmpty() && !itemNorm.isEmpty()
                 && (n == itemNorm || (n.size() >= 4 && itemNorm.contains(n))
@@ -647,11 +689,28 @@ void WorkshopBrowserDialog::applyFilter()
     }
 }
 
+// What Browse's "Installed" marks are made from, to tell whether they are stale.
+QStringList WorkshopBrowserDialog::installedStateKey() const
+{
+    QStringList key(installedIds.begin(), installedIds.end());
+    for (const InstalledEntry &e : std::as_const(installedCache)) {
+        key << e.kind + ":" + e.name;
+    }
+    key.sort();
+    return key;
+}
+
 void WorkshopBrowserDialog::rescanInstalled()
 {
     const QString gameRoot = QCoreApplication::applicationDirPath();
     installedCache = scanInstalled(gameRoot);
     backupCache = scanBackups(gameRoot);
+    installedIds.clear();
+    for (const InstallRecord &rec : load_install_records(gameRoot)) {
+        if (!install_record_present(gameRoot, rec).isEmpty()) {
+            installedIds.insert(rec.id);
+        }
+    }
     renderInstalled();
 }
 
@@ -1029,6 +1088,16 @@ void WorkshopBrowserDialog::installItem(const QJsonObject &item)
         QMessageBox::warning(this, tr("Nothing to install"),
                              tr("No installable content was found inside “%1”.").arg(name));
         return;
+    }
+
+    // Before the rescan, which reads it: the Installed tab lists the item by what it
+    // created, and Browse marks it installed by its id.
+    InstallRecord record;
+    record.id = QString::number(id);
+    record.name = name;
+    record.files = result.createdFiles;
+    if (!save_install_record(gameRoot, record)) {
+        qWarning() << "Could not write the install record" << install_record_path(gameRoot);
     }
 
     rescanInstalled(); // the new item shows up in the Installed tab

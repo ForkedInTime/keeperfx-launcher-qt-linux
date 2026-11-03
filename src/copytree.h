@@ -30,9 +30,15 @@ inline bool copytree_is_junk_entry(const QString & name)
 // skipped, and the caller announced a successful install. On a packaged install
 // campgns/ and levels/ resolved into root-owned /usr trees, so every add-on
 // install "succeeded" while writing nothing at all.
+//
+// `created` lists the destination files this merge wrote, and only those: a file
+// it kept belongs to whatever put it there (a stock map, another add-on), so the
+// install record (installrecord.h) must never claim it, or uninstalling the add-on
+// would take it away.
 struct CopyTreeOutcome {
-	int  skipped = 0;
-	bool ok      = true;
+	int         skipped = 0;
+	bool        ok      = true;
+	QStringList created;
 };
 
 // Merge src into dst without ever overwriting an existing destination file, so a
@@ -56,6 +62,7 @@ inline CopyTreeOutcome copy_tree_no_clobber(const QString & src, const QString &
 			}
 			const CopyTreeOutcome child = copy_tree_no_clobber(src + "/" + entry, dst + "/" + entry);
 			out.skipped += child.skipped;
+			out.created += child.created;
 			// Keep going so the caller learns the full picture, but remember the failure.
 			out.ok = out.ok && child.ok;
 		}
@@ -67,6 +74,9 @@ inline CopyTreeOutcome copy_tree_no_clobber(const QString & src, const QString &
 		return out;
 	}
 	out.ok = QFile::copy(src, dst);
+	if (out.ok) {
+		out.created << dst;
+	}
 	return out;
 }
 

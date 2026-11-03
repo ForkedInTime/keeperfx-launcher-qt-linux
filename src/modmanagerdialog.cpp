@@ -3,6 +3,7 @@
 #include "modwidget.h"
 #include "mod.h"
 #include "addoninstaller.h"
+#include "installrecord.h"
 #include "ui_modmanagerdialog.h"
 
 #include <QCoreApplication>
@@ -98,6 +99,14 @@ void ModManagerDialog::on_installButton_clicked()
                              tr("No mod, campaign, map or map pack was found inside %1.").arg(archiveName));
         return;
     }
+
+    // So the Workshop browser's Installed tab lists it, a map added to a stock pack
+    // above all (installrecord.h).
+    InstallRecord record;
+    record.id = "file:" + archiveName;
+    record.name = QFileInfo(archivePath).completeBaseName();
+    record.files = result.createdFiles;
+    save_install_record(QCoreApplication::applicationDirPath(), record);
 
     QString body = tr("Installed from %1:").arg(archiveName) + "\n\n• " + result.lines.join("\n• ") + "\n\n";
     if (result.installedMod) {

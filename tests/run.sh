@@ -47,3 +47,10 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	"$ROOT_DIR/src/crashcontext.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_crashcontext"
+
+# The install record: what each add-on install created (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_installrecord" "$ROOT_DIR/tests/test_installrecord.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_installrecord"

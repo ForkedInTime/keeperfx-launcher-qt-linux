@@ -123,6 +123,15 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                                                            const QString &archiveName)
 {
     Result r;
+    // What the install record (installrecord.h) keeps: the files this install created,
+    // relative to the game directory.
+    const auto recordCreated = [&r, &gameRoot](const QStringList &paths) {
+        for (const QString &p : paths) {
+            if (p.startsWith(gameRoot + "/")) {
+                r.createdFiles << p.mid(gameRoot.size() + 1);
+            }
+        }
+    };
     // Optimistic because extraction has already succeeded by the time we get here --
     // but EVERY failure path below must clear it. They used to set r.error and return
     // with ok still true, so the caller's "if (!result.ok)" never fired, the reason was
@@ -170,6 +179,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
 
         // No-clobber merge: keep existing files (stock campaigns/maps, other add-ons)
         const CopyTreeOutcome merge = copy_tree_no_clobber(src, dst);
+        recordCreated(merge.created);
         if (!merge.ok) {
             // Nothing was written, or only part of it was. Saying so beats the old
             // behaviour, which counted skipped files, ignored failed ones, and
@@ -221,6 +231,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
             int kept = 0;
             for (const QString &rel : loose_campaign_entries(tmpPath, base)) {
                 const CopyTreeOutcome m = copy_tree_no_clobber(tmpPath + "/" + rel, dst + "/" + rel);
+                recordCreated(m.created);
                 if (!m.ok) {
                     r.error = QObject::tr("Could not write into “%1”.\n\n"
                                           "The folder may be read-only — on a package-managed "
@@ -265,6 +276,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                 }
                 if (QFile::copy(mapDir + "/" + f, d)) {
                     copied++;
+                    recordCreated({d});
                 } else {
                     failed++;
                 }
@@ -340,6 +352,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
             r.lines << QObject::tr("Mod: %1").arg(name);
             r.installedMod = true;
             r.foundContent = true;
+            recordCreated({dest});
         }
     }
 
