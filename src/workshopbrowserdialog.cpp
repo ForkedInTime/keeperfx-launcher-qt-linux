@@ -214,16 +214,18 @@ QVector<InstalledEntry> scanInstalled(const QString &gameRoot)
     // add-on entry above already covers are the item, listed under its Workshop name.
     // Stock entries do not count: the Standard pack's entry names all of
     // levels/standard, the very folder such a map was added to.
+    // A stock entry's own files are never the item's either: an archive that carries a
+    // byte-identical copy of, say, levels/standard.cfg has it recorded as kept
+    // (copytree.h), and Uninstall would take the Standard pack's cfg with the map.
     QStringList covered;
+    QStringList stockOwn;
     for (const InstalledEntry &e : std::as_const(out)) {
-        if (!e.stock) {
-            covered << e.relPaths;
-        }
+        (e.stock ? stockOwn : covered) << e.relPaths;
     }
     for (const InstallRecord &rec : load_install_records(gameRoot)) {
         QStringList own;
         for (const QString &rel : install_record_present(gameRoot, rec)) {
-            if (!install_record_covered(rel, covered)) {
+            if (!install_record_covered(rel, covered) && !stockOwn.contains(rel)) {
                 own << rel;
             }
         }
