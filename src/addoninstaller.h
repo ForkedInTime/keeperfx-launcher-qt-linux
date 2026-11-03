@@ -16,7 +16,8 @@ public:
         bool installedMod = false; // a mod (vs only campaign/map/pack) was added
         QStringList lines;         // human-readable summary lines
         QString error;             // set when ok == false
-        QStringList createdFiles;  // gameRoot-relative files (a mod: its folder) this install created
+        QStringList createdFiles;  // gameRoot-relative files (a mod: its folder) this install created,
+                                   // or found identical from an earlier install of it
     };
 
     // Extract the archive at archivePath and install its contents into gameRoot.

@@ -180,6 +180,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
         // No-clobber merge: keep existing files (stock campaigns/maps, other add-ons)
         const CopyTreeOutcome merge = copy_tree_no_clobber(src, dst);
         recordCreated(merge.created);
+        recordCreated(merge.keptSame);
         if (!merge.ok) {
             // Nothing was written, or only part of it was. Saying so beats the old
             // behaviour, which counted skipped files, ignored failed ones, and
@@ -232,6 +233,7 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
             for (const QString &rel : loose_campaign_entries(tmpPath, base)) {
                 const CopyTreeOutcome m = copy_tree_no_clobber(tmpPath + "/" + rel, dst + "/" + rel);
                 recordCreated(m.created);
+                recordCreated(m.keptSame);
                 if (!m.ok) {
                     r.error = QObject::tr("Could not write into “%1”.\n\n"
                                           "The folder may be read-only — on a package-managed "
@@ -272,6 +274,9 @@ AddonInstaller::Result AddonInstaller::installExtractedDir(const QString &tmpPat
                 const QString d = dst + "/" + f;
                 if (QFileInfo::exists(d)) {
                     kept++;
+                    if (!QFileInfo(d).isSymLink() && copytree_same_content(mapDir + "/" + f, d)) {
+                        recordCreated({d}); // an earlier install's copy: see CopyTreeOutcome::keptSame
+                    }
                     continue;
                 }
                 if (QFile::copy(mapDir + "/" + f, d)) {

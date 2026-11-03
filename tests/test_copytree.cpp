@@ -117,6 +117,24 @@ int main(int argc, char **argv)
 		expect(r.ok && r.skipped == 1, "a merge over a stock map keeps it");
 		expect(r.created == QStringList{dst + "/levels/standard/map27194.dat"},
 		       "created lists the new file and not the kept stock one");
+		expect(r.keptSame.isEmpty(), "a kept file with other content is not claimed");
+	}
+
+	// A Reinstall over an earlier install's copy: identical files are claimed, so the
+	// install record can register a map installed before the record existed -- but a
+	// link (a package install's stock file) never is.
+	{
+		const QString src = root + "/src_same";
+		const QString dst = root + "/dst_same";
+		writeFile(src + "/levels/standard/map27194.dat", "map");
+		writeFile(src + "/levels/standard/map00301.dat", "stock");
+		writeFile(dst + "/levels/standard/map27194.dat", "map");
+		writeFile(root + "/pkg/map00301.dat", "stock");
+		QFile::link(root + "/pkg/map00301.dat", dst + "/levels/standard/map00301.dat");
+		const CopyTreeOutcome r = copy_tree_no_clobber(src, dst);
+		expect(r.ok && r.created.isEmpty() && r.skipped == 2, "a reinstall over both copies writes nothing");
+		expect(r.keptSame == QStringList{dst + "/levels/standard/map27194.dat"},
+		       "the identical earlier copy is claimed, the identical package link is not");
 	}
 
 	if (g_failures > 0) {

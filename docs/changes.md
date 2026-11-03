@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 117 commits on top of the team's `master`, 98 of them this
+The fork has grown well past the porting patches: 118 commits on top of the team's `master`, 99 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -45,7 +45,9 @@ Everything below is ours, not upstream's:
   Restore** backed by a recycle bin. The launcher records what each install created (`installrecord.h`), so
   a Workshop map that adds itself to a stock pack (`levels/standard/mapNNNNN.*`, the usual way single maps
   ship) is listed and uninstalled on its own, and Browse marks an item installed by its id, not by guessing
-  from its name; before, such a map never appeared here and Browse kept offering *Install*.
+  from its name; before, such a map never appeared here and Browse kept offering *Install*. One installed by an
+  earlier launcher is registered by a *Reinstall*: files already there that are identical to the archive's
+  count as the item's, and a package install's stock files, which are links, never do.
 - **Mod Manager** (`modmanager*.cpp`) — list mods, enable/disable them, persist `mods/load_order.cfg`.
 - **Universal installer** (`addoninstaller.cpp`) — one code path that installs mods, campaigns, map packs and
   loose maps from a `.7z`/`.zip`/`.rar`, detecting the format from the file rather than its name and
