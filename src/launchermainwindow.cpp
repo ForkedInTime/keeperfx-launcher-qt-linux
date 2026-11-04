@@ -336,6 +336,9 @@ LauncherMainWindow::LauncherMainWindow(QWidget *parent)
             // Refresh GUI
             refreshKfxVersionInGui();
 
+            // An engine that defaults to OpenGL: move an old shipped SOFTWARE default once
+            Settings::applyOpenGlDefaultOnce();
+
         } else {
             // Failed to get KeeperFX version
             // Asking the user if they want to reinstall

@@ -926,11 +926,13 @@ void SettingsDialog::loadSettings()
 
     // Graphics: renderer backend and the parchment map fade (both live in keeperfx.cfg)
     if (KfxVersion::hasFunctionality("opengl_renderer") == true) {
-        // A config written before the key existed has no RENDERER line; the engine
-        // treats that as SOFTWARE, so show that rather than an empty box.
+        // A config written before the key existed has no RENDERER line; show what the
+        // engine uses then (OPENGL since the engine made it the default, SOFTWARE before)
+        // rather than an empty box.
         int rendererIndex = ui->comboBoxRenderer->findData(Settings::getKfxSetting("RENDERER").toString().toUpper());
         if (rendererIndex < 0) {
-            rendererIndex = ui->comboBoxRenderer->findData("SOFTWARE");
+            rendererIndex = ui->comboBoxRenderer->findData(
+                KfxVersion::hasFunctionality("opengl_default") ? "OPENGL" : "SOFTWARE");
         }
         ui->comboBoxRenderer->setCurrentIndex(rendererIndex);
     }

@@ -22,6 +22,7 @@ public:
 
     static bool autoSetGameLanguageToLocaleLanguage();
     static bool autoSetMaxFpsToScreenRefreshRate(QWidget *widget = nullptr);
+    static bool applyOpenGlDefaultOnce();
 
     static void resetKfxSettings();
     static void resetLauncherSettings();
