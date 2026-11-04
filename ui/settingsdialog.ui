@@ -606,7 +606,7 @@ height: 35px;
         <rect>
          <x>30</x>
          <y>540</y>
-         <width>361</width>
+         <width>161</width>
          <height>23</height>
         </rect>
        </property>
@@ -615,6 +615,19 @@ height: 35px;
        </property>
        <property name="text">
         <string comment="Checkbox Toggle">Enable VSync</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBoxVariableRefresh">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>540</y>
+         <width>201</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string comment="Tooltip">For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs it).</string>
        </property>
       </widget>
       <widget class="QLabel" name="labelViewportMode">

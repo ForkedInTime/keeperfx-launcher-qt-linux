@@ -48,6 +48,8 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     // RENDERER defaults to OPENGL from this build on (the engine falls back to
     // SOFTWARE on its own where OpenGL cannot start).
     {"opengl_default", "1.4.0.6075"},
+    // VARIABLE_REFRESH (AUTO/ON/OFF): the alpha merge that brings the engine key in (6086).
+    {"variable_refresh", "1.4.0.6086"},
     {"matchmaking_server", "1.4.0.5339"},
     {"multiplayer_port", "1.4.0.5350"},
 
