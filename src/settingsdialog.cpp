@@ -189,6 +189,15 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->checkBoxVSync->setDisabled(true);
     }
 
+    // Variable refresh rate (FreeSync / G-Sync): Auto asks the desktop
+    if (KfxVersion::hasFunctionality("variable_refresh") == true) {
+        ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: Auto", "Variable Refresh Dropdown"), "AUTO");
+        ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: On", "Variable Refresh Dropdown"), "ON");
+        ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: Off", "Variable Refresh Dropdown"), "OFF");
+    } else {
+        ui->comboBoxVariableRefresh->setVisible(false);
+    }
+
     // Relative mouse mode
     if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == false) {
         ui->checkBoxRelativeMouseMode->setDisabled(true);
@@ -946,6 +955,10 @@ void SettingsDialog::loadSettings()
     if (KfxVersion::hasFunctionality("vsync") == true) {
         ui->checkBoxVSync->setChecked(Settings::getKfxSetting("VSYNC") == true);
     }
+    if (KfxVersion::hasFunctionality("variable_refresh") == true) {
+        int vrrIndex = ui->comboBoxVariableRefresh->findData(Settings::getKfxSetting("VARIABLE_REFRESH").toString().toUpper());
+        ui->comboBoxVariableRefresh->setCurrentIndex(vrrIndex < 0 ? ui->comboBoxVariableRefresh->findData("AUTO") : vrrIndex);
+    }
 
     if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {
         ui->checkBoxRelativeMouseMode->setChecked(Settings::getKfxSetting("RELATIVE_MOUSE_MODE") == true);
@@ -1278,6 +1291,9 @@ void SettingsDialog::saveSettings()
     }
     if (KfxVersion::hasFunctionality("vsync") == true) {
         Settings::setKfxSetting("VSYNC", ui->checkBoxVSync->isChecked());
+    }
+    if (KfxVersion::hasFunctionality("variable_refresh") == true) {
+        Settings::setKfxSetting("VARIABLE_REFRESH", ui->comboBoxVariableRefresh->currentData().toString());
     }
 
     if (KfxVersion::hasFunctionality("relative_mouse_mode_toggle") == true) {

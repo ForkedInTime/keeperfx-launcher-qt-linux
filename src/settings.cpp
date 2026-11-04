@@ -441,9 +441,11 @@ bool Settings::autoSetMaxFpsToScreenRefreshRate(QWidget *widget)
         refreshRate = 20;
     }
 
-    // Let's also limit it to something reasonable
-    if(refreshRate > 200) {
-        refreshRate = 200;
+    // Let's also limit it to something reasonable: the fastest monitors sold run at 500 Hz.
+    // (This is only the fallback the engine uses when it cannot read the rate itself;
+    // it used to stop at 200, which would cap a 240 or 360 Hz monitor.)
+    if(refreshRate > 500) {
+        refreshRate = 500;
     }
 
     // Add automatic monitor refresh rate determinitation built into KeeperFX
