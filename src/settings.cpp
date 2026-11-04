@@ -456,6 +456,30 @@ bool Settings::autoSetMaxFpsToScreenRefreshRate(QWidget *widget)
     return true;
 }
 
+// The engine's default renderer became OpenGL (it falls back to the software renderer on
+// its own where OpenGL cannot start). A keeperfx.cfg written before then says
+// RENDERER=SOFTWARE because that was the shipped default, and copying missing keys never
+// touches a key that is there, so nothing would ever move it. Move it once, the first time
+// this launcher sees an engine with the new default; whatever the player picks from then
+// on is kept.
+bool Settings::applyOpenGlDefaultOnce()
+{
+    if (KfxVersion::hasFunctionality("opengl_default") == false) {
+        return false;
+    }
+    const QString doneKey("RENDERER_OPENGL_DEFAULT_APPLIED");
+    if (launcherSettings->value(doneKey).toBool() == true) {
+        return false;
+    }
+    launcherSettings->setValue(doneKey, true);
+    if (getKfxSetting("RENDERER").toString().compare("SOFTWARE", Qt::CaseInsensitive) != 0) {
+        return false;
+    }
+    setKfxSetting("RENDERER", QString("OPENGL"));
+    qInfo() << "Renderer set to OPENGL once: the engine's new default (RENDERER=SOFTWARE was the old one)";
+    return true;
+}
+
 void Settings::resetKfxSettings()
 {
     if (Settings::kfxSettings) {

@@ -88,6 +88,12 @@ Everything below is ours, not upstream's:
   panning, delta time and the possession cursor lock off, the startup screens and the zoom-out limit gone, and
   the creature flower, select box and hand sizes and the API port saved empty, which the engine reads as 0. An
   empty value left by such a Save reads the same way.
+- **OpenGL as the renderer, once, for configs that never chose** (`settings.cpp`) — the engine's default renderer
+  became OpenGL (with the software renderer taking over by itself where OpenGL cannot start). A config written
+  before then says `RENDERER=SOFTWARE` because that was the shipped default, and copying missing keys never
+  changes a key that is there, so the first time the launcher sees such an engine it moves `SOFTWARE` to
+  `OPENGL` once and notes that it did; whatever the player picks afterwards is kept. A config with no
+  `RENDERER` line shows *OpenGL* in the Graphics tab, as the engine runs it.
 
 ## Kept in step with upstream
 
