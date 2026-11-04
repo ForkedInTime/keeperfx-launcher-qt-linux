@@ -94,6 +94,10 @@ Everything below is ours, not upstream's:
   changes a key that is there, so the first time the launcher sees such an engine it moves `SOFTWARE` to
   `OPENGL` once and notes that it did; whatever the player picks afterwards is kept. A config with no
   `RENDERER` line shows *OpenGL* in the Graphics tab, as the engine runs it.
+- **Variable refresh on the Graphics tab** (`settingsdialog.cpp`) — *Variable refresh: Auto / On / Off* beside
+  VSync writes the engine's `VARIABLE_REFRESH` (engines from 1.4.0.6086; hidden on older ones). Auto lets the
+  engine ask the desktop, which GNOME answers; on another desktop a FreeSync / G-Sync owner picks On. The
+  refresh rate the launcher writes as the frame cap's fallback now goes up to 500 Hz instead of stopping at 200.
 
 ## Kept in step with upstream
 
