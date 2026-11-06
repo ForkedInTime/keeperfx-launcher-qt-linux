@@ -34,6 +34,7 @@
 #include "fileremover.h"
 #include "fileremoverdialog.h"
 #include "game.h"
+#include "crashcontext.h"
 #include "helper.h"
 #include "imagehelper.h"
 #include "installkfxdialog.h"
@@ -1729,6 +1730,42 @@ void LauncherMainWindow::on_browseWorkshopButton_clicked()
 
 void LauncherMainWindow::on_discordButton_clicked()
 {
+    // Keeper Klan is the official KeeperFX's Discord, and that game is made for
+    // Windows. A good place to talk about the game, but not for problems with
+    // this edition, which its makers do not build: say so before opening it.
+    if (Settings::getLauncherSetting("SUPPRESS_DISCORD_COMMUNITY_MESSAGEBOX").toBool() == false) {
+
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(tr("Keeper Klan Discord", "MessageBox Title"));
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setTextFormat(Qt::RichText);
+        msgBox.setText(tr("Keeper Klan is the Discord server of the official KeeperFX, which is made for Windows. "
+                          "It's a good place to talk about the game and chat with the rest of the community."
+                          "<br/><br/>"
+                          "It is not the place for problems with KeeperFX: Tux Edition. The KeeperFX team does not "
+                          "make this Linux edition, so please report those on our GitHub page instead:<br/>%1",
+                          "MessageBox Text")
+                           .arg(QString("<a href=\"%1\">%1</a>").arg(CrashContext::ISSUE_TRACKER_URL)));
+        msgBox.setTextInteractionFlags(Qt::TextBrowserInteraction);
+
+        QPushButton *openButton = msgBox.addButton(tr("Open Discord", "MessageBox Button"), QMessageBox::AcceptRole);
+        msgBox.addButton(QMessageBox::Cancel);
+        msgBox.setDefaultButton(openButton);
+
+        // Add "Don't show this again" checkbox
+        QCheckBox dontShowAgain(tr("Don't show this again", "Messagebox Checkbox label"));
+        dontShowAgain.setStyleSheet("margin-top: 12px;");
+        msgBox.setCheckBox(&dontShowAgain);
+
+        msgBox.exec();
+        if (msgBox.clickedButton() != openButton) {
+            return;
+        }
+        if (dontShowAgain.isChecked()) {
+            Settings::setLauncherSetting("SUPPRESS_DISCORD_COMMUNITY_MESSAGEBOX", true);
+        }
+    }
+
     // Use default browser to open Discord invite
     QUrl url("https://discord.gg/WxgE8WZBku");
     Helper::openUrl(url);

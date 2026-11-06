@@ -73,8 +73,18 @@ Everything below is ours, not upstream's:
   stable you have (`kfxversion.cpp`): every stable is promoted from the alpha line, so right after a promotion
   the newest alpha is behind it, and the team's rule (offer the other channel's release whenever the channel
   differs) offered 1.4.0.6013-alpha to 1.4.0.6062. Switching back to stable is still offered either way.
-- **Crash reports carry the right log** (`crashcontext.cpp`) — a report is only sent with a log the failing
-  run actually wrote, never a stale one from an earlier session.
+- **Crash reports come to us, and nothing is sent anywhere** (`crashdialog.cpp`, `crashcontext.cpp`) — the
+  team's dialog uploaded the report (description, contact details, `keeperfx.cfg`, `keeperfx.log`, a save) to
+  keeperfx.net. This one saves it as a zip on the player's computer and opens a new issue on this edition's
+  tracker with the versions, the description and the end of the log filled in, the home folder shown as `~`;
+  the player attaches the zip and submits the issue. `ApiClient` only does GET now, so nothing in the launcher
+  can upload to keeperfx.net. The log goes in only if the failing run wrote it, never a stale one from an
+  earlier session.
+- **Where to ask** (`launchermainwindow.cpp`, `settingsdialog.cpp`) — before the Discord button opens the
+  invite, it says that Keeper Klan is the official KeeperFX's community (a Windows game): a good place to talk
+  about the game, while problems with this edition go to our GitHub page. "Don't show this again" turns the
+  note off. The About tab says the same, and the messages that sent players to that Discord for help now
+  point to our tracker.
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
 - **UI scale** — scale the whole launcher from 100% up to 200% (110 / 125 / 150 / 200) for readability.
 - **Camera settings that survive Save** (`settingsdialog.cpp`) — *Zoom to cursor* and *Rotate around cursor*

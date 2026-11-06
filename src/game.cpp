@@ -204,7 +204,8 @@ void Game::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
                     tr("KeeperFX has crashed", "MessageBox Title"),
                     tr("It seems that KeeperFX has crashed and is unable to recover.\n\n"
                        "Crash reporting is disabled because you are using the heavylog option.\n\n"
-                        "If you require assistance, please create an issue on Github or contact us on the Keeper Klan Discord.", "MessageBox Text"));
+                       "To report it, open an issue on our GitHub page and attach keeperfx.log from your game folder:\n"
+                       "https://github.com/ForkedInTime/keeperfx-tux-edition/issues", "MessageBox Text"));
 
             } else {
 

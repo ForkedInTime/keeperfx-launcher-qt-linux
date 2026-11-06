@@ -16,7 +16,7 @@ class Archiver
 public:
     static bit7z::BitArchiveReader getReader(std::string filePath);
     static bit7z::BitFileExtractor getExtractor();
-    static bit7z::BitFileCompressor getCompressor();
+    static bit7z::BitFileCompressor getCompressor(const bit7z::BitInOutFormat &format = bit7z::BitFormat::SevenZip);
 
     static bool compressSingleFile(QFile *inputFile, std::string outputPath);
 
@@ -24,7 +24,11 @@ public:
     // compressSingleFile() once per file onto the same path does not work: the
     // second call finds the archive already there and bit7z refuses to update
     // it, so only the first file was ever kept.
-    static bool compressFiles(const QStringList &inputFiles, std::string outputPath);
+    //
+    // 7z unless told otherwise. The crash report is a zip, because GitHub
+    // takes .zip attachments and refuses .7z ones.
+    static bool compressFiles(const QStringList &inputFiles, std::string outputPath,
+                              const bit7z::BitInOutFormat &format = bit7z::BitFormat::SevenZip);
 
     // Extract everything except symbolic links, which are skipped and logged.
     //
