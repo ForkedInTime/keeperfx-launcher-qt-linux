@@ -101,6 +101,11 @@ Everything below is ours, not upstream's:
 - **No dead *Smoothen edges* checkbox** (`settingsdialog.cpp`, `settings.cpp`) — engines from 1.4.0.6151 ignore
   `-vidsmooth` and only log that it no longer works, so the checkbox is hidden there and the launcher stops
   passing it; older engines still get both, and the saved choice is kept.
+- **Our own online lobby** (`lobbyserver.h`, `settingsdialog.cpp`) — the default matchmaking server is
+  KeeperFX: Tux Edition's own (`lobby.keeperfx-tux.workers.dev`; its code is `lobby-server/` in the engine
+  repository), not the KeeperFX team's. A `keeperfx.cfg` that still names theirs, or anything under
+  keeperfx.workers.dev or keeperfx.net, shows ours on the Multiplayer tab, so Save writes ours. The engine
+  makes the same swap when it reads the file. *Set to default server* gives ours.
 
 ## Kept in step with upstream
 

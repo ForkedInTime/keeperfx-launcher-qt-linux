@@ -54,3 +54,9 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_installrecord" "$ROOT_DIR/tests/test_installrecord.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_installrecord"
+# The lobby server choice: the team's lobby is swapped for ours (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_lobbyserver" "$ROOT_DIR/tests/test_lobbyserver.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_lobbyserver"
