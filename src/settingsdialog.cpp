@@ -179,6 +179,21 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->labelRenderer->setDisabled(true);
     }
 
+    // Smoothen edges (-vidsmooth): newer engines ignore it. Hide it there and move the rest of
+    // the left column up a row, so the Graphics tab has no hole. The setting itself is kept.
+    if (KfxVersion::hasFunctionality("vidsmooth_ignored") == true) {
+        QWidget *gfxTab = ui->checkBoxSmoothenVideo->parentWidget();
+        const int hiddenY = ui->checkBoxSmoothenVideo->y();
+        const int rowStep = ui->comboBoxRenderer->y() - hiddenY;
+        const int rightColumnX = ui->labelNeutralFlashRate->x();
+        ui->checkBoxSmoothenVideo->setVisible(false);
+        for (QWidget *w : gfxTab->findChildren<QWidget *>(Qt::FindDirectChildrenOnly)) {
+            if (w->x() < rightColumnX && w->y() > hiddenY) {
+                w->move(w->x(), w->y() - rowStep);
+            }
+        }
+    }
+
     // Parchment map fade
     if (KfxVersion::hasFunctionality("map_fade_animation") == false) {
         ui->checkBoxParchmentMapFade->setDisabled(true);

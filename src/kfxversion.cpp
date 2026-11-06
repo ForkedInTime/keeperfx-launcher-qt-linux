@@ -50,6 +50,9 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"opengl_default", "1.4.0.6075"},
     // VARIABLE_REFRESH (AUTO/ON/OFF): the alpha merge that brings the engine key in (6086).
     {"variable_refresh", "1.4.0.6086"},
+    // -vidsmooth does nothing from the 2026-11-05 upstream sync on (6151): the engine only
+    // logs that the parameter no longer works, so "Smoothen edges" is hidden there.
+    {"vidsmooth_ignored", "1.4.0.6151"},
     {"matchmaking_server", "1.4.0.5339"},
     {"multiplayer_port", "1.4.0.5350"},
 
