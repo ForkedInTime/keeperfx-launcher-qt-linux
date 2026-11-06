@@ -37,8 +37,12 @@ launcher build required. It exits non-zero on failure.
 The release AppImage and Flatpak are built by **`build-appimage.yml` and `build-flatpak.yml` in the
 [game repo](https://github.com/ForkedInTime/keeperfx-tux-edition)**, which clone this repo's **`alpha`**
 branch. They live there because a workflow can only be triggered by, and attach assets to, a release in its
-own repository. This repo keeps a manual-dispatch copy of
-[`build-appimage.yml`](../.github/workflows/build-appimage.yml) for launcher-side debugging: it builds a working
-AppImage from the current branch without touching any release.
+own repository. To try a launcher branch in a real AppImage before it is merged, run the game repo's
+`build-appimage.yml` by hand with that branch; it attaches nothing to a release, and its artifacts carry the
+branch in their names:
+
+```bash
+gh workflow run build-appimage.yml --repo ForkedInTime/keeperfx-tux-edition --ref alpha -f launcher_branch=<branch>
+```
 
 Push launcher work to **both `alpha` and `master`** — `alpha` is what the release build clones.
