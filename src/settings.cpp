@@ -59,7 +59,7 @@ QMap<QString, QString> Settings::gameSettingsParameterMap = {
     {"GAME_PARAM_NO_SOUND", "-nosound"},
     {"GAME_PARAM_USE_CD_MUSIC", "-cd"},
     {"GAME_PARAM_ALEX", "-alex"},
-    {"GAME_PARAM_VID_SMOOTH", "-vidsmooth"},
+    // {"GAME_PARAM_VID_SMOOTH", "-vidsmooth"}, // Hardcoded: newer engines ignore it
     // {"GAME_PARAM_ALT_INPUT", "-altinput"}, // Hardcoded: engines with CAPTURE_CURSOR read the config instead
     // {"GAME_PARAM_FPS", "-fps %d"}, // Hardcoded
     // {"GAME_PARAM_HUMAN_PLAYER", "-human %d"}, // Hardcoded
@@ -353,6 +353,15 @@ QStringList Settings::getGameSettingsParameters()
     if (KfxVersion::hasFunctionality("capture_cursor_config_option") == false) {
         if (Settings::getLauncherSetting("GAME_PARAM_ALT_INPUT").toBool() == true) {
             paramList << "-altinput";
+        }
+    }
+
+    // Add video smoothing
+    // Engines from 1.4.0.6151 on ignore -vidsmooth and log a warning for it; the setting is
+    // kept, so an older engine still gets it
+    if (KfxVersion::hasFunctionality("vidsmooth_ignored") == false) {
+        if (Settings::getLauncherSetting("GAME_PARAM_VID_SMOOTH").toBool() == true) {
+            paramList << "-vidsmooth";
         }
     }
 

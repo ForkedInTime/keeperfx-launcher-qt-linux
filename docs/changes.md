@@ -98,6 +98,9 @@ Everything below is ours, not upstream's:
   VSync writes the engine's `VARIABLE_REFRESH` (engines from 1.4.0.6086; hidden on older ones). Auto lets the
   engine ask the desktop, which GNOME answers; on another desktop a FreeSync / G-Sync owner picks On. The
   refresh rate the launcher writes as the frame cap's fallback now goes up to 500 Hz instead of stopping at 200.
+- **No dead *Smoothen edges* checkbox** (`settingsdialog.cpp`, `settings.cpp`) — engines from 1.4.0.6151 ignore
+  `-vidsmooth` and only log that it no longer works, so the checkbox is hidden there and the launcher stops
+  passing it; older engines still get both, and the saved choice is kept.
 
 ## Kept in step with upstream
 
