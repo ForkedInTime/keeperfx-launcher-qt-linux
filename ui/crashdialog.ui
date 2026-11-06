@@ -132,7 +132,7 @@
 }</string>
      </property>
      <property name="text">
-      <string comment="Information Label">It seems that KeeperFX has crashed and is unable to recover. If you wish to submit technical details about this crash to the KeeperFX developers, you can describe your problem below and click 'Send'. If you add contact details we can contact you later. Additional information such as KeeperFX logfiles and configuration will be sent too.</string>
+      <string comment="Information Label">It seems that KeeperFX has crashed and is unable to recover. To help us fix it, describe what happened below and click 'Report on GitHub'. The launcher saves a crash report on your computer (the game's log and settings, and a save if you choose one) and opens a new issue on our GitHub page with the details filled in. Attach the report file there and submit it. Nothing is sent anywhere until you do.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -153,7 +153,7 @@
 }</string>
      </property>
      <property name="text">
-      <string comment="Information Label">You can also raise an issue on Github: %1</string>
+      <string comment="Information Label">Our issue tracker: %1</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -231,46 +231,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="contactInfoLabel">
-     <property name="text">
-      <string comment="Input box title">Contact Information (Optional)</string>
-     </property>
-     <property name="margin">
-      <number>3</number>
-     </property>
-     <property name="indent">
-      <number>10</number>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="contactInfoWidget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <widget class="QLineEdit" name="contactInfoDiscordLineEdit">
-        <property name="placeholderText">
-         <string comment="Input Placeholder">Discord handle</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="contactInfoKfxNetLineEdit">
-        <property name="placeholderText">
-         <string comment="Input Placeholder">KeeperFX.net username</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="contactInfoEmailLineEdit">
-        <property name="placeholderText">
-         <string comment="Input Placeholder">Email Address</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QWidget" name="buttonsWidget" native="true">
      <property name="minimumSize">
       <size>
@@ -293,7 +253,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="cancelButton">
+       <widget class="QPushButton" name="closeButton">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -301,7 +261,7 @@
          </size>
         </property>
         <property name="text">
-         <string comment="Button">Cancel</string>
+         <string comment="Button">Close</string>
         </property>
         <property name="icon">
          <iconset theme="QIcon::ThemeIcon::EditClear"/>
@@ -312,7 +272,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="sendButton">
+       <widget class="QPushButton" name="reportButton">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -320,7 +280,7 @@
          </size>
         </property>
         <property name="text">
-         <string comment="Button">Send</string>
+         <string comment="Button">Report on GitHub</string>
         </property>
         <property name="autoDefault">
          <bool>false</bool>

@@ -412,8 +412,8 @@ void InstallKfxDialog::on_versionComboBox_currentIndexChanged(int index)
                                            tr("KeeperFX Alpha builds", "MessageBox Title"),
                                            tr("Alpha patches may contain new features and changes, but often contain "
                                               "bugs and unfinished functionality. These patches are mostly meant "
-                                              "for testers, and it is suggested to be part of the Keeper Klan discord "
-                                              "if you use them.\n\nAre you sure you want to use Alpha patches?",
+                                              "for testers. Please report any problems you find on our GitHub page."
+                                              "\n\nAre you sure you want to use Alpha patches?",
                                               "MessageBox Text"));
 
         // Check whether or not user is sure

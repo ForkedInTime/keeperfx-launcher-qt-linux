@@ -7,6 +7,8 @@
 #include "crashcontext.h"
 
 #include <QCoreApplication>
+#include <QStringList>
+#include <QUrlQuery>
 #include <cstdio>
 
 static int g_failures = 0;
@@ -93,6 +95,108 @@ static void testIsStartupFailure()
 		"a clean exit is not a startup failure");
 }
 
+static void testHideHomeDir()
+{
+	std::printf("CrashContext::hideHomeDir\n");
+
+	expect(CrashContext::hideHomeDir("/home/al/.local/share/keeperfx-alpha/keeperfx", "/home/al")
+			== "~/.local/share/keeperfx-alpha/keeperfx",
+		"a path under the home folder starts with ~");
+
+	expect(CrashContext::hideHomeDir("cwd /home/al and /home/al/x", "/home/al") == "cwd ~ and ~/x",
+		"the home folder itself, and every path under it, is hidden");
+
+	expect(CrashContext::hideHomeDir("/home/alice/game", "/home/al") == "/home/alice/game",
+		"another user's folder that merely starts with the same letters is left alone");
+
+	expect(CrashContext::hideHomeDir("/usr/share/x", "/") == "/usr/share/x",
+		"a root home folder hides nothing");
+
+	expect(CrashContext::hideHomeDir("/home/al/x", "") == "/home/al/x",
+		"no home folder hides nothing");
+}
+
+static void testTailLines()
+{
+	std::printf("CrashContext::tailLines\n");
+
+	expect(CrashContext::tailLines("a\nb\nc\nd\n", 2, 100) == "c\nd",
+		"the last lines are kept, trailing newline dropped");
+
+	expect(CrashContext::tailLines("aaaa\nbbbb\ncccc", 10, 9) == "bbbb\ncccc",
+		"whole lines only, as many as fit the character limit");
+
+	expect(CrashContext::tailLines("0123456789", 10, 4) == "6789",
+		"a single line longer than the limit keeps its end");
+
+	expect(CrashContext::tailLines("", 10, 100).isEmpty(),
+		"nothing in, nothing out");
+}
+
+static CrashContext::ReportFacts sampleFacts()
+{
+	CrashContext::ReportFacts f;
+	f.gameVersion = "1.4.0.6156 Alpha";
+	f.launcherVersion = "1.11.0";
+	f.system = "Arch Linux, kernel 6.18.57, wayland, GNOME, AppImage";
+	f.description = "Crashed when my imps dug into the portal.";
+	f.gameOutput = "Segmentation fault";
+	QStringList log;
+	for (int i = 1; i <= 400; i++) {
+		log << QString("line %1 of the game log").arg(i);
+	}
+	log << "Error: the last line, where the crash is";
+	f.logTail = log.join('\n');
+	f.archiveName = "keeperfx-crash-20261106-101500.zip";
+	return f;
+}
+
+static void testIssueBody()
+{
+	std::printf("CrashContext::issueBody\n");
+
+	const CrashContext::ReportFacts f = sampleFacts();
+	const QString body = CrashContext::issueBody(f, 3000);
+
+	expect(body.size() <= 3000, "the body fits the limit");
+	expect(body.contains(f.description), "the player's description is in it");
+	expect(body.contains(f.gameVersion) && body.contains(f.launcherVersion) && body.contains(f.system),
+		"the versions and the system are in it");
+	expect(body.contains(f.archiveName), "it names the zip to attach");
+	expect(body.contains(f.gameOutput), "the game's error output is in it");
+	expect(body.contains("Error: the last line, where the crash is"), "the end of the log is kept");
+	expect(body.contains("line 1 of the game log") == false, "the start of a long log is dropped");
+
+	CrashContext::ReportFacts bare;
+	bare.gameVersion = "1.4.0.6156 Alpha";
+	bare.launcherVersion = "1.11.0";
+	bare.system = "Linux";
+	const QString bareBody = CrashContext::issueBody(bare, 3000);
+	expect(bareBody.contains("keeperfx.log"), "without a zip it asks for keeperfx.log instead");
+	expect(bareBody.contains("End of keeperfx.log") == false, "an empty log adds no log section");
+}
+
+static void testNewIssueUrl()
+{
+	std::printf("CrashContext::newIssueUrl\n");
+
+	const QUrl url = CrashContext::newIssueUrl("Crash: C++ & more", "line one\nline two + three");
+	const QUrlQuery query(url);
+
+	expect(url.scheme() == "https" && url.host() == "github.com", "it is a GitHub link");
+	expect(url.path() == "/ForkedInTime/keeperfx-tux-edition/issues/new", "it opens a new issue on OUR tracker");
+	expect(url.toString().contains("keeperfx.net") == false, "it never points at keeperfx.net");
+	expect(query.queryItemValue("title", QUrl::FullyDecoded) == "Crash: C++ & more",
+		"the title survives '+' and '&'");
+	expect(query.queryItemValue("body", QUrl::FullyDecoded) == "line one\nline two + three",
+		"the body survives newlines and '+'");
+	expect(url.toEncoded().contains('+') == false,
+		"no literal '+' that GitHub would read as a space");
+
+	expect(QString(CrashContext::ISSUE_TRACKER_URL) == "https://github.com/ForkedInTime/keeperfx-tux-edition/issues",
+		"the tracker is this edition's own");
+}
+
 int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
@@ -100,6 +204,10 @@ int main(int argc, char *argv[])
 	testLogBelongsToRun();
 	testShouldAttachLog();
 	testIsStartupFailure();
+	testHideHomeDir();
+	testTailLines();
+	testIssueBody();
+	testNewIssueUrl();
 
 	if (g_failures > 0) {
 		std::printf("%d failure(s)\n", g_failures);

@@ -568,7 +568,11 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     aboutString += libraries.join(", ");
     aboutString += "<br/>";
     aboutString += "<br/>";
-    aboutString += tr("Join us on Discord: %1", "About Label").arg(QString("<a href=\"%1\">%2</a>").arg("https://discord.gg/WxgE8WZBku", "Keeper Klan Discord"));
+    // Keeper Klan is the official KeeperFX's community (a Windows game), not this
+    // edition's support channel: problems with this edition come to our tracker.
+    aboutString += tr("Community Discord of the official KeeperFX (Windows): %1", "About Label").arg(QString("<a href=\"%1\">%2</a>").arg("https://discord.gg/WxgE8WZBku", "Keeper Klan Discord"));
+    aboutString += "<br/>";
+    aboutString += tr("Problems with KeeperFX: Tux Edition: %1", "About Label").arg(QString("<a href=\"%1\">%2</a>").arg("https://github.com/ForkedInTime/keeperfx-tux-edition/issues", tr("report them on our GitHub page", "About Label")));
 
     // Load about page
     ui->labelAbout->setTextFormat(Qt::RichText);

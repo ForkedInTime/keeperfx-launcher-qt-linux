@@ -12,13 +12,15 @@ class ApiClient
 {
 
 public:
-    enum class HttpMethod { GET, POST };
-
     static QString getApiEndpoint();
 
     static QImage downloadImage(QUrl url);
 
-    static QJsonDocument getJsonResponse(QUrl endpointPath, HttpMethod method = HttpMethod::GET, QJsonObject jsonPostObject = QJsonObject());
+    // GET only. This edition reads keeperfx.net (the Workshop, their news) and
+    // never sends it anything: upstream's one POST, the crash report, now goes
+    // to our own issue tracker instead (see CrashContext::ISSUE_TRACKER_URL).
+    // An upstream change that POSTs here again should fail to build, not ship.
+    static QJsonDocument getJsonResponse(QUrl endpointPath);
 
     static QJsonObject getLatestStable();
     static QJsonObject getLatestAlpha();

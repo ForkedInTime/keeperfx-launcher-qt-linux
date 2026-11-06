@@ -26,8 +26,8 @@ public:
     void setGameStartTime(QDateTime gameStartTime);
 
 private slots:
-    void on_cancelButton_clicked();
-    void on_sendButton_clicked();
+    void on_closeButton_clicked();
+    void on_reportButton_clicked();
 
 private:
     Ui::CrashDialog *ui;

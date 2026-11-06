@@ -1,20 +1,40 @@
 #include "crashdialog.h"
 #include "ui_crashdialog.h"
 
-#include "apiclient.h"
 #include "archiver.h"
 #include "crashcontext.h"
-#include "gzip.h"
+#include "kfxversion.h"
 #include "savefile.h"
-#include "version.h"
 #include "settings.h"
-#include "launcheroptions.h"
+#include "version.h"
 
+#include <QCoreApplication>
+#include <QDesktopServices>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
+#include <QLayout>
 #include <QMessageBox>
+#include <QScreen>
+#include <QStandardPaths>
+#include <QSysInfo>
+#include <QTemporaryDir>
 
-#define COMPRESS_KEEPERFX_LOG_GZIP true
+// Crash reports go to this edition's own issue tracker and nowhere else.
+//
+// The upstream dialog POSTed the report -- description, contact details,
+// keeperfx.cfg, keeperfx.log and optionally a save -- to keeperfx.net. This one
+// sends nothing anywhere. It saves the report as a zip on the player's computer
+// and opens a new issue on our GitHub page with the details filled in; the
+// player attaches the zip and submits the issue themselves.
+
+// How much of the end of keeperfx.log is read for the issue text. The full log
+// goes into the zip; the issue only quotes its end, where a crash is.
+static const qint64 LOG_TAIL_BYTES = 64 * 1024;
+
+// The issue text travels in the URL, so it is kept well inside what browsers
+// and GitHub accept once percent-encoded.
+static const int ISSUE_BODY_MAX_CHARS = 3000;
 
 CrashDialog::CrashDialog(QWidget *parent)
     : QDialog(parent)
@@ -22,11 +42,6 @@ CrashDialog::CrashDialog(QWidget *parent)
     , saveFileList(SaveFile::getAll())
 {
     ui->setupUi(this);
-
-    // Disable resizing and remove maximize button
-    setFixedSize(size());
-    setWindowFlag(Qt::WindowMaximizeButtonHint, false);
-    setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
 
     // Load save file list
     if (saveFileList.empty() == true) {
@@ -43,12 +58,24 @@ CrashDialog::CrashDialog(QWidget *parent)
     ui->crashInfoLabel2->setTextFormat(Qt::RichText);
     ui->crashInfoLabel2->setTextInteractionFlags(Qt::TextBrowserInteraction);
     ui->crashInfoLabel2->setOpenExternalLinks(true);
-    ui->crashInfoLabel2->setText(ui->crashInfoLabel2->text().arg(QString("<a href=\"%1\">%1</a>").arg("https://github.com/dkfans/keeperfx/issues")));
+    ui->crashInfoLabel2->setText(ui->crashInfoLabel2->text().arg(
+        QString("<a href=\"%1\">%1</a>").arg(CrashContext::ISSUE_TRACKER_URL)));
 
-    // Load preset contact details
-    ui->contactInfoDiscordLineEdit->setText(Settings::getLauncherSetting("CRASH_REPORTING_CONTACT_DISCORD").toString());
-    ui->contactInfoKfxNetLineEdit->setText(Settings::getLauncherSetting("CRASH_REPORTING_CONTACT_KEEPERFX_NET").toString());
-    ui->contactInfoEmailLineEdit->setText(Settings::getLauncherSetting("CRASH_REPORTING_CONTACT_EMAIL").toString());
+    // Not resizable, but as tall as the text needs at the width the dialog was
+    // designed for. Fixing the size straight from the .ui file clipped the
+    // wrapped first paragraph whenever the desktop scaled fonts up. Never
+    // taller than the screen either, or the buttons end up below it: the
+    // description box gives up the room first, the wrapped text keeps it.
+    setWindowFlag(Qt::WindowMaximizeButtonHint, false);
+    setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+    const int dialogWidth = width();
+    int dialogHeight = layout()->hasHeightForWidth() ? layout()->totalHeightForWidth(dialogWidth)
+                                                     : sizeHint().height();
+    if (const QScreen *dialogScreen = screen()) {
+        dialogHeight = qMin(dialogHeight, dialogScreen->availableGeometry().height() * 9 / 10);
+    }
+    dialogHeight = qMax(dialogHeight, minimumSizeHint().height());
+    setFixedSize(dialogWidth, dialogHeight);
 }
 
 CrashDialog::~CrashDialog()
@@ -66,201 +93,218 @@ void CrashDialog::setGameStartTime(QDateTime startTime)
     this->gameStartTime = startTime;
 }
 
-void CrashDialog::on_cancelButton_clicked()
+void CrashDialog::on_closeButton_clicked()
 {
     this->close();
 }
 
-void CrashDialog::on_sendButton_clicked()
+// Distribution, kernel, session and how the game was installed: what a crash
+// report needs to be reproduced on another machine.
+static QString systemDescription()
 {
-    // Disable the send button
-    this->ui->sendButton->setDisabled(true);
+    QStringList parts;
+    parts << QSysInfo::prettyProductName();
+    parts << QStringLiteral("kernel %1").arg(QSysInfo::kernelVersion());
 
-    // Create post object
-    QJsonObject jsonPostObject;
-
-    // Game and launcher version
-    jsonPostObject["game_version"] = KfxVersion::currentVersion.fullString;
-    jsonPostObject["source"] = "keeperfx-launcher-qt " + QString(LAUNCHER_VERSION);
-
-    // Description of the crash
-    QString infoDetails = ui->infoTextEdit->toPlainText();
-    if (infoDetails.isEmpty() == false) {
-        jsonPostObject["description"] = infoDetails;
+    const QString session = qEnvironmentVariable("XDG_SESSION_TYPE");
+    if (session.isEmpty() == false) {
+        parts << session;
+    }
+    const QString desktop = qEnvironmentVariable("XDG_CURRENT_DESKTOP");
+    if (desktop.isEmpty() == false) {
+        parts << desktop;
     }
 
-    // Create contact details list
-    QStringList contactDetails;
-
-    // Contact details (Discord)
-    QString contactDetailsDiscord = ui->contactInfoDiscordLineEdit->text();
-    if (contactDetailsDiscord.isEmpty() == false) {
-        contactDetails << ("Discord: " + contactDetailsDiscord);
-        Settings::setLauncherSetting("CRASH_REPORTING_CONTACT_DISCORD", contactDetailsDiscord);
-    } else {
-        Settings::setLauncherSetting("CRASH_REPORTING_CONTACT_DISCORD", "");
+    if (qEnvironmentVariableIsSet("APPIMAGE")) {
+        parts << QStringLiteral("AppImage");
+    } else if (qEnvironmentVariableIsSet("FLATPAK_ID")) {
+        parts << QStringLiteral("Flatpak");
     }
 
-    // Contact details (KeeperFX.net)
-    QString contactDetailsKfxNet = ui->contactInfoKfxNetLineEdit->text();
-    if (contactDetailsKfxNet.isEmpty() == false) {
-        contactDetails << ("KfxNet: " + contactDetailsKfxNet);
-        Settings::setLauncherSetting("CRASH_REPORTING_CONTACT_KEEPERFX_NET", contactDetailsKfxNet);
-    } else {
-        Settings::setLauncherSetting("CRASH_REPORTING_CONTACT_KEEPERFX_NET", "");
+    parts << QStringLiteral("Qt %1").arg(QString::fromLatin1(qVersion()));
+    return parts.join(QStringLiteral(", "));
+}
+
+// The first folder the report can be written to: the game folder, which is
+// where the player looks for the game's files, then Documents, then /tmp.
+static QString reportFolder()
+{
+    const QStringList candidates = {
+        QCoreApplication::applicationDirPath() + "/crash-reports",
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/KeeperFX crash reports",
+        QDir::tempPath() + "/keeperfx-crash-reports",
+    };
+
+    for (const QString &folder : candidates) {
+        if (QDir().mkpath(folder) && QFileInfo(folder).isWritable()) {
+            return folder;
+        }
+    }
+    return QString();
+}
+
+// Copy a file into the staging folder under the name it gets inside the zip.
+static bool stageFile(const QTemporaryDir &staging, const QString &sourcePath, const QString &name, QStringList &staged)
+{
+    if (QFileInfo(sourcePath).isFile() == false) {
+        return false;
     }
 
-    // Contact details (Email)
-    QString contactDetailsEmail = ui->contactInfoEmailLineEdit->text();
-    if (contactDetailsEmail.isEmpty() == false) {
-        contactDetails << ("Email: " + contactDetailsEmail);
-        Settings::setLauncherSetting("CRASH_REPORTING_CONTACT_EMAIL", contactDetailsEmail);
-    } else {
-        Settings::setLauncherSetting("CRASH_REPORTING_CONTACT_EMAIL", "");
+    const QString target = staging.filePath(name);
+    if (QFile::copy(sourcePath, target) == false) {
+        qWarning() << "Crash report: could not copy" << sourcePath;
+        return false;
     }
 
-    // Add contact details
-    if (contactDetails.isEmpty() == false) {
-        jsonPostObject["contact_details"] = contactDetails.join(" - ");
-    }
+    staged << target;
+    return true;
+}
 
-    // keeperfx.cfg
-    QFile kfxConfigFile = Settings::getKfxConfigFile();
-    if (kfxConfigFile.exists() && kfxConfigFile.open(QIODevice::ReadOnly)) {
-        jsonPostObject["game_config"] = QString(kfxConfigFile.readAll());
-        kfxConfigFile.close();
+static QString readTail(const QString &path, qint64 maxBytes)
+{
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly) == false) {
+        return QString();
     }
+    if (file.size() > maxBytes) {
+        file.seek(file.size() - maxBytes);
+        file.readLine(); // start on a whole line
+    }
+    return QString::fromUtf8(file.readAll());
+}
+
+void CrashDialog::on_reportButton_clicked()
+{
+    this->ui->reportButton->setDisabled(true);
+
+    const QString homeDir = QDir::homePath();
+    const QDateTime now = QDateTime::currentDateTime();
+    const QString archiveName = QStringLiteral("keeperfx-crash-%1.zip").arg(now.toString("yyyyMMdd-HHmmss"));
+
+    CrashContext::ReportFacts facts;
+    facts.gameVersion = KfxVersion::currentVersion.fullString;
+    facts.launcherVersion = QString(LAUNCHER_VERSION);
+    facts.system = systemDescription();
+    facts.description = ui->infoTextEdit->toPlainText().trimmed();
+    facts.gameOutput = CrashContext::hideHomeDir(this->stdErrorString, homeDir);
+
+    // Everything for the zip is gathered in a scratch folder first, under the
+    // names it will have inside the zip.
+    QTemporaryDir staging;
+    QStringList staged;
+    QString logNote;
 
     // keeperfx.log -- but only if this run wrote it. The engine truncates the
     // log as it starts, so a log older than the launch is a leftover from an
     // earlier session: attaching it describes a run that did not fail and hides
     // the fact that the failing run logged nothing at all.
-    QFile kfxLogFile(QCoreApplication::applicationDirPath() + "/keeperfx.log");
-    const QDateTime kfxLogModified = QFileInfo(kfxLogFile).lastModified();
+    const QString kfxLogPath = QCoreApplication::applicationDirPath() + "/keeperfx.log";
+    const QDateTime kfxLogModified = QFileInfo(kfxLogPath).lastModified();
 
-    if (kfxLogFile.exists()
-        && CrashContext::shouldAttachLog(kfxLogModified, this->gameStartTime) == false) {
+    if (QFileInfo::exists(kfxLogPath) == false) {
+        logNote = QStringLiteral("There was no keeperfx.log in the game folder.");
 
-        qWarning() << "Not attaching keeperfx.log to the crash report: last modified"
+    } else if (CrashContext::shouldAttachLog(kfxLogModified, this->gameStartTime) == false) {
+        qWarning() << "Not adding keeperfx.log to the crash report: last modified"
                    << kfxLogModified.toString(Qt::ISODate)
                    << "but the game was started at"
                    << this->gameStartTime.toString(Qt::ISODate);
 
         // Say so in the report itself, so nobody reads a missing log as a log
         // that was empty.
-        jsonPostObject["game_log_missing"] =
-            QStringLiteral("The game produced no log for this run; any existing "
-                           "keeperfx.log predates it and was not attached.");
+        logNote = QStringLiteral("The game produced no log for this run; the keeperfx.log in the "
+                                 "game folder predates it and was left out.");
 
-    } else if (kfxLogFile.exists() && kfxLogFile.open(QIODevice::ReadOnly)) {
-
-        // Check if logfile is reasonable size (<32MiB)
-        if (kfxLogFile.size() > 32 * 1024LL * 1024LL) {
-            QMessageBox::warning(this, tr("Crash Report", "MessageBox Title"), tr("Failed to submit crash report.", "MessageBox Text"));
-            qWarning() << "Log file too big to be sent with crash report:" << kfxLogFile.fileName() << "Size:" << kfxLogFile.size();
-            this->close();
-            return;
-        }
-
-        // Read logfile
-        QByteArray logData = kfxLogFile.readAll();
-        kfxLogFile.close();
-
-#if COMPRESS_KEEPERFX_LOG_GZIP
-
-        // Check command line override
-        if (LauncherOptions::isSet("disable-gzip-upload") != true) {
-
-            // Compress using gzip
-            QByteArray gzipped = GZip::compress(logData);
-
-            if (!gzipped.isEmpty()) {
-                jsonPostObject["game_log"] = QString(gzipped.toBase64());
-                jsonPostObject["game_log_encoding"] = "gzip+base64";
-            } else {
-                qDebug() << "GZip::Compress failed, sending plain text log";
-                jsonPostObject["game_log"] = QString(logData);
-            }
-
-        } else {
-            qDebug() << "--disable-gzip set, sending plain text log";
-            jsonPostObject["game_log"] = QString(logData);
-        }
-#else
-        // gzip disabled at compile time
-        jsonPostObject["game_log"] = QString(logData);
-#endif
+    } else if (staging.isValid() && stageFile(staging, kfxLogPath, "keeperfx.log", staged)) {
+        facts.logTail = CrashContext::hideHomeDir(readTail(kfxLogPath, LOG_TAIL_BYTES), homeDir);
+        logNote = QStringLiteral("keeperfx.log is in this zip.");
     }
 
-    // Game std output
-    if (this->stdErrorString.isEmpty() == false) {
-        jsonPostObject["game_output"] = this->stdErrorString;
-    }
+    if (staging.isValid()) {
+        // The game's settings
+        QFile kfxConfigFile = Settings::getKfxConfigFile();
+        stageFile(staging, kfxConfigFile.fileName(), "keeperfx.cfg", staged);
 
-    // Savefile
-    int saveFileIndex = ui->saveFileComboBox->currentIndex();
-    if (saveFileIndex > 0) { // -1 = nothing selected, 0 = "None"
+        // The launcher's own log: the game's error output on a failed start is
+        // only there.
+        const QString launcherLogPath = QCoreApplication::applicationDirPath() + "/"
+                                        + QFileInfo(QCoreApplication::applicationFilePath()).baseName() + ".log";
+        stageFile(staging, launcherLogPath, QFileInfo(launcherLogPath).fileName(), staged);
 
-        // Get selected savefile
-        SaveFile *saveFile = saveFileList.at(saveFileIndex - 1);
-        if (saveFile) {
-            // Variables for temporary archive for savefile
-            QString tempArchivePath = QDir::temp().filePath("crashreport-savefile.7z.tmp");
-            QFile tempArchive(tempArchivePath);
-
-            // Make sure archive output file does not exist
-            if (tempArchive.exists()) {
-                tempArchive.remove();
+        // The save the player picked
+        const int saveFileIndex = ui->saveFileComboBox->currentIndex();
+        if (saveFileIndex > 0) { // -1 = nothing selected, 0 = "None"
+            SaveFile *saveFile = saveFileList.at(saveFileIndex - 1);
+            if (saveFile) {
+                const QString savePath = saveFile->file.fileName();
+                stageFile(staging, savePath, QFileInfo(savePath).fileName(), staged);
             }
+        }
 
-            // Compress the save into the archive
-            if (Archiver::compressSingleFile(&saveFile->file, tempArchivePath.toStdString())) {
-                // Make sure archive exists and can be opened
-                if (tempArchive.exists() && tempArchive.open(QIODevice::ReadOnly)) {
-                    // Add savefile data to post object
-                    jsonPostObject["save_file_name"] = saveFile->fileName + ".7z";
-                    jsonPostObject["save_file_data"] = QString(tempArchive.readAll().toBase64());
-                    tempArchive.close();
-                    tempArchive.remove();
-                }
-            } else {
-                qDebug() << "Failed to create temporary savefile archive";
-            }
+        // The report itself, in full: the issue text is cut to fit a URL.
+        QFile reportText(staging.filePath("crash-report.txt"));
+        if (reportText.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QString text;
+            text += QStringLiteral("KeeperFX crash report, %1\n\n").arg(now.toString(Qt::ISODate));
+            text += QStringLiteral("Game: %1\nLauncher: %2\nSystem: %3\n%4\n\n")
+                        .arg(facts.gameVersion, facts.launcherVersion, facts.system, logNote);
+            text += QStringLiteral("What happened:\n%1\n\n")
+                        .arg(facts.description.isEmpty() ? QStringLiteral("(not described)") : facts.description);
+            text += QStringLiteral("Game output:\n%1\n")
+                        .arg(facts.gameOutput.isEmpty() ? QStringLiteral("(none)") : facts.gameOutput);
+            reportText.write(text.toUtf8());
+            reportText.close();
+            staged << reportText.fileName();
         }
     }
 
-    // Make request
-    QJsonDocument jsonDoc = ApiClient::getJsonResponse(QUrl("v1/crash-report"),
-                                                       ApiClient::HttpMethod::POST,
-                                                       jsonPostObject);
-
-    // Make sure response is an object
-    if (jsonDoc.isObject() == false) {
-        this->close();
-        return;
+    // Pack it
+    QString archivePath;
+    const QString folder = reportFolder();
+    if (staging.isValid() && folder.isEmpty() == false && staged.isEmpty() == false) {
+        archivePath = QDir(folder).filePath(archiveName);
+        if (Archiver::compressFiles(staged, archivePath.toStdString(), bit7z::BitFormat::Zip) == false
+            || QFileInfo::exists(archivePath) == false) {
+            qWarning() << "Crash report: could not write" << archivePath;
+            archivePath.clear();
+        }
     }
+    facts.archiveName = archivePath.isEmpty() ? QString() : archiveName;
 
-    // Get object
-    QJsonObject jsonObj = jsonDoc.object();
-
-    // Make sure response was succesful
-    bool success = jsonObj["success"].toBool();
-    if (!success) {
-        QMessageBox::warning(this, tr("Crash Report", "MessageBox Title"), tr("Failed to submit crash report.", "MessageBox Text"));
-        qWarning() << "Crash Report API response:" << jsonObj["error"].toString();
-        this->close();
-        return;
+    // The issue
+    QString title = facts.description.section(QLatin1Char('\n'), 0, 0).trimmed();
+    if (title.size() > 80) {
+        title = title.left(77) + QStringLiteral("...");
     }
+    title = title.isEmpty() ? QStringLiteral("Crash in %1").arg(facts.gameVersion)
+                            : QStringLiteral("Crash: %1").arg(title);
+    const QUrl issueUrl = CrashContext::newIssueUrl(title, CrashContext::issueBody(facts, ISSUE_BODY_MAX_CHARS));
 
-    // Show success and the report ID number
-    QMessageBox::information(this,
-                             tr("Crash Report", "MessageBox Title"),
-                             tr("Your crash report has been successfully submitted!\n\n"
-                                "The KeeperFX team can not guarantee immediate results, "
-                                "but your feedback is very helpful for the developers working on KeeperFX.\n\n"
-                                "Report ID: %1",
-                                "MessageBox Text")
-                                 .arg(QString::number(jsonObj["id"].toInt())));
+    if (archivePath.isEmpty() == false) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
+    }
+    const bool browserOpened = QDesktopServices::openUrl(issueUrl);
+
+    QString message;
+    if (archivePath.isEmpty() == false) {
+        message += tr("The crash report was saved as:\n%1\n\n", "MessageBox Text").arg(QDir::toNativeSeparators(archivePath));
+    } else {
+        message += tr("The crash report file could not be saved. "
+                      "Please attach keeperfx.log from your game folder to the issue instead.\n\n",
+                      "MessageBox Text");
+    }
+    if (browserOpened) {
+        message += tr("A new issue on our GitHub page has opened in your browser with the details "
+                      "filled in. Attach the report file to it and click Submit.",
+                      "MessageBox Text");
+    } else {
+        message += tr("Please report it on our GitHub page:\n%1", "MessageBox Text")
+                       .arg(QString(CrashContext::ISSUE_TRACKER_URL) + "/new");
+    }
+    message += tr("\n\nNothing has been sent anywhere. The report reaches us only when you submit the issue.",
+                  "MessageBox Text");
+
+    QMessageBox::information(this, tr("Crash Report", "MessageBox Title"), message);
 
     // Accept crash dialog (close it)
     this->accept();

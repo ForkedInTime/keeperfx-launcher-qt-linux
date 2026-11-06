@@ -145,14 +145,13 @@ bit7z::BitFileExtractor Archiver::getExtractor()
     return bit7z::BitFileExtractor{*lib, bit7z::BitFormat::SevenZip};
 }
 
-bit7z::BitFileCompressor Archiver::getCompressor()
+bit7z::BitFileCompressor Archiver::getCompressor(const bit7z::BitInOutFormat &format)
 {
     // Make sure library is loaded
     Archiver::loadBit7zLib();
 
     // Create the compressor
-    // For now only 7z
-    return bit7z::BitFileCompressor{*lib, bit7z::BitFormat::SevenZip};
+    return bit7z::BitFileCompressor{*lib, format};
 }
 
 bool Archiver::compressSingleFile(QFile *inputFile, std::string outputPath)
@@ -175,7 +174,8 @@ bool Archiver::compressSingleFile(QFile *inputFile, std::string outputPath)
     return false;
 }
 
-bool Archiver::compressFiles(const QStringList &inputFiles, std::string outputPath)
+bool Archiver::compressFiles(const QStringList &inputFiles, std::string outputPath,
+                             const bit7z::BitInOutFormat &format)
 {
     std::vector<std::string> paths;
     paths.reserve(inputFiles.size());
@@ -184,7 +184,7 @@ bool Archiver::compressFiles(const QStringList &inputFiles, std::string outputPa
     }
 
     try {
-        bit7z::BitFileCompressor compressor = Archiver::getCompressor();
+        bit7z::BitFileCompressor compressor = Archiver::getCompressor(format);
         compressor.compress(paths, outputPath);
         return true;
 
