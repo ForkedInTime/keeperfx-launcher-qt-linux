@@ -8,8 +8,9 @@
 #include "launcheroptions.h"
 #include "cdn.h"
 #include "helper.h"
+#include "lobbyserver.h"
 
-#define MATCHMAKING_DEFAULT_SERVER "matchmaking.keeperfx.workers.dev"
+#define MATCHMAKING_DEFAULT_SERVER LobbyServer::DEFAULT_HOST
 
 #include <QDesktopServices>
 #include <QEvent>
@@ -1023,11 +1024,10 @@ void SettingsDialog::loadSettings()
         ui->checkBoxMatchmaking->setChecked(matchmakingServer != "OFF");
         ui->labelMatchmakingServer->setDisabled(matchmakingServer == "OFF");
         ui->lineEditMatchmakingServer->setDisabled(matchmakingServer == "OFF");
-        // A config from before the key existed has no server at all; show the default rather than
-        // an empty field that would be written back as an empty server
-        if (matchmakingServer.isEmpty()) {
-            matchmakingServer = MATCHMAKING_DEFAULT_SERVER;
-        }
+        // A config from before the key existed has no server at all, and one from before this
+        // edition had its own lobby names the KeeperFX team's. Both show ours, so Save writes ours
+        // rather than an empty server or theirs (see lobbyserver.h).
+        matchmakingServer = LobbyServer::fromConfig(matchmakingServer);
         ui->lineEditMatchmakingServer->setText(matchmakingServer != "OFF" ? matchmakingServer : "");
         ui->anchorMatchmakingDefaultServer->setDisabled(matchmakingServer == "OFF");
     }

@@ -37,6 +37,8 @@ everything in it, or the Arch package or Flatpak
   `.7z`/`.zip`/`.rar`, each put where it belongs; no archive can write outside its folder.
 - 🔄 **Updates on two channels** — stable or alpha, a small patch when one fits, and the engine it
   replaces kept so older saves stay playable.
+- 🌐 **Our own online lobby** — the Multiplayer tab points at KeeperFX: Tux Edition's lobby server, and a
+  config that still names the KeeperFX team's is moved over by itself.
 - 🧰 **And** a log viewer, the Unearth map editor, music recovery, crash reports with the right log,
   a single-instance lock and UI scaling.
 
