@@ -8,12 +8,12 @@ This is a **Linux-native fork** of the KeeperFX team's settings launcher
 [KeeperFX Tux Edition](https://github.com/ForkedInTime/keeperfx-tux-edition).
 
 ![The KeeperFX Tux Edition launcher — the latest workshop items, Tux Edition release news, and buttons for
-Settings, Mods, Workshop, Browse Workshop and Map Editor](./docs/img/launcher-1.4.0.6072.png)
+Settings, Mods, Workshop, Browse Workshop and Map Editor](./docs/img/launcher-1.4.0.6103.png)
 
 ![The Workshop browser inside the launcher — maps sorted by rating, with Details, Install and Reinstall
-buttons](./docs/img/launcher-1.4.0.6072-workshop.png)
+buttons](./docs/img/launcher-1.4.0.6103-workshop.png)
 
-<sub>The launcher as of 1.4.0.6072 (November 2026). These pictures are replaced whenever the launcher changes.
+<sub>The launcher as of 1.4.0.6103 (November 2026). These pictures are replaced whenever the launcher changes.
 **[Every screen of the launcher »](docs/screenshots.md)** — all eight Settings tabs, the Mod Manager, installed add-ons, the Play menu and its dialogs, the update check, the map editor.</sub>
 
 > ⚠️ **Unofficial — not affiliated with the KeeperFX team.** The launcher is *their* work; this fork only adds
@@ -42,7 +42,7 @@ everything in it, or the Arch package or Flatpak
 - 🧰 **And** a log viewer, the Unearth map editor, music recovery, crash reports that come to our own
   issue tracker (the launcher sends nothing anywhere), a single-instance lock and UI scaling.
 
-128 commits on top of the team's `master`, 109 of them this fork's.
+130 commits on top of the team's `master`, 111 of them this fork's.
 **[Everything this fork changes »](docs/changes.md)**
 
 ## 🛠️ Build from source
