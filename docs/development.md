@@ -46,3 +46,18 @@ gh workflow run build-appimage.yml --repo ForkedInTime/keeperfx-tux-edition --re
 ```
 
 Push launcher work to **both `alpha` and `master`** — `alpha` is what the release build clones.
+
+## Keeping the pages current
+
+The README, [changes](changes.md) and [screenshots](screenshots.md) are what users read, so they are brought
+up to date at every release of the game, by the game repository's checklist
+([Keeping the pages current](https://github.com/ForkedInTime/keeperfx-tux-edition/blob/alpha/docs/releasing.md#keeping-the-pages-current)).
+For this repository that means:
+
+- **Every launcher change a user can see** gets its line in the README's list and in `docs/changes.md`.
+- **All the pictures are retaken** (the two in the README and the seventeen on the screenshots page) whenever
+  anything visible changed since the version they show, on the released build. Each set gets new file names
+  with the version in them, the old files are removed, and the captions name the version.
+- **The commit count**, in the README and in `docs/changes.md`, is
+  `git log --oneline --no-merges upstream/master..HEAD`, counting the commit that writes it.
+- **After the merge**, `alpha` and `master` match, and the front page on GitHub (`alpha`'s README) shows it.
