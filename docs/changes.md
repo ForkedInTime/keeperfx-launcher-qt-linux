@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 130 commits on top of the team's `master`, 111 of them this
+The fork has grown well past the porting patches: 133 commits on top of the team's `master`, 114 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -98,6 +98,15 @@ Everything below is ours, not upstream's:
   panning, delta time and the possession cursor lock off, the startup screens and the zoom-out limit gone, and
   the creature flower, select box and hand sizes and the API port saved empty, which the engine reads as 0. An
   empty value left by such a Save reads the same way.
+- **Your own notes in `keeperfx.cfg` stay** (`cfgmerge.h`, `settingscfgformat.cpp`, `settings.cpp`) — the
+  team's launcher writes the file again from the release's copy of the defaults (`_keeperfx.cfg`, which the
+  AppImage and an update from inside the launcher leave next to yours), so the first start after an update
+  replaced your own comment lines, order and layout with the release's. Now your file is the start: values
+  change on their own lines, a setting the launcher removes loses its line, and a setting your file lacks
+  is added at the end under the release's comment for it. Resetting the settings (the installer does) puts
+  back the release's defaults, and keeps your settings when there is no release copy to go back to. The
+  settings format is also registered once: every load registered it again, and Qt takes sixteen, so a few
+  *Restore defaults* in one session left the launcher unable to read or write its settings.
 - **OpenGL as the renderer, once, for configs that never chose** (`settings.cpp`) — the engine's default renderer
   became OpenGL (with the software renderer taking over by itself where OpenGL cannot start). A config written
   before then says `RENDERER=SOFTWARE` because that was the shipped default, and copying missing keys never
