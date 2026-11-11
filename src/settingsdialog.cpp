@@ -16,10 +16,13 @@
 #include <QDesktopServices>
 #include <QEvent>
 #include <QFontDatabase>
+#include <QFormLayout>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QResizeEvent>
 #include <QScreen>
 
 // Selects the ZOOM_TO_MOUSE / ROTATE_AROUND_MOUSE entry that keeperfx.cfg's value means to the
@@ -51,11 +54,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     , ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
-
-    // Disable resizing and remove maximize button
-    setFixedSize(size());
-    setWindowFlag(Qt::WindowMaximizeButtonHint, false);
-    setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
 
     // Reset setting has changed variable
     settingHasChanged = false;
@@ -181,19 +179,9 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->labelRenderer->setDisabled(true);
     }
 
-    // Smoothen edges (-vidsmooth): newer engines ignore it. Hide it there and move the rest of
-    // the left column up a row, so the Graphics tab has no hole. The setting itself is kept.
+    // Smoothen edges (-vidsmooth): newer engines ignore it. Hide its row there; the setting itself is kept.
     if (KfxVersion::hasFunctionality("vidsmooth_ignored") == true) {
-        QWidget *gfxTab = ui->checkBoxSmoothenVideo->parentWidget();
-        const int hiddenY = ui->checkBoxSmoothenVideo->y();
-        const int rowStep = ui->comboBoxRenderer->y() - hiddenY;
-        const int rightColumnX = ui->labelNeutralFlashRate->x();
-        ui->checkBoxSmoothenVideo->setVisible(false);
-        for (QWidget *w : gfxTab->findChildren<QWidget *>(Qt::FindDirectChildrenOnly)) {
-            if (w->x() < rightColumnX && w->y() > hiddenY) {
-                w->move(w->x(), w->y() - rowStep);
-            }
-        }
+        hideSettingRow(ui->checkBoxSmoothenVideo);
     }
 
     // Parchment map fade
@@ -212,7 +200,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: On", "Variable Refresh Dropdown"), "ON");
         ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: Off", "Variable Refresh Dropdown"), "OFF");
     } else {
-        ui->comboBoxVariableRefresh->setVisible(false);
+        hideSettingRow(ui->comboBoxVariableRefresh);
     }
 
     // Relative mouse mode
@@ -348,8 +336,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 #ifndef Q_OS_WINDOWS
     // The Tux Edition downloads from our GitHub releases (served by GitHub's own
     // worldwide CDN), so the keeperfx.net/Cloudflare picker does nothing here — hide it.
-    ui->comboBoxCDN->setVisible(false);
-    ui->labelCDN->setVisible(false);
+    hideSettingRow(ui->comboBoxCDN);
 #endif
 
     // Screenshot type dropdown
@@ -1822,6 +1809,97 @@ void SettingsDialog::addCustomResolution(int width, int height, QComboBox *sourc
         if (index != -1) {
             sourceCombo->setCurrentIndex(index);
             sourceCombo->setProperty("previousIndex", index);
+        }
+    }
+}
+
+// Hide a setting's row: the control and the label in front of it, with no gap left in the form.
+void SettingsDialog::hideSettingRow(QWidget *field)
+{
+    auto *form = qobject_cast<QFormLayout *>(field->parentWidget() ? field->parentWidget()->layout() : nullptr);
+    if (form && form->indexOf(field) >= 0) {
+        form->setRowVisible(field, false);
+    } else {
+        field->setVisible(false);
+    }
+}
+
+void SettingsDialog::switchContainerLayout(QWidget *container, bool useHorizontal) {
+
+    // Make sure container exists
+    if (!container) return;
+
+    // Variables
+    QList<QWidget*> widgets;
+    QLayoutItem *child;
+    QLayout *oldLayout = container->layout();
+
+    // Store widgets and delete the old layout
+    if (oldLayout) {
+        while ((child = oldLayout->takeAt(0)) != nullptr) {
+            if (child->widget()) {
+                widgets.append(child->widget());
+            }
+            delete child;
+        }
+        delete oldLayout;
+    }
+
+    // Create the new layout
+    QBoxLayout *newLayout;
+    if (useHorizontal) {
+        newLayout = new QHBoxLayout(container);
+    } else {
+        newLayout = new QVBoxLayout(container);
+    }
+
+    // Keep margins clean so it doesn't look bloated when wrapped
+    // newLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Add widgets back
+    for (QWidget *widget : widgets) {
+
+        newLayout->addWidget(widget);
+
+        if (useHorizontal) {
+            widget->setVisible(true);
+        } else {
+            bool hasRealContent = false;
+            QLayout *wLayout = widget->layout();
+
+            if (wLayout) {
+                for (int i = 0; i < wLayout->count(); ++i) {
+                    QLayoutItem *item = wLayout->itemAt(i);
+                    if (item->widget() || item->layout()) {
+                        hasRealContent = true;
+                        break;
+                    }
+                }
+            } else {
+                hasRealContent = true;
+            }
+            widget->setVisible(hasRealContent);
+        }
+    }
+}
+
+void SettingsDialog::resizeEvent(QResizeEvent *event) {
+
+    // Original dialog resize event
+    QDialog::resizeEvent(event);
+
+    // Switch layout based on current window width
+    bool useHorizontal = (width() >= 800);
+
+    // Dynamically find all widgets named starting with "responsive_"
+    QList<QWidget*> responsiveContainers = this->findChildren<QWidget*>(QRegularExpression("^responsive_.*"));
+
+    // Loop trough all found containers
+    for (qsizetype i = 0; i < responsiveContainers.size(); ++i) {
+        QWidget* container = responsiveContainers.at(i);
+        // Only attempt to switch if the container has a layout assigned to it
+        if (container->layout()) {
+            switchContainerLayout(container, useHorizontal);
         }
     }
 }
