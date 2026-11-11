@@ -85,8 +85,31 @@ int main(int argc, char **argv)
 		const QDir game(tmp.path());
 		touch(game, "replays/campaign/notes.txt", base);
 		QDir(game.filePath("replays/campaign/x.fxpkt")).mkpath(".");
-		touch(game, "old.pck", base);
-		expect(ReplayFiles::list(game).isEmpty(), "other files, a folder named .fxpkt and a root .pck are not listed");
+		touch(game, "keeperfx.log", base);
+		expect(ReplayFiles::list(game).isEmpty(), "other files and a folder named .fxpkt are not listed");
+	}
+
+	{
+		// packetsave_pck_listed: with "Enable Packetsave" the launcher passes -packetsave <name>.pck; the
+		// engine then records only to that file in the game folder and saves no automatic replay
+		QTemporaryDir tmp;
+		const QDir game(tmp.path());
+		touch(game, "packetsave.pck", base.addSecs(60));
+		touch(game, "replays/campaign/old.pck", base);
+		const QList<ReplayFiles::Entry> entries = ReplayFiles::list(game);
+		expect(paths(entries) == QStringList({"packetsave.pck", "replays/campaign/old.pck"}),
+			"a Packetsave recording (.pck) is listed, in the game folder and under replays/");
+		expect(folders(entries) == QStringList({"", "campaign"}), "the game folder's with no folder");
+	}
+
+	{
+		// replays_folder_any_case: a game folder unpacked from an archive may hold Replays/
+		QTemporaryDir tmp;
+		const QDir game(tmp.path());
+		touch(game, "Replays/campaign/a.fxpkt", base);
+		const QList<ReplayFiles::Entry> entries = ReplayFiles::list(game);
+		expect(paths(entries) == QStringList({"Replays/campaign/a.fxpkt"}) && folders(entries) == QStringList({"campaign"}),
+			"a Replays/ folder in another case is found, its path kept as it is on disk");
 	}
 
 	{

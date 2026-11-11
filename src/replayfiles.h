@@ -4,9 +4,12 @@
 //
 // The engine saves each replay as replays/<folder>/<name>.fxpkt in the game folder: campaign/,
 // multiplayer/, freeplay/, a mod's own folder, or replays/ itself. This lists every one of them,
-// and any .fxpkt put straight into the game folder (one a friend sent, say), newest first (equal
+// and any replay put straight into the game folder (one a friend sent, say), newest first (equal
 // times by path), with the path relative to the game folder -- what the launcher passes to
-// -packetload, since the engine runs in the game folder. Header-only and QtCore-only, so
+// -packetload, since the engine runs in the game folder. Also listed: .pck files, which is what a
+// player with "Enable Packetsave" gets (-packetsave <name>.pck; the engine then saves no automatic
+// replay) and what older builds wrote; the engine's own replay housekeeping treats both alike. The
+// replays folder is found in any case (Replays/ from an archive). Header-only and QtCore-only, so
 // tests/test_replayfiles.cpp can check it without the launcher.
 
 #include <QDateTime>
@@ -31,8 +34,19 @@ struct Entry
 inline QList<Entry> list(const QDir &gameDir)
 {
 	QList<Entry> entries;
-	const QStringList filters = QStringList() << "*.fxpkt";
-	const QString replaysPath = gameDir.filePath("replays");
+	const QStringList filters = QStringList() << "*.fxpkt" << "*.pck";
+
+	// replays/, or the same name in another case when that is all there is
+	QString replaysName = "replays";
+	if (!QFileInfo(gameDir.filePath(replaysName)).isDir()) {
+		for (const QString &name : gameDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+			if (name.compare("replays", Qt::CaseInsensitive) == 0) {
+				replaysName = name;
+				break;
+			}
+		}
+	}
+	const QString replaysPath = gameDir.filePath(replaysName);
 	const QDir replaysDir(replaysPath);
 
 	auto add = [&](const QFileInfo &info, const QString &folder) {
