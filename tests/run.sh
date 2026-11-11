@@ -81,3 +81,14 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_clipboardfile" "$ROOT_DIR/tests/test_clipboardfile.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_clipboardfile"
+
+# The About tab shows every line whole at the window's fixed size (Qt Widgets, offscreen; the
+# window comes from the real ui/settingsdialog.ui through uic).
+UIC="$(pkg-config --variable=libexecdir Qt6Core)/uic"
+"$UIC" "$ROOT_DIR/ui/settingsdialog.ui" -o "$ROOT_DIR/bin/ui_settingsdialog.h"
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" -I"$ROOT_DIR/bin" \
+	-DSOURCE_ROOT="\"$ROOT_DIR\"" \
+	$(pkg-config --cflags Qt6Widgets) \
+	-o "$ROOT_DIR/bin/test_aboutlayout" "$ROOT_DIR/tests/test_aboutlayout.cpp" \
+	$(pkg-config --libs Qt6Widgets)
+QT_QPA_PLATFORM=offscreen "$ROOT_DIR/bin/test_aboutlayout"

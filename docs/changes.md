@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 143 commits on top of the team's `master`, 124 of them this
+The fork has grown well past the porting patches: 145 commits on top of the team's `master`, 126 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -85,6 +85,9 @@ Everything below is ours, not upstream's:
   about the game, while problems with this edition go to our GitHub page. "Don't show this again" turns the
   note off. The About tab says the same, and the messages that sent players to that Discord for help now
   point to our tracker.
+- **About tab** (`settingsdialog.ui`, `aboutcredits.h`) — the tab is laid out, so its lines wrap instead of
+  being cut off at the edge (at the window's fixed size the Discord and GitHub links were cut short from a
+  10 pt font up), and a line under the translators credits this edition's contributors.
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
 - **UI scale** — scale the whole launcher from 100% up to 200% (110 / 125 / 150 / 200) for readability.
 - **Camera settings that survive Save** (`settingsdialog.cpp`) — *Zoom to cursor* and *Rotate around cursor*

@@ -1726,144 +1726,187 @@ height: 35px;
       <attribute name="title">
        <string comment="Tab Title">About</string>
       </attribute>
-      <widget class="QWidget" name="aboutLayoutWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>17</x>
-         <y>18</y>
-         <width>750</width>
-         <height>216</height>
-        </rect>
+      <layout class="QVBoxLayout" name="verticalLayoutAboutTab">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>750</width>
-         <height>0</height>
-        </size>
+       <property name="rightMargin">
+        <number>0</number>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QWidget" name="widget" native="true">
-          <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QScrollArea" name="scrollAreaAbout">
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaAboutContents">
+          <layout class="QVBoxLayout" name="verticalLayoutAboutPage">
            <item>
-            <widget class="QLabel" name="labelAboutImage">
-             <property name="maximumSize">
-              <size>
-               <width>250</width>
-               <height>180</height>
-              </size>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="pixmap">
-              <pixmap resource="../resources.qrc">:/res/img/launchermn.jpg</pixmap>
-             </property>
-             <property name="scaledContents">
-              <bool>true</bool>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
-             </property>
+            <widget class="QWidget" name="aboutLayoutWidget" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item alignment="Qt::AlignmentFlag::AlignTop">
+               <widget class="QWidget" name="widget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelAboutImage">
+                   <property name="maximumSize">
+                    <size>
+                     <width>250</width>
+                     <height>180</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap resource="../resources.qrc">:/res/img/launchermn.jpg</pixmap>
+                   </property>
+                   <property name="scaledContents">
+                    <bool>true</bool>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widgetAbout" native="true">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayoutAboutText">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelAbout">
+                   <property name="text">
+                    <string notr="true">&lt;PLACEHOLDER_ABOUT_PAGE&gt;</string>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::TextFormat::PlainText</enum>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                   <property name="openExternalLinks">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_2" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="spacing">
+               <number>15</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="labelContributors">
+                <property name="text">
+                 <string notr="true">&lt;PLACEHOLDER_CONTRIBUTORS&gt;</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelLauncherTranslators">
+                <property name="text">
+                 <string notr="true">&lt;PLACEHOLDER_LAUNCHER_TRANSLATORS&gt;</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelTuxContributors">
+                <property name="text">
+                 <string notr="true">&lt;PLACEHOLDER_TUX_CONTRIBUTORS&gt;</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
            </item>
           </layout>
          </widget>
-        </item>
-        <item>
-         <widget class="QWidget" name="widgetAbout" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <widget class="QLabel" name="labelAbout">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>10</y>
-             <width>451</width>
-             <height>181</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string notr="true">&lt;PLACEHOLDER_ABOUT_PAGE&gt;</string>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::TextFormat::PlainText</enum>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
-           </property>
-           <property name="openExternalLinks">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="widget_2" native="true">
-       <property name="geometry">
-        <rect>
-         <x>39</x>
-         <y>239</y>
-         <width>771</width>
-         <height>231</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="spacing">
-         <number>15</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="labelContributors">
-          <property name="text">
-           <string notr="true">&lt;PLACEHOLDER_CONTRIBUTORS&gt;</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="labelLauncherTranslators">
-          <property name="text">
-           <string notr="true">&lt;PLACEHOLDER_LAUNCHER_TRANSLATORS&gt;</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
