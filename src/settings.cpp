@@ -494,16 +494,40 @@ bool Settings::applyOpenGlDefaultOnce()
 
 void Settings::resetKfxSettings()
 {
-    if (Settings::kfxSettings) {
-        Settings::kfxSettings->clear();
-        Settings::copyMissingDefaultSettings();
+    if (!Settings::kfxSettings) {
+        return;
     }
+
+    // This edition: the settings go back to the defaults, which with configs in the game's
+    // folder are the release's own copy, '_keeperfx.cfg'. Without one there is nothing to go
+    // back to and the settings stay: the file keeps every line a setting is not cleared from,
+    // and a keeperfx.cfg with no settings in it would leave the game without INSTALL_PATH until
+    // the launcher's next start.
+    if (KfxVersion::hasFunctionality("use_appdata_configs") == false
+        && QFile::exists(QCoreApplication::applicationDirPath() + "/_keeperfx.cfg") == false) {
+        qInfo() << "No defaults to reset keeperfx.cfg to, keeping its settings";
+        return;
+    }
+
+    Settings::kfxSettings->clear();
+    Settings::copyMissingDefaultSettings();
+    Settings::copyMissingAlphaSettings();
 }
 
 void Settings::resetLauncherSettings()
 {
-    if (Settings::launcherSettings) {
-        Settings::launcherSettings->clear();
-        Settings::copyMissingLauncherSettings();
+    if (!Settings::launcherSettings) {
+        return;
     }
+
+    // Back to the defaults: every setting that has one, and the release channel, which
+    // copyMissingLauncherSettings works out again. The records without a default stay, such as
+    // RENDERER_OPENGL_DEFAULT_APPLIED (without it the next start would move a RENDERER=SOFTWARE
+    // the player chose back to OPENGL) and MAP_EDITOR_VERSION. They also stayed while the file
+    // writer kept every line it was not given a value for.
+    for (auto it = defaultLauncherSettingsMap.begin(); it != defaultLauncherSettingsMap.end(); ++it) {
+        Settings::launcherSettings->remove(it.key());
+    }
+    Settings::launcherSettings->remove("CHECK_FOR_UPDATES_RELEASE");
+    Settings::copyMissingLauncherSettings();
 }
