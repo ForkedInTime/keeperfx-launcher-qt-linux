@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 15:20+0200\n"
+"POT-Creation-Date: 2026-11-11 09:31-0800\n"
 "PO-Revision-Date: 2026-03-20 10:31+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -119,8 +119,6 @@ msgid "Restore Defaults"
 msgstr "Відновити налаштування за замовчуванням"
 
 #, fuzzy
-#| msgctxt "CrashDialog|Input Placeholder"
-#| msgid "KeeperFX.net username"
 msgctxt "CDN|Download Server"
 msgid "KeeperFX.net (Default, Germany)"
 msgstr "Ім'я користувача KeeperFX.net"
@@ -167,8 +165,18 @@ msgid "Copy"
 msgstr "Копіювати"
 
 msgctxt "CopyDkFilesDialog|Label"
-msgid "A suitable DK installation has been automatically detected."
-msgstr "Відповідну установку DK було визначено автоматично."
+msgid "Searching for your Dungeon Keeper install…"
+msgstr ""
+
+msgctxt "CopyDkFilesDialog|Label"
+msgid "✓ Found your Dungeon Keeper files — ready to copy."
+msgstr ""
+
+msgctxt "CopyDkFilesDialog|Label"
+msgid ""
+"Couldn't find Dungeon Keeper anywhere on this system. Please point to your "
+"install below."
+msgstr ""
 
 msgctxt "CopyDkFilesDialog|Directory Browse Dialog"
 msgid "Select Directory containing Dungeon Keeper files"
@@ -244,23 +252,18 @@ msgstr "KeeperFX вийшов з ладу"
 
 msgctxt "CrashDialog|Information Label"
 msgid ""
-"It seems that KeeperFX has crashed and is unable to recover. If you wish to "
-"submit technical details about this crash to the KeeperFX developers, you "
-"can describe your problem below and click 'Send'. If you add contact details "
-"we can contact you later. Additional information such as KeeperFX logfiles "
-"and configuration will be sent too."
+"It seems that KeeperFX has crashed and is unable to recover. To help us fix "
+"it, describe what happened below and click 'Report on GitHub'. The launcher "
+"saves a crash report on your computer (the game's log and settings, and a "
+"save if you choose one) and opens a new issue on our GitHub page with the "
+"details filled in. Attach the report file there and submit it. Nothing is "
+"sent anywhere until you do."
 msgstr ""
-"Схоже, що KeeperFX зазнав аварійного завершення роботи і не може "
-"відновитися. Якщо ви хочете повідомити розробникам KeeperFX про технічні "
-"деталі цієї проблеми, опишіть вашу проблему нижче і натисніть кнопку "
-"«Надіслати». Якщо ви додасте контактні дані, ми зможемо зв'язатися з вами "
-"пізніше. Також буде надіслана додаткова інформація, така як файли журналів "
-"KeeperFX і конфігурація."
 
 #, qt-format
 msgctxt "CrashDialog|Information Label"
-msgid "You can also raise an issue on Github: %1"
-msgstr "Ви також можете підняти питання на Github: %1"
+msgid "Our issue tracker: %1"
+msgstr ""
 
 msgctxt "CrashDialog|Input box title"
 msgid "Information (Optional)"
@@ -286,29 +289,13 @@ msgstr ""
 "Якщо у вас є збереження гри, яке може надати нам більше інформації. Ви "
 "можете додати його тут."
 
-msgctxt "CrashDialog|Input box title"
-msgid "Contact Information (Optional)"
-msgstr "Контактна інформація (необов'язково)"
-
-msgctxt "CrashDialog|Input Placeholder"
-msgid "Discord handle"
-msgstr "Ім’я користувача Discord"
-
-msgctxt "CrashDialog|Input Placeholder"
-msgid "KeeperFX.net username"
-msgstr "Ім'я користувача KeeperFX.net"
-
-msgctxt "CrashDialog|Input Placeholder"
-msgid "Email Address"
-msgstr "Адреса електронної пошти"
+msgctxt "CrashDialog|Button"
+msgid "Close"
+msgstr ""
 
 msgctxt "CrashDialog|Button"
-msgid "Cancel"
-msgstr "Скасувати"
-
-msgctxt "CrashDialog|Button"
-msgid "Send"
-msgstr "Надіслати"
+msgid "Report on GitHub"
+msgstr ""
 
 msgctxt "CrashDialog|Menu Placeholder"
 msgid "No saves found"
@@ -318,30 +305,45 @@ msgctxt "CrashDialog|Default Savefile"
 msgid "None"
 msgstr "Ні"
 
-msgctxt "CrashDialog|MessageBox Title"
-msgid "Crash Report"
-msgstr "Звіт про збій"
+#, qt-format
+msgctxt "CrashDialog|MessageBox Text"
+msgid ""
+"The crash report was saved as:\n"
+"%1\n"
+"\n"
+msgstr ""
 
 msgctxt "CrashDialog|MessageBox Text"
-msgid "Failed to submit crash report."
-msgstr "Не вдалося надіслати звіт про збій."
+msgid ""
+"The crash report file could not be saved. Please attach keeperfx.log from "
+"your game folder to the issue instead.\n"
+"\n"
+msgstr ""
+
+msgctxt "CrashDialog|MessageBox Text"
+msgid ""
+"A new issue on our GitHub page has opened in your browser with the details "
+"filled in. Attach the report file to it and click Submit."
+msgstr ""
 
 #, qt-format
 msgctxt "CrashDialog|MessageBox Text"
 msgid ""
-"Your crash report has been successfully submitted!\n"
-"\n"
-"The KeeperFX team can not guarantee immediate results, but your feedback is "
-"very helpful for the developers working on KeeperFX.\n"
-"\n"
-"Report ID: %1"
+"Please report it on our GitHub page:\n"
+"%1"
 msgstr ""
-"Ваш звіт про збій був успішно відправлений!\n"
+
+msgctxt "CrashDialog|MessageBox Text"
+msgid ""
 "\n"
-"Команда KeeperFX не може гарантувати негайних результатів, але ваш відгук "
-"дуже корисний для розробників, які працюють над KeeperFX.\n"
 "\n"
-"Ідентифікатор звіту: %1"
+"Nothing has been sent anywhere. The report reaches us only when you submit "
+"the issue."
+msgstr ""
+
+msgctxt "CrashDialog|MessageBox Title"
+msgid "Crash Report"
+msgstr "Звіт про збій"
 
 msgctxt "DirectConnectDialog|Window Title"
 msgid "Direct Connect"
@@ -386,6 +388,73 @@ msgstr "Неправильна IP-адреса"
 msgctxt "DirectConnectDialog|MessageBox Text"
 msgid "IPv6 addresses are not supported."
 msgstr "IPv6 адреси не підтримуються."
+
+msgctxt "DownloadMapEditorDialog|Dialog Title"
+msgid "Download Map Editor"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Header"
+msgid "Download Map Editor"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Information"
+msgid ""
+"The Unearth map editor was not found. Unearth is a third-party tool for "
+"creating and editing KeeperFX maps.\n"
+"\n"
+"You can let the launcher automatically download and install the latest "
+"version of Unearth for you.\n"
+"\n"
+"Once installed, you can launch the map editor directly from the launcher."
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Button"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Button"
+msgid "Download"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Failure Message"
+msgid "Failed to get download URL for the map editor"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Failure Message"
+msgid "Invalid map editor file extension. It must be a zip archive."
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Failure Message"
+msgid "Failed to download the map editor archive"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Failure message"
+msgid "Map editor archive test failed. It may be corrupted."
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Progress bar"
+msgid "Extracting: %p%"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|MessageBox Text"
+msgid "The Unearth map editor has been installed."
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|Progress bar"
+msgid "Downloading: %p% (%vMiB)"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|MessageBox Title"
+msgid "Download failed"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|MessageBox Title"
+msgid "Confirmation"
+msgstr ""
+
+msgctxt "DownloadMapEditorDialog|MessageBox Text"
+msgid "Are you sure you want to cancel?"
+msgstr ""
 
 msgctxt "DownloadMusicDialog|Dialog Title"
 msgid "KeeperFX Background Music"
@@ -554,8 +623,6 @@ msgid "Failed to connect to local ENET server."
 msgstr "Не вдалося підключитися до локального сервера ENET."
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|Header"
-#| msgid "Remove leftover files"
 msgctxt "FileRemoverDialog|Window Title"
 msgid "Remove leftover files"
 msgstr "Видалити залишкові файли"
@@ -565,14 +632,6 @@ msgid "Remove leftover files"
 msgstr "Видалити залишкові файли"
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|Information Label"
-#| msgid ""
-#| "The KeeperFX launcher has found files that were left over after KeeperFX "
-#| "updates. These files might cause issues and should be removed.\n"
-#| "\n"
-#| "This list is maintained by the KeeperFX team, and the files are "
-#| "considered safe to remove. You can review the files that will be removed "
-#| "before proceeding."
 msgctxt "FileRemoverDialog|Information Label"
 msgid ""
 "The KeeperFX launcher has found files that were left over after KeeperFX was "
@@ -586,8 +645,6 @@ msgstr ""
 "продовжувати."
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|Header"
-#| msgid "Remove leftover files"
 msgctxt "FileRemoverDialog|Checkbox Toggle"
 msgid "Always remove leftover files automatically"
 msgstr "Видалити залишкові файли"
@@ -605,11 +662,6 @@ msgid "Confirmation"
 msgstr "Підтвердження"
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|MessageBox Text"
-#| msgid ""
-#| "Are you sure?\n"
-#| "\n"
-#| "KeeperFX might not function correctly with these files."
 msgctxt "FileRemoverDialog|MessageBox Text"
 msgid ""
 "KeeperFX might not function correctly if these files are present.\n"
@@ -621,18 +673,37 @@ msgstr ""
 "KeeperFX може працювати некоректно з цими файлами."
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|MessageBox Text"
-#| msgid "Something went wrong while removing unwanted files."
 msgctxt "FileRemoverDialog|MessageBox Text"
 msgid "Something went wrong while removing leftover files."
 msgstr "Щось пішло не так під час видалення небажаних файлів."
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|MessageBox Text"
-#| msgid "Unwanted files have been removed!"
 msgctxt "FileRemoverDialog|MessageBox Text"
 msgid "Leftover files have been removed!"
 msgstr "Небажані файли видалено!"
+
+msgctxt "Game|MessageBox Title"
+msgid "KeeperFX could not start"
+msgstr ""
+
+#, qt-format
+msgctxt "Game|MessageBox Text"
+msgid ""
+"KeeperFX could not be started.\n"
+"\n"
+"This is not a game crash — the program stopped before it began running. That "
+"normally means this installation no longer matches the libraries on your "
+"system, which an update can cause. Reinstalling or rebuilding KeeperFX "
+"usually fixes it.\n"
+"\n"
+"Details:\n"
+"%1"
+msgstr ""
+
+#, qt-format
+msgctxt "Game|"
+msgid "The program exited immediately with code %1."
+msgstr ""
 
 msgctxt "Game|MessageBox Title"
 msgid "KeeperFX has crashed"
@@ -644,16 +715,10 @@ msgid ""
 "\n"
 "Crash reporting is disabled because you are using the heavylog option.\n"
 "\n"
-"If you require assistance, please create an issue on Github or contact us on "
-"the Keeper Klan Discord."
+"To report it, open an issue on our GitHub page and attach keeperfx.log from "
+"your game folder:\n"
+"https://github.com/ForkedInTime/keeperfx-tux-edition/issues"
 msgstr ""
-"Схоже, що KeeperFX аварійно завершив роботу і не може відновитися.\n"
-"\n"
-"Відправка звіту про збій вимкнена, оскільки ви використовуєте опцію "
-"heavylog.\n"
-"\n"
-"Якщо потрібна допомога, будь ласка, створіть issue на GitHub або зв’яжіться "
-"з нами через Discord Keeper Klan."
 
 msgctxt "InstallKfxDialog|Window Title"
 msgid "Install KeeperFX"
@@ -744,17 +809,11 @@ msgstr "Альфа-збірки KeeperFX"
 msgctxt "InstallKfxDialog|MessageBox Text"
 msgid ""
 "Alpha patches may contain new features and changes, but often contain bugs "
-"and unfinished functionality. These patches are mostly meant for testers, "
-"and it is suggested to be part of the Keeper Klan discord if you use them.\n"
+"and unfinished functionality. These patches are mostly meant for testers. "
+"Please report any problems you find on our GitHub page.\n"
 "\n"
 "Are you sure you want to use Alpha patches?"
 msgstr ""
-"Альфа-випуски можуть містити нові функції та зміни, але часто містять "
-"помилки та незавершену функціональність. Ці патчі здебільшого призначені для "
-"тестувальників, і якщо ви використовуєте їх, ви маєте бути частиною "
-"розбіжностей у клані Хранителів, якщо ви їх використовуєте.\n"
-"\n"
-"Ви впевнені, що хочете використовувати Альфа-випуск?"
 
 msgctxt "InstallKfxDialog|MessageBox Title"
 msgid "Uninstall KeeperFX"
@@ -826,9 +885,25 @@ msgctxt "LauncherMainWindow|Button"
 msgid "Workshop"
 msgstr "Майстерня"
 
+msgctxt "LauncherMainWindow|Button"
+msgid "Browse Workshop"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Tooltip"
+msgid ""
+"Browse and install workshop maps, campaigns and mods without leaving the "
+"launcher"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Button"
+msgid "Map Editor"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Tooltip"
+msgid "Create and edit maps with Unearth"
+msgstr ""
+
 #, fuzzy
-#| msgctxt "SettingsDialog|Checkbox Toggle"
-#| msgid "Check for KeeperFX updates"
 msgctxt "LauncherMainWindow|Button tooltip text"
 msgid "Check for updates"
 msgstr "Перевірте наявність оновлень KeeperFX"
@@ -850,15 +925,11 @@ msgid "Play"
 msgstr "Грати"
 
 #, fuzzy
-#| msgctxt "SettingsDialog|Checkbox Toggle"
-#| msgid "Check for KeeperFX updates"
 msgctxt "LauncherMainWindow|Version label tooltip text"
 msgid "Click to check for updates"
 msgstr "Перевірте наявність оновлень KeeperFX"
 
 #, fuzzy
-#| msgctxt "ScanNetworkDialog|Progress bar"
-#| msgid "Scanning..."
 msgctxt "LauncherMainWindow|Fallback text label"
 msgid "Loading..."
 msgstr "Сканування..."
@@ -894,6 +965,21 @@ msgctxt "LauncherMainWindow|Messagebox Checkbox label"
 msgid "Don't show this again"
 msgstr "Не показуйте це знову"
 
+msgctxt "LauncherMainWindow|MessageBox Title"
+msgid "KeeperFX"
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Text"
+msgid ""
+"The background music files are missing, so the game will play without "
+"music.\n"
+"\n"
+"The music is not part of the KeeperFX download. It can be downloaded "
+"separately, or copied from an original Dungeon Keeper installation.\n"
+"\n"
+"Do you want to download the music now?"
+msgstr ""
+
 msgctxt "LauncherMainWindow|MessageBox Text"
 msgid ""
 "The launcher failed to determine the version of KeeperFX. Your installation "
@@ -927,16 +1013,8 @@ msgid "Direct connect (MP)"
 msgstr "Пряме підключення (MP)"
 
 msgctxt "LauncherMainWindow|Menu"
-msgid "Scan local network (MP)"
-msgstr "Сканування локальної мережі (MP)"
-
-msgctxt "LauncherMainWindow|Menu"
-msgid "Test internet lobby (MP)"
-msgstr "Випробувати інтернет-лобі (MP)"
-
-msgctxt "LauncherMainWindow|Menu"
-msgid "Run packetfile"
-msgstr "Запустити файл пакету"
+msgid "Replays…"
+msgstr ""
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Start without mods"
@@ -953,6 +1031,14 @@ msgstr "Гра (hvlog)"
 msgctxt "LauncherMainWindow|Button text"
 msgid "Play"
 msgstr "Грати"
+
+msgctxt "LauncherMainWindow|Menu"
+msgid "View logs"
+msgstr ""
+
+msgctxt "LauncherMainWindow|Menu"
+msgid "Download music"
+msgstr ""
 
 msgctxt "LauncherMainWindow|MessageBox Text"
 msgid ""
@@ -990,14 +1076,21 @@ msgstr ""
 "Щоб змінити мову, потрібно перезапустити лаунчер. Ви хочете зробити це зараз?"
 
 #, fuzzy
-#| msgctxt "UpdateDialog|Window Title"
-#| msgid "KeeperFX Update"
 msgctxt "LauncherMainWindow|MessageBox Title"
 msgid "KeeperFX Update"
 msgstr "Оновлення KeeperFX"
 
 msgctxt "LauncherMainWindow|MessageBox Text"
-msgid "You are already on the latest version!"
+msgid ""
+"This copy of KeeperFX was installed by your package manager, which owns the "
+"game files.\n"
+"\n"
+"Update it the same way you installed it — for example 'yay -Syu' on Arch — "
+"and this launcher will follow along."
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Text"
+msgid "No updates at this time — you're on the latest version!"
 msgstr ""
 
 msgctxt "LauncherMainWindow|MessageBox Text"
@@ -1042,8 +1135,66 @@ msgid "Failed to start KeeperFX. Unknown error."
 msgstr "Не вдалося запустити KeeperFX. Невідома помилка."
 
 msgctxt "LauncherMainWindow|Window Title"
-msgid "KeeperFX Launcher"
-msgstr "Лаунчер KeeperFX"
+msgid "KeeperFX Tux Edition"
+msgstr ""
+
+msgctxt "LauncherMainWindow|"
+msgid "an older version"
+msgstr ""
+
+msgctxt "LauncherMainWindow|"
+msgid "Map editor update"
+msgstr ""
+
+#, qt-format
+msgctxt "LauncherMainWindow|"
+msgid ""
+"You have %1 of the Unearth map editor; %2 is available.\n"
+"\n"
+"Update now?"
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Title"
+msgid "Keeper Klan Discord"
+msgstr ""
+
+#, qt-format
+msgctxt "LauncherMainWindow|MessageBox Text"
+msgid ""
+"Keeper Klan is the Discord server of the official KeeperFX, which is made "
+"for Windows. It's a good place to talk about the game and chat with the rest "
+"of the community.<br/><br/>It is not the place for problems with KeeperFX: "
+"Tux Edition. The KeeperFX team does not make this Linux edition, so please "
+"report those on our GitHub page instead:<br/>%1"
+msgstr ""
+
+msgctxt "LauncherMainWindow|MessageBox Button"
+msgid "Open Discord"
+msgstr ""
+
+msgctxt "LogViewerDialog|Log viewer window title"
+msgid "Logs"
+msgstr ""
+
+msgctxt "LogViewerDialog|Log tab"
+msgid "Launcher"
+msgstr ""
+
+msgctxt "LogViewerDialog|Log tab"
+msgid "Game"
+msgstr ""
+
+msgctxt "LogViewerDialog|Log viewer button"
+msgid "Copy"
+msgstr ""
+
+msgctxt "LogViewerDialog|Log viewer button"
+msgid "Open folder"
+msgstr ""
+
+msgctxt "LogViewerDialog|Log viewer button"
+msgid "Refresh"
+msgstr ""
 
 msgctxt "ModManagerDialog|"
 msgid "KeeperFX Mod Manager"
@@ -1053,33 +1204,317 @@ msgctxt "ModManagerDialog|Header"
 msgid "Mod Manager"
 msgstr "Менеджер модів"
 
-msgctxt "RunPacketFileDialog|Dialog Title"
-msgid "Run Packetfile"
-msgstr "Запустити файл пакетів"
-
-msgctxt "RunPacketFileDialog|Header"
-msgid "Run Packetfile"
-msgstr "Запустити файл пакетів"
-
-msgctxt "RunPacketFileDialog|Information Label"
+msgctxt "ModManagerDialog|Info text"
 msgid ""
-"Select a packetfile to replay. KeeperFX will be started and the packetfile "
-"will automatically start playing."
+"Mods are loaded from top to bottom and you can decide when a mod gets "
+"loaded. It can be after the KeeperFX base game, after the campaign specific "
+"changes, or after the map specific changes. Move them up or down to change "
+"the order."
 msgstr ""
-"Виберіть пакетний файл для відтворення. Буде запущено KeeperFX, і пакетний "
-"файл автоматично почне відтворюватися."
 
-msgctxt "RunPacketFileDialog|Notice Label"
-msgid "Packetsave will be disabled when loading a packetfile."
-msgstr "Збереження пакетів буде вимкнено під час завантаження файлу пакетів."
+msgctxt "ModManagerDialog|"
+msgid ""
+"Install a mod, campaign, or map pack from a .7z or .zip archive (e.g. a "
+"keeperfx.net workshop download)"
+msgstr ""
 
-msgctxt "RunPacketFileDialog|Button"
-msgid "Cancel"
-msgstr "Скасувати"
+msgctxt "ModManagerDialog|"
+msgid "Install…"
+msgstr ""
 
-msgctxt "RunPacketFileDialog|Button"
+msgctxt "ModManagerDialog|"
+msgid "Close"
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid ""
+"No mods installed. Use “Install…”, or drop a mod folder into the 'mods' "
+"folder."
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid "Install add-on (mod, campaign, map or map pack)"
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid "KeeperFX add-ons (*.7z *.zip)"
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid "Install failed"
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid "Nothing to install"
+msgstr ""
+
+#, qt-format
+msgctxt "ModManagerDialog|"
+msgid "No mod, campaign, map or map pack was found inside %1."
+msgstr ""
+
+#, qt-format
+msgctxt "ModManagerDialog|"
+msgid "Installed from %1:"
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid "Mods appear in this list — tick “Enabled” to turn them on. "
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid ""
+"Campaigns, maps and map packs appear in the game itself (Land selection / "
+"free play) the next time you launch it."
+msgstr ""
+
+msgctxt "ModManagerDialog|"
+msgid "Add-on installed"
+msgstr ""
+
+msgctxt "ModWidget|"
+msgid "Enabled"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "Installed from %1."
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Could not create a temporary folder to install into."
+msgstr ""
+
+msgctxt "QObject|"
+msgid ""
+"This add-on is packed as a RAR archive, which this build cannot extract.\n"
+"\n"
+"Extract it yourself with an archive tool, then install the extracted folder "
+"from the Installed tab."
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid ""
+"Could not extract the archive:\n"
+"%1"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "Campaign: %1"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "Mod: %1"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Map pack (added to 'levels')"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Multiplayer maps"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid ""
+"Could not write into “%1”.\n"
+"\n"
+"The folder may be read-only — on a package-managed install the game's data "
+"folders are owned by the package manager."
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "(kept %1 existing file(s) in '%2', not overwritten)"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "Map pack: %1"
+msgstr ""
+
+msgctxt "QObject|"
+msgid ""
+"Could not write into “levels/personal”.\n"
+"\n"
+"The folder may be read-only — on a package-managed install the game's data "
+"folders are owned by the package manager."
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "%n map(s) (added to Personal levels)"
+msgid_plural "%n map(s) (added to Personal levels)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgctxt "QObject|"
+msgid "Map already installed (Personal levels)"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "Could not copy “%1” into the mods folder."
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid ""
+"No log file yet at:\n"
+"%1"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid ""
+"Could not open:\n"
+"%1\n"
+"\n"
+"%2"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid ""
+"[ showing the last %1 KB of %2 KB ]\n"
+"\n"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "All categories"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Map"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Map Pack"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Campaign"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Multiplayer Map"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Multiplayer Map Pack"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Mod"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Creature"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Application"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Other"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "Unknown"
+msgstr ""
+
+#, qt-format
+msgctxt "QObject|"
+msgid "Personal map %1"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "🏰 KeeperFX stock"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "🌐 Workshop / user"
+msgstr ""
+
+msgctxt "QObject|"
+msgid "no image"
+msgstr ""
+
+msgctxt "ReplayDialog|Dialog Title"
+msgid "Replays"
+msgstr ""
+
+msgctxt "ReplayDialog|Header"
+msgid "Replays"
+msgstr ""
+
+msgctxt "ReplayDialog|Information Label"
+msgid ""
+"These are your stored replays. You can either play them directly in KeeperFX "
+"or copy them to your clipboard if you want to share them with others."
+msgstr ""
+
+msgctxt "ReplayDialog|Button"
+msgid "Close"
+msgstr ""
+
+msgctxt "ReplayDialog|Button"
+msgid "Copy to Clipboard"
+msgstr ""
+
+msgctxt "ReplayDialog|Button"
 msgid "Start"
-msgstr "Старт"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Table Column Header"
+msgid "Type"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Table Column Header"
+msgid "Name"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Table Column Header"
+msgid "Size"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Table Column Header"
+msgid "Date"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Type"
+msgid "Unknown"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Type"
+msgid "Freeplay"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Type"
+msgid "Campaign"
+msgstr ""
+
+msgctxt "ReplayDialog|Replay Type"
+msgid "Multiplayer"
+msgstr ""
+
+#, qt-format
+msgctxt "ReplayDialog|Replay Filesize"
+msgid "%1 KiB"
+msgstr ""
+
+msgctxt "ReplayDialog|Information Label"
+msgid "No replays yet. Replays of your games appear here once you have played."
+msgstr ""
+
+msgctxt "ReplayDialog|Button State Text"
+msgid "Copied!"
+msgstr ""
 
 msgctxt "ScanNetworkDialog|Window Title"
 msgid "Scan Network"
@@ -1173,10 +1608,6 @@ msgstr ""
 "Ігрових тактів на секунду \n"
 "(типово = 20)"
 
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Command character"
-msgstr "Командний символ"
-
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Display splash screens"
 msgstr "Відображати заставки"
@@ -1196,6 +1627,26 @@ msgstr "Пакети зберігають ім'я файлу"
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable Packetsave"
 msgstr "Увімкнути збереження пакетів"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Max. replay size (kB)"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid "Largest replay file the game will write, in kB. 0 means no limit."
+msgstr ""
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid ""
+"Keep replays\n"
+"(campaign / free play / multi)"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"Every game is recorded as a replay under replays/. How many to keep per "
+"kind; the oldest are removed first. 0 turns recording off for that kind."
+msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Exit on LUA error"
@@ -1259,6 +1710,41 @@ msgstr ""
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Resize Movies"
 msgstr "Масштабувати відео"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Renderer"
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Fade when opening the map"
+msgstr ""
+
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Lock the frame rate to the monitor to remove tearing. Off uncaps the present "
+"rate."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable VSync"
+msgstr ""
+
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
+"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
+"it)."
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Viewport mode"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"How the 3D view fills the window. Original keeps the classic frame; Full "
+"uses the whole window; Full (Letterbox) keeps the aspect ratio with bars."
+msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Creature flower size (px)"
@@ -1380,21 +1866,71 @@ msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable tag mode toggle (Right-click)"
 msgstr "Увімкнути перемикання режиму тегів (правий клік)"
 
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"How the game locks the mouse. Relative mode reads movement instead of moving "
+"the cursor; try it if the cursor jumps or escapes the window."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Relative mouse mode"
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Zoom towards cursor"
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Rotate around cursor"
+msgstr ""
+
+msgctxt "SettingsDialog|Slider Title Label"
+msgid "Max. zoom distance"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"How far the camera can zoom out [0 - 100]. 0 is the original Dungeon Keeper "
+"limit, 100 the KeeperFX limit."
+msgstr ""
+
+msgctxt "SettingsDialog|Slider Value Label"
+msgid "0"
+msgstr ""
+
 msgctxt "SettingsDialog|Tab Title"
 msgid "Multiplayer"
 msgstr "Багатокористувацький"
 
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Advertise and find games through the matchmaking server. Off keeps "
+"multiplayer to direct connections."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable matchmaking"
+msgstr ""
+
 msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Masterserver"
-msgstr "Мастер сервер"
+msgid "Matchmaking server"
+msgstr ""
+
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"The UDP port the game listens on for other players. Must differ from the API "
+"port when the API is enabled."
+msgstr ""
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Multiplayer port"
+msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Launcher"
 msgstr "Лаунчер"
 
 #, fuzzy
-#| msgctxt "SettingsDialog|Checkbox Toggle"
-#| msgid "Check for KeeperFX updates"
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Automatically check for KeeperFX updates"
 msgstr "Перевірте наявність оновлень KeeperFX"
@@ -1404,8 +1940,6 @@ msgid "Enable crash reporting"
 msgstr "Увімкнути повідомлення про збій"
 
 #, fuzzy
-#| msgctxt "CrashDialog|Header"
-#| msgid "KeeperFX has crashed"
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "KeeperFX Release Channel"
 msgstr "KeeperFX вийшов з ладу"
@@ -1451,18 +1985,24 @@ msgid "Show directory name in window title"
 msgstr ""
 
 #, fuzzy
-#| msgctxt "FileRemoverDialog|Header"
-#| msgid "Remove leftover files"
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Automatically remove leftover files"
 msgstr "Видалити залишкові файли"
 
 #, fuzzy
-#| msgctxt "DownloadMusicDialog|Button"
-#| msgid "Download"
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Download Server"
 msgstr "Завантажити"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Launcher size"
+msgstr ""
+
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Make the whole launcher bigger or smaller. Takes effect next time you open "
+"the launcher."
+msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "API"
@@ -1483,6 +2023,90 @@ msgstr "Про"
 msgctxt "SettingsDialog|Dialog Button"
 msgid "Open config file"
 msgstr "Відкрити файл конфігурації"
+
+msgctxt "SettingsDialog|Launcher Size Dropdown"
+msgid "Normal (100%)"
+msgstr ""
+
+msgctxt "SettingsDialog|Launcher Size Dropdown"
+msgid "Comfortable (110%)"
+msgstr ""
+
+msgctxt "SettingsDialog|Launcher Size Dropdown"
+msgid "Large (125%)"
+msgstr ""
+
+msgctxt "SettingsDialog|Launcher Size Dropdown"
+msgid "Larger (150%)"
+msgstr ""
+
+msgctxt "SettingsDialog|Launcher Size Dropdown"
+msgid "Huge (175%)"
+msgstr ""
+
+msgctxt "SettingsDialog|Launcher Size Dropdown"
+msgid "Largest (200%)"
+msgstr ""
+
+msgctxt "SettingsDialog|Zoom To Cursor Dropdown"
+msgid "Never"
+msgstr ""
+
+msgctxt "SettingsDialog|Zoom To Cursor Dropdown"
+msgid "Mousewheel only"
+msgstr ""
+
+msgctxt "SettingsDialog|Zoom To Cursor Dropdown"
+msgid "Mousewheel & Keyboard"
+msgstr ""
+
+msgctxt "SettingsDialog|Renderer Dropdown"
+msgid "Software"
+msgstr ""
+
+msgctxt "SettingsDialog|Renderer Dropdown"
+msgid "OpenGL"
+msgstr ""
+
+msgctxt "SettingsDialog|Variable Refresh Dropdown"
+msgid "Variable refresh: Auto"
+msgstr ""
+
+msgctxt "SettingsDialog|Variable Refresh Dropdown"
+msgid "Variable refresh: On"
+msgstr ""
+
+msgctxt "SettingsDialog|Variable Refresh Dropdown"
+msgid "Variable refresh: Off"
+msgstr ""
+
+msgctxt "SettingsDialog|Viewport Mode Dropdown"
+msgid "Original"
+msgstr ""
+
+msgctxt "SettingsDialog|Viewport Mode Dropdown"
+msgid "Full"
+msgstr ""
+
+msgctxt "SettingsDialog|Viewport Mode Dropdown"
+msgid "Full (Letterbox)"
+msgstr ""
+
+msgctxt "SettingsDialog|Rotate Around Cursor Dropdown"
+msgid "Never"
+msgstr ""
+
+msgctxt "SettingsDialog|Rotate Around Cursor Dropdown"
+msgid "Always"
+msgstr ""
+
+msgctxt "SettingsDialog|Rotate Around Cursor Dropdown"
+msgid "Movement Keys Only (While holding Ctrl)"
+msgstr ""
+
+msgctxt "SettingsDialog|Rotate Around Cursor Dropdown"
+msgid "Rotation Keys Only"
+msgstr ""
 
 msgctxt "SettingsDialog|Default Tag Mode Dropdown"
 msgid "Single"
@@ -1565,18 +2189,18 @@ msgid "High"
 msgstr "Високий"
 
 #, fuzzy
-#| msgctxt "InstallKfxDialog|Game Release Build"
-#| msgid "Stable (Default)"
 msgctxt "SettingsDialog|Game Release Channel"
 msgid "Stable (Default)"
 msgstr "Стабільний (за замовчуванням)"
 
 #, fuzzy
-#| msgctxt "InstallKfxDialog|Game Release Build"
-#| msgid "Alpha"
 msgctxt "SettingsDialog|Game Release Channel"
 msgid "Alpha"
 msgstr "Альфа"
+
+msgctxt "SettingsDialog|Link"
+msgid "Set to default server"
+msgstr ""
 
 #, qt-format
 msgctxt "SettingsDialog|About Label"
@@ -1594,8 +2218,17 @@ msgstr "Бібліотеки лаунчера:"
 
 #, qt-format
 msgctxt "SettingsDialog|About Label"
-msgid "Join us on Discord: %1"
-msgstr "Приєднуйтесь до нас у Discord: %1"
+msgid "Community Discord of the official KeeperFX (Windows): %1"
+msgstr ""
+
+#, qt-format
+msgctxt "SettingsDialog|About Label"
+msgid "Problems with KeeperFX: Tux Edition: %1"
+msgstr ""
+
+msgctxt "SettingsDialog|About Label"
+msgid "report them on our GitHub page"
+msgstr ""
 
 #, qt-format
 msgctxt "SettingsDialog|Label Contributor List"
@@ -1603,15 +2236,30 @@ msgid "KeeperFX Contributors: %1"
 msgstr "Учасники проєкту KeeperFX: %1"
 
 #, fuzzy, qt-format
-#| msgctxt "SettingsDialog|About Label"
-#| msgid "KeeperFX Launcher v%1"
 msgctxt "SettingsDialog|Label Translator List"
 msgid "KeeperFX Launcher Translators: %1"
 msgstr "Лаунчер KeeperFX v%1"
 
+msgctxt "SettingsDialog|MessageBox Text"
+msgid "Multiplayer port and API port must be different when API is enabled"
+msgstr ""
+
+msgctxt "SettingsDialog|MessageBox Title"
+msgid "Invalid Settings"
+msgstr ""
+
+msgctxt "SettingsDialog|MessageBox Text"
+msgid "Cannot save settings due to the following errors:"
+msgstr ""
+
 msgctxt "SettingsDialog|MessageBox Title"
 msgid "KeeperFX Settings"
 msgstr "Налаштування KeeperFX"
+
+msgctxt "SettingsDialog|MessageBox Text"
+msgid ""
+"The new launcher size will take effect the next time you open the launcher."
+msgstr ""
 
 msgctxt "SettingsDialog|MessageBox Text"
 msgid ""
@@ -1743,6 +2391,13 @@ msgid "Failed to open file: %1"
 msgstr "Не вдалося відкрити файл: %1"
 
 msgctxt "UpdateDialog|Failure Message"
+msgid ""
+"A newer version was found, but its release doesn't include a downloadable "
+"Linux package yet. It may still be building — please try again in a few "
+"minutes."
+msgstr ""
+
+msgctxt "UpdateDialog|Failure Message"
 msgid "Archive download failed."
 msgstr "Не вдалося завантажити архів."
 
@@ -1813,6 +2468,309 @@ msgctxt "UpdateDialog|Failure message"
 msgid "Failed to move all downloaded files"
 msgstr "Не вдалося перемістити всі завантажені файли"
 
+msgctxt "WorkshopBrowserDialog|"
+msgid "Workshop — browse & install"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Browse && install"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Installed"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Loading workshop…"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Open website"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Close"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Highest rated"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Most downloaded"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Newest"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Search by name…"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Category:"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Sort:"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "All categories"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Campaigns"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Map packs"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Maps"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Mods"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Refreshing workshop…"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Offline — showing cached workshop."
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Could not load the workshop (offline?)."
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "  ·  updated (+%1 / −%2)"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "%1 · by %2"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "★ %1   ⬇ %2 downloads"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "✓ Installed"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Details"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Open this item's page on keeperfx.net"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Reinstall"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Install"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "no image"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Showing %1 of %2 — refine with search."
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "%n item(s)."
+msgid_plural "%n item(s)."
+msgstr[0] ""
+msgstr[1] ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Installed add-ons (%1)"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Uninstall"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"“%1” ships with KeeperFX. You can Restore it later from this tab.\n"
+"\n"
+"Uninstall it anyway?"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Uninstall “%1”? You can Restore it later from this tab."
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Uninstall failed"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"Could not remove %1 of “%2”.\n"
+"\n"
+"The folder may be read-only — on a package-managed install the game's data "
+"folders are owned by the package manager.\n"
+"\n"
+"%3"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "any part"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "every part"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Uninstalled — restorable (%1) · %2 MB total"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Empty all backups"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Empty backups"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"Permanently delete ALL uninstalled backups? Restore will no longer be "
+"possible for any of them."
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Restore"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Restore failed"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"Could not restore part of “%1”. The backup has been kept, so nothing is lost "
+"— you can try again.\n"
+"\n"
+"The folder may be read-only — on a package-managed install the game's data "
+"folders are owned by the package manager.\n"
+"\n"
+"%2"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Delete permanently"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Permanently delete the backup of “%1”? This cannot be undone."
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Needs a newer KeeperFX"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"“%1” was made for KeeperFX build %2, but you have %3.\n"
+"\n"
+"It may not load correctly. Install anyway?"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Marked broken"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"The latest file for “%1” is flagged as broken on the workshop.\n"
+"\n"
+"Download and install it anyway?"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Install failed"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"No download is published for “%1”.\n"
+"\n"
+"The workshop's API lists no file for this item, and its page on keeperfx.net "
+"does not offer one either. This is a gap on the workshop's side, not a "
+"problem with your game.\n"
+"\n"
+"Use “Open website” to check the item directly."
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Show log"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Installing"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Downloading “%1”…"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Could not download “%1”."
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid "Nothing to install"
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "No installable content was found inside “%1”."
+msgstr ""
+
+#, qt-format
+msgctxt "WorkshopBrowserDialog|"
+msgid "Installed “%1”:"
+msgstr ""
+
+msgctxt "WorkshopBrowserDialog|"
+msgid ""
+"Campaigns, maps and map packs appear in the game (Land selection / free "
+"play). Mods appear in the Mods manager — enable them there. You can remove "
+"any add-on from the “Installed” tab."
+msgstr ""
+
 msgctxt "main|MessageBox Title"
 msgid "KeeperFX Error"
 msgstr "KeeperFX Помилка"
@@ -1824,6 +2782,177 @@ msgid ""
 msgstr ""
 "Не вдалося визначити версію KeeperFX. Для відправки звіту про краш потрібна "
 "ця інформація."
+
+msgctxt "main|MessageBox Title"
+msgid "KeeperFX Launcher"
+msgstr ""
+
+msgctxt "main|MessageBox Text"
+msgid ""
+"KeeperFX Launcher is already running.\n"
+"\n"
+"Only one instance can run at a time."
+msgstr ""
+
+#~ msgctxt "CopyDkFilesDialog|Label"
+#~ msgid "A suitable DK installation has been automatically detected."
+#~ msgstr "Відповідну установку DK було визначено автоматично."
+
+#~ msgctxt "CrashDialog|Information Label"
+#~ msgid ""
+#~ "It seems that KeeperFX has crashed and is unable to recover. If you wish "
+#~ "to submit technical details about this crash to the KeeperFX developers, "
+#~ "you can describe your problem below and click 'Send'. If you add contact "
+#~ "details we can contact you later. Additional information such as KeeperFX "
+#~ "logfiles and configuration will be sent too."
+#~ msgstr ""
+#~ "Схоже, що KeeperFX зазнав аварійного завершення роботи і не може "
+#~ "відновитися. Якщо ви хочете повідомити розробникам KeeperFX про технічні "
+#~ "деталі цієї проблеми, опишіть вашу проблему нижче і натисніть кнопку "
+#~ "«Надіслати». Якщо ви додасте контактні дані, ми зможемо зв'язатися з вами "
+#~ "пізніше. Також буде надіслана додаткова інформація, така як файли "
+#~ "журналів KeeperFX і конфігурація."
+
+#, qt-format
+#~ msgctxt "CrashDialog|Information Label"
+#~ msgid "You can also raise an issue on Github: %1"
+#~ msgstr "Ви також можете підняти питання на Github: %1"
+
+#~ msgctxt "CrashDialog|Input box title"
+#~ msgid "Contact Information (Optional)"
+#~ msgstr "Контактна інформація (необов'язково)"
+
+#~ msgctxt "CrashDialog|Input Placeholder"
+#~ msgid "Discord handle"
+#~ msgstr "Ім’я користувача Discord"
+
+#~ msgctxt "CrashDialog|Input Placeholder"
+#~ msgid "KeeperFX.net username"
+#~ msgstr "Ім'я користувача KeeperFX.net"
+
+#~ msgctxt "CrashDialog|Input Placeholder"
+#~ msgid "Email Address"
+#~ msgstr "Адреса електронної пошти"
+
+#~ msgctxt "CrashDialog|Button"
+#~ msgid "Cancel"
+#~ msgstr "Скасувати"
+
+#~ msgctxt "CrashDialog|Button"
+#~ msgid "Send"
+#~ msgstr "Надіслати"
+
+#~ msgctxt "CrashDialog|MessageBox Text"
+#~ msgid "Failed to submit crash report."
+#~ msgstr "Не вдалося надіслати звіт про збій."
+
+#, qt-format
+#~ msgctxt "CrashDialog|MessageBox Text"
+#~ msgid ""
+#~ "Your crash report has been successfully submitted!\n"
+#~ "\n"
+#~ "The KeeperFX team can not guarantee immediate results, but your feedback "
+#~ "is very helpful for the developers working on KeeperFX.\n"
+#~ "\n"
+#~ "Report ID: %1"
+#~ msgstr ""
+#~ "Ваш звіт про збій був успішно відправлений!\n"
+#~ "\n"
+#~ "Команда KeeperFX не може гарантувати негайних результатів, але ваш відгук "
+#~ "дуже корисний для розробників, які працюють над KeeperFX.\n"
+#~ "\n"
+#~ "Ідентифікатор звіту: %1"
+
+#~ msgctxt "Game|MessageBox Text"
+#~ msgid ""
+#~ "It seems that KeeperFX has crashed and is unable to recover.\n"
+#~ "\n"
+#~ "Crash reporting is disabled because you are using the heavylog option.\n"
+#~ "\n"
+#~ "If you require assistance, please create an issue on Github or contact us "
+#~ "on the Keeper Klan Discord."
+#~ msgstr ""
+#~ "Схоже, що KeeperFX аварійно завершив роботу і не може відновитися.\n"
+#~ "\n"
+#~ "Відправка звіту про збій вимкнена, оскільки ви використовуєте опцію "
+#~ "heavylog.\n"
+#~ "\n"
+#~ "Якщо потрібна допомога, будь ласка, створіть issue на GitHub або "
+#~ "зв’яжіться з нами через Discord Keeper Klan."
+
+#~ msgctxt "InstallKfxDialog|MessageBox Text"
+#~ msgid ""
+#~ "Alpha patches may contain new features and changes, but often contain "
+#~ "bugs and unfinished functionality. These patches are mostly meant for "
+#~ "testers, and it is suggested to be part of the Keeper Klan discord if you "
+#~ "use them.\n"
+#~ "\n"
+#~ "Are you sure you want to use Alpha patches?"
+#~ msgstr ""
+#~ "Альфа-випуски можуть містити нові функції та зміни, але часто містять "
+#~ "помилки та незавершену функціональність. Ці патчі здебільшого призначені "
+#~ "для тестувальників, і якщо ви використовуєте їх, ви маєте бути частиною "
+#~ "розбіжностей у клані Хранителів, якщо ви їх використовуєте.\n"
+#~ "\n"
+#~ "Ви впевнені, що хочете використовувати Альфа-випуск?"
+
+#~ msgctxt "LauncherMainWindow|Menu"
+#~ msgid "Scan local network (MP)"
+#~ msgstr "Сканування локальної мережі (MP)"
+
+#~ msgctxt "LauncherMainWindow|Menu"
+#~ msgid "Test internet lobby (MP)"
+#~ msgstr "Випробувати інтернет-лобі (MP)"
+
+#~ msgctxt "LauncherMainWindow|Menu"
+#~ msgid "Run packetfile"
+#~ msgstr "Запустити файл пакету"
+
+#~ msgctxt "LauncherMainWindow|Window Title"
+#~ msgid "KeeperFX Launcher"
+#~ msgstr "Лаунчер KeeperFX"
+
+#~ msgctxt "RunPacketFileDialog|Dialog Title"
+#~ msgid "Run Packetfile"
+#~ msgstr "Запустити файл пакетів"
+
+#~ msgctxt "RunPacketFileDialog|Header"
+#~ msgid "Run Packetfile"
+#~ msgstr "Запустити файл пакетів"
+
+#~ msgctxt "RunPacketFileDialog|Information Label"
+#~ msgid ""
+#~ "Select a packetfile to replay. KeeperFX will be started and the "
+#~ "packetfile will automatically start playing."
+#~ msgstr ""
+#~ "Виберіть пакетний файл для відтворення. Буде запущено KeeperFX, і "
+#~ "пакетний файл автоматично почне відтворюватися."
+
+#~ msgctxt "RunPacketFileDialog|Notice Label"
+#~ msgid "Packetsave will be disabled when loading a packetfile."
+#~ msgstr ""
+#~ "Збереження пакетів буде вимкнено під час завантаження файлу пакетів."
+
+#~ msgctxt "RunPacketFileDialog|Button"
+#~ msgid "Cancel"
+#~ msgstr "Скасувати"
+
+#~ msgctxt "RunPacketFileDialog|Button"
+#~ msgid "Start"
+#~ msgstr "Старт"
+
+#~ msgctxt "SettingsDialog|Textinput Title Label"
+#~ msgid "Command character"
+#~ msgstr "Командний символ"
+
+#~ msgctxt "SettingsDialog|Textinput Title Label"
+#~ msgid "Masterserver"
+#~ msgstr "Мастер сервер"
+
+#, qt-format
+#~ msgctxt "SettingsDialog|About Label"
+#~ msgid "Join us on Discord: %1"
+#~ msgstr "Приєднуйтесь до нас у Discord: %1"
 
 #~ msgctxt "FileRemoverDialog|Window Title"
 #~ msgid "Remove unwanted files"
