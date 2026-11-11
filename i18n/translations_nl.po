@@ -1003,7 +1003,7 @@ msgstr "Direct verbinden (MP)"
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Replays…"
-msgstr ""
+msgstr "Replays…"
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Start without mods"

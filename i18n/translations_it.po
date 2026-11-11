@@ -1013,7 +1013,7 @@ msgstr "Collegamento diretto (MG)"
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Replays…"
-msgstr ""
+msgstr "Gestore dei replay…"
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Start without mods"

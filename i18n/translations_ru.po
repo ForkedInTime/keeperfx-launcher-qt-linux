@@ -995,7 +995,7 @@ msgstr "Прямое подключение (МП)"
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Replays…"
-msgstr ""
+msgstr "Реплеи…"
 
 msgctxt "LauncherMainWindow|Menu"
 msgid "Start without mods"
