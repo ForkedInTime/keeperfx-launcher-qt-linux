@@ -2,6 +2,7 @@
 #include "ui_settingsdialog.h"
 
 #include "version.h"
+#include "aboutcredits.h"
 #include "kfxversion.h"
 #include "popupsignalcombobox.h"
 #include "settings.h"
@@ -630,6 +631,12 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     } else {
         ui->labelLauncherTranslators->setText(""); // Hide
     }
+
+    // This edition's own contributors
+    ui->labelTuxContributors->setTextFormat(Qt::RichText);
+    ui->labelTuxContributors->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    ui->labelTuxContributors->setOpenExternalLinks(true);
+    ui->labelTuxContributors->setText(AboutCredits::tuxEditionContributors());
 }
 
 SettingsDialog::~SettingsDialog()
