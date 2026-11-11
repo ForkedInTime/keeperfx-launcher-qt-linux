@@ -74,3 +74,10 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_replayfiles" "$ROOT_DIR/tests/test_replayfiles.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_replayfiles"
+
+# What Copy to Clipboard offers for a file (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_clipboardfile" "$ROOT_DIR/tests/test_clipboardfile.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_clipboardfile"

@@ -14,7 +14,8 @@
 #include <QUuid>
 #include <QClipboard>
 #include <QGuiApplication>
-#include <QMimeData>
+
+#include "clipboardfile.h"
 
 #ifdef Q_OS_WINDOWS
     #include <windows.h>
@@ -389,7 +390,7 @@ public:
     }
 
     // Puts a file (not its contents) on the clipboard, so it can be pasted into a file manager or a
-    // chat window (from the team's launcher, ea5310e).
+    // chat window (from the team's launcher, ea5310e; the formats are ClipboardFile's).
     static bool copyFileToClipboard(const QString &filePath)
     {
         if (filePath.isEmpty() || !QFileInfo::exists(filePath)) {
@@ -399,9 +400,7 @@ public:
         if (!clipboard) {
             return false;
         }
-        QMimeData *mimeData = new QMimeData();
-        mimeData->setUrls(QList<QUrl>() << QUrl::fromLocalFile(filePath));
-        clipboard->setMimeData(mimeData); // the clipboard takes ownership
+        clipboard->setMimeData(ClipboardFile::mimeData(QFileInfo(filePath).absoluteFilePath())); // the clipboard takes ownership
         return true;
     }
 };
