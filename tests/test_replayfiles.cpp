@@ -106,6 +106,18 @@ int main(int argc, char **argv)
 	}
 
 	{
+		// root_fxpkt_listed: a replay put straight into the game folder (one a friend sent, say)
+		QTemporaryDir tmp;
+		const QDir game(tmp.path());
+		touch(game, "from-a-friend.fxpkt", base.addSecs(60));
+		touch(game, "replays/campaign/a.fxpkt", base);
+		const QList<ReplayFiles::Entry> entries = ReplayFiles::list(game);
+		expect(paths(entries) == QStringList({"from-a-friend.fxpkt", "replays/campaign/a.fxpkt"}),
+			"a replay in the game folder itself is listed too");
+		expect(folders(entries) == QStringList({"", "campaign"}), "with no folder");
+	}
+
+	{
 		// equal times: by path
 		QTemporaryDir tmp;
 		const QDir game(tmp.path());
