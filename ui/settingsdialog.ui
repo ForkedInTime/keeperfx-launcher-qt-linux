@@ -672,8 +672,7 @@ Note: This is not a percentage</string>
                  <item row="2" column="0">
                   <widget class="QLabel" name="labelMaxFps">
                    <property name="text">
-                    <string comment="Textinput Title Label">Max. FPS
-(0 = unlimited)</string>
+                    <string comment="Textinput Title Label">Max. FPS (0 = unlimited)</string>
                    </property>
                   </widget>
                  </item>
@@ -764,7 +763,7 @@ Note: This is not a percentage</string>
                  <item row="1" column="0">
                   <widget class="QLabel" name="labelCreatureFlowerSize">
                    <property name="text">
-                    <string comment="Textinput Title Label">Creature flower size</string>
+                    <string comment="Textinput Title Label">Creature flower size (px)</string>
                    </property>
                   </widget>
                  </item>
@@ -786,20 +785,13 @@ Note: This is not a percentage</string>
                     <item>
                      <widget class="QLineEdit" name="lineEditCreatureFlowerSize"/>
                     </item>
-                    <item>
-                     <widget class="QLabel" name="labelCreatureFlowerSizeMeasurementUnit">
-                      <property name="text">
-                       <string comment="Measurement Unit Label" extracomment="Shorthand for 'pixel(s)'">px</string>
-                      </property>
-                     </widget>
-                    </item>
                    </layout>
                   </widget>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="labelHandSize">
                    <property name="text">
-                    <string comment="Textinput Title Label">Hand size</string>
+                    <string comment="Textinput Title Label">Hand size %</string>
                    </property>
                   </widget>
                  </item>
@@ -821,20 +813,13 @@ Note: This is not a percentage</string>
                     <item>
                      <widget class="QLineEdit" name="lineEditHandSize"/>
                     </item>
-                    <item>
-                     <widget class="QLabel" name="labelHandSizeMeasurementUnit">
-                      <property name="text">
-                       <string comment="Measurement Unit Label" extracomment="Shorthand for 'percent'">%</string>
-                      </property>
-                     </widget>
-                    </item>
                    </layout>
                   </widget>
                  </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="labelLineBoxSize">
                    <property name="text">
-                    <string comment="Textinput Title Label">Select box line size</string>
+                    <string comment="Textinput Title Label">Select box line size %</string>
                    </property>
                   </widget>
                  </item>
@@ -855,13 +840,6 @@ Note: This is not a percentage</string>
                     </property>
                     <item>
                      <widget class="QLineEdit" name="lineEditLineBoxSize"/>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="labelLineBoxSizeMeasurementUnit">
-                      <property name="text">
-                       <string comment="Measurement Unit Label" extracomment="Shorthand for 'percent'">%</string>
-                      </property>
-                     </widget>
                     </item>
                    </layout>
                   </widget>
