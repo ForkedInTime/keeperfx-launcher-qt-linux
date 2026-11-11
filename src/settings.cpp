@@ -494,10 +494,24 @@ bool Settings::applyOpenGlDefaultOnce()
 
 void Settings::resetKfxSettings()
 {
-    if (Settings::kfxSettings) {
-        Settings::kfxSettings->clear();
-        Settings::copyMissingDefaultSettings();
+    if (!Settings::kfxSettings) {
+        return;
     }
+
+    // This edition: the settings go back to the defaults, which with configs in the game's
+    // folder are the release's own copy, '_keeperfx.cfg'. Without one there is nothing to go
+    // back to and the settings stay: the file keeps every line a setting is not cleared from,
+    // and a keeperfx.cfg with no settings in it would leave the game without INSTALL_PATH until
+    // the launcher's next start.
+    if (KfxVersion::hasFunctionality("use_appdata_configs") == false
+        && QFile::exists(QCoreApplication::applicationDirPath() + "/_keeperfx.cfg") == false) {
+        qInfo() << "No defaults to reset keeperfx.cfg to, keeping its settings";
+        return;
+    }
+
+    Settings::kfxSettings->clear();
+    Settings::copyMissingDefaultSettings();
+    Settings::copyMissingAlphaSettings();
 }
 
 void Settings::resetLauncherSettings()

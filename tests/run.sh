@@ -60,3 +60,10 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	-o "$ROOT_DIR/bin/test_lobbyserver" "$ROOT_DIR/tests/test_lobbyserver.cpp" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_lobbyserver"
+
+# How a saved .cfg file is written: the player's comments stay (pure, QtCore only).
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_cfgmerge" "$ROOT_DIR/tests/test_cfgmerge.cpp" \
+	$(pkg-config --libs Qt6Core)
+"$ROOT_DIR/bin/test_cfgmerge"
