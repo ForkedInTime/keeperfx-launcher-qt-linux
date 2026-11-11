@@ -29,6 +29,7 @@ protected:
 
     // Handle hover enter event
     void enterEvent(QEnterEvent *event) override {
+        overlay->raise(); // Above child widgets added after the overlay (the team's 6532ae1)
         overlay->show();  // Show the overlay
         QWidget::enterEvent(event);
     }

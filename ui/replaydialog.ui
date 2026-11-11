@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RunPacketFileDialog</class>
- <widget class="QDialog" name="RunPacketFileDialog">
+ <class>ReplayDialog</class>
+ <widget class="QDialog" name="ReplayDialog">
   <property name="windowModality">
    <enum>Qt::WindowModality::WindowModal</enum>
   </property>
@@ -9,12 +9,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>291</height>
+    <width>700</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string comment="Dialog Title">Run Packetfile</string>
+   <string comment="Dialog Title">Replays</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
@@ -30,7 +30,7 @@
       </font>
      </property>
      <property name="text">
-      <string comment="Header">Run Packetfile</string>
+      <string comment="Header">Replays</string>
      </property>
      <property name="margin">
       <number>7</number>
@@ -48,7 +48,7 @@
 }</string>
      </property>
      <property name="text">
-      <string comment="Information Label">Select a packetfile to replay. KeeperFX will be started and the packetfile will automatically start playing.</string>
+      <string comment="Information Label">These are your stored replays. You can either play them directly in KeeperFX or copy them to your clipboard if you want to share them with others.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -62,32 +62,10 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="infoPacketSaveLabel">
+    <widget class="QTableWidget" name="tableWidget">
      <property name="styleSheet">
-      <string notr="true">QLabel {
-color: #fff;
-}</string>
-     </property>
-     <property name="text">
-      <string comment="Notice Label">Packetsave will be disabled when loading a packetfile.</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-     <property name="margin">
-      <number>5</number>
-     </property>
-     <property name="indent">
-      <number>5</number>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QListView" name="listView">
-     <property name="styleSheet">
-      <string notr="true">QListView {
-margin-top: 5px;
-}</string>
+      <string notr="true">QTableWidget { outline: 0; }
+QTableView::item { padding: 4px 8px; }</string>
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
@@ -95,8 +73,8 @@ margin-top: 5px;
      <property name="showDropIndicator" stdset="0">
       <bool>false</bool>
      </property>
-     <property name="alternatingRowColors">
-      <bool>false</bool>
+     <property name="sortingEnabled">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -131,13 +109,29 @@ margin-top: 5px;
          </size>
         </property>
         <property name="text">
-         <string comment="Button">Cancel</string>
+         <string comment="Button">Close</string>
         </property>
         <property name="icon">
          <iconset theme="QIcon::ThemeIcon::EditClear"/>
         </property>
         <property name="autoDefault">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="copyButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string comment="Button">Copy to Clipboard</string>
+        </property>
+        <property name="icon">
+         <iconset theme="QIcon::ThemeIcon::EditCopy"/>
         </property>
        </widget>
       </item>

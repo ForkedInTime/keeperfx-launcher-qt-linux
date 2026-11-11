@@ -45,7 +45,7 @@
 #include "modmanagerdialog.h"
 #include "workshopbrowserdialog.h"
 #include "newsarticlewidget.h"
-#include "runpacketfiledialog.h"
+#include "replaydialog.h"
 #include "savefile.h"
 #include "scannetworkdialog.h"
 #include "settings.h"
@@ -505,16 +505,17 @@ void LauncherMainWindow::setupPlayExtraMenu()
         dialog.exec();
     });*/
 
-    // Run packetsave action
-    menu->addAction(tr("Run packetfile", "Menu"), [this]() {
-        qDebug() << "Run packetsave selected!";
-        // Open the dialog
-        RunPacketFileDialog dialog(this);
-        if (dialog.exec() == QDialog::Accepted) {
-            // Start the game
-            startGame(Game::StartType::LOAD_PACKETSAVE, dialog.getPacketFileName());
-        }
-    });
+    // Replays: the engine saves them as replays/<folder>/*.fxpkt since fork build 5854; the old
+    // "Run packetfile" looked for *.pck in the game folder and found none of them
+    if (KfxVersion::hasFunctionality("replays") == true) {
+        menu->addAction(tr("Replays…", "Menu"), [this]() {
+            qDebug() << "Replays selected!";
+            ReplayDialog dialog(this);
+            if (dialog.exec() == QDialog::Accepted) {
+                startGame(Game::StartType::LOAD_REPLAY, dialog.getReplayFileName());
+            }
+        });
+    }
 
     // Start without mods action
     if (KfxVersion::hasFunctionality("start_without_mods_param") == true) {

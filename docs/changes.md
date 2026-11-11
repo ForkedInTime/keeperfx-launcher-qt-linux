@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 133 commits on top of the team's `master`, 114 of them this
+The fork has grown well past the porting patches: 143 commits on top of the team's `master`, 124 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -141,6 +141,12 @@ setting, and sliders that enable Save when moved. Every control is greyed out on
 predates its setting, and only settings the running engine understands are written back. The launcher binary
 also carries its version in an ELF section, so a crash report or a package script can read it
 without running it.
-Their October work is not in yet: the replay browser that replaces *Run packetfile* (the engine still
-accepts the `-packetload` that *Run packetfile* passes), the launcher/game version-mismatch notice, a settings-dialog
-layout fix, the restyled main-window scroll area, and most of their translation updates since September.
+From their October work: the **Replays** window (Play ▾ → *Replays…*) in place of *Run packetfile*,
+which looked for `*.pck` files in the game folder and so found none of the `.fxpkt` replays the engine
+saves under `replays/` — here the list comes from our own tested `replayfiles.h`, also holds the `.pck`
+that *Enable Packetsave* records instead, and says so when it is empty, and Copy to Clipboard pastes in
+the GTK file managers too; the hover highlight drawn above an item's thumbnail; the contributor list; and their translations,
+merged string by string into a translation template that now also holds this edition's own strings. Left
+out on purpose: their release-type mismatch pop-up (wrong where a package manager picks the version), a
+settings-dialog layout fix (our settings dialog has its own layout), and the restyled main-window scroll
+area.
