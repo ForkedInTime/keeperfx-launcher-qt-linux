@@ -9,7 +9,10 @@
 
 QSettings::Format SettingsCfgFormat::registerFormat()
 {
-    return QSettings::registerFormat("cfg", readFile, writeFile);
+    // Once: Qt takes 16 custom formats and then returns InvalidFormat, and every Settings::load()
+    // asked again (the Settings window's restore defaults loads the settings each time).
+    static const QSettings::Format format = QSettings::registerFormat("cfg", readFile, writeFile);
+    return format;
 }
 
 bool SettingsCfgFormat::readFile(QIODevice &device, QSettings::SettingsMap &map)

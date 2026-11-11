@@ -7,7 +7,7 @@
 class SettingsCfgFormat
 {
 public:
-    // Registers the format and returns the registered format ID
+    // Registers the format the first time and returns its ID
     static QSettings::Format registerFormat();
 
 private:

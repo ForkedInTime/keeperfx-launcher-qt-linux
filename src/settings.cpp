@@ -516,8 +516,18 @@ void Settings::resetKfxSettings()
 
 void Settings::resetLauncherSettings()
 {
-    if (Settings::launcherSettings) {
-        Settings::launcherSettings->clear();
-        Settings::copyMissingLauncherSettings();
+    if (!Settings::launcherSettings) {
+        return;
     }
+
+    // Back to the defaults: every setting that has one, and the release channel, which
+    // copyMissingLauncherSettings works out again. The records without a default stay, such as
+    // RENDERER_OPENGL_DEFAULT_APPLIED (without it the next start would move a RENDERER=SOFTWARE
+    // the player chose back to OPENGL) and MAP_EDITOR_VERSION. They also stayed while the file
+    // writer kept every line it was not given a value for.
+    for (auto it = defaultLauncherSettingsMap.begin(); it != defaultLauncherSettingsMap.end(); ++it) {
+        Settings::launcherSettings->remove(it.key());
+    }
+    Settings::launcherSettings->remove("CHECK_FOR_UPDATES_RELEASE");
+    Settings::copyMissingLauncherSettings();
 }
