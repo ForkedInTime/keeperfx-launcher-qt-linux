@@ -12,6 +12,9 @@
 #include <QVariant>
 #include <QDirIterator>
 #include <QUuid>
+#include <QClipboard>
+#include <QGuiApplication>
+#include <QMimeData>
 
 #ifdef Q_OS_WINDOWS
     #include <windows.h>
@@ -383,5 +386,22 @@ public:
         // Append flag should guarantee the file won't be truncated
         return !file.open(QIODevice::Append);
 #endif
+    }
+
+    // Puts a file (not its contents) on the clipboard, so it can be pasted into a file manager or a
+    // chat window (from the team's launcher, ea5310e).
+    static bool copyFileToClipboard(const QString &filePath)
+    {
+        if (filePath.isEmpty() || !QFileInfo::exists(filePath)) {
+            return false;
+        }
+        QClipboard *clipboard = QGuiApplication::clipboard();
+        if (!clipboard) {
+            return false;
+        }
+        QMimeData *mimeData = new QMimeData();
+        mimeData->setUrls(QList<QUrl>() << QUrl::fromLocalFile(filePath));
+        clipboard->setMimeData(mimeData); // the clipboard takes ownership
+        return true;
     }
 };

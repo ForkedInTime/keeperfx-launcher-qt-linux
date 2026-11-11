@@ -45,6 +45,7 @@ const QMap<QString, QString> KfxVersion::versionFunctionaltyMap = {
     {"max_zoom_distance", "1.4.0.4410"},       // MAX_ZOOM_DISTANCE predates this fork (upstream, March 2025)
     {"packetsave_max_filesize", "1.4.0.5728"}, // PACKETSAVE_MAX_SIZE, 2026-09-21 sync; renamed a week later:
     {"replay_autosave", "1.4.0.5748"},         // REPLAY_MAX_SIZE + MAX_REPLAYS, 2026-09-28 sync
+    {"replays", "1.4.0.5854"},                 // replays saved as replays/<folder>/*.fxpkt: merge 6d2be1a0c, 2026-10-10 sync (first release 6010)
     // RENDERER defaults to OPENGL from this build on (the engine falls back to
     // SOFTWARE on its own where OpenGL cannot start).
     {"opengl_default", "1.4.0.6075"},
