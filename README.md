@@ -42,7 +42,7 @@ everything in it, or the Arch package or Flatpak
 - 🧰 **And** a log viewer, the Unearth map editor, music recovery, crash reports that come to our own
   issue tracker (the launcher sends nothing anywhere), a single-instance lock and UI scaling.
 
-133 commits on top of the team's `master`, 114 of them this fork's.
+139 commits on top of the team's `master`, 120 of them this fork's.
 **[Everything this fork changes »](docs/changes.md)**
 
 ## 🛠️ Build from source
