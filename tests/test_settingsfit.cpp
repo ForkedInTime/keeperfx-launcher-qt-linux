@@ -22,6 +22,7 @@
 #include <QComboBox>
 #include <QFile>
 #include <QGroupBox>
+#include <QScreen>
 #include <QLabel>
 #include <QProcess>
 #include <QRadioButton>
@@ -45,11 +46,20 @@ struct Font {
     int pointSize;
     const char *who;
 };
-const Font FONTS[] = {
-    {"Adwaita Sans", 11, "GNOME"},
-    {"Noto Sans", 10, "KDE Plasma"},
-    {"DejaVu Sans", 10, "Xfce"},
-    {"Adwaita Sans", 14, "GNOME Large Text"},
+struct Run {
+    const char *family;
+    int pointSize;
+    int screenWidth;
+    int screenHeight;
+    const char *who;
+};
+// The screen sizes are what the window sees: a 1080p monitor, and a 1366x768 laptop at 125%.
+const Run RUNS[] = {
+    {"Adwaita Sans", 11, 1920, 1080, "GNOME"},
+    {"Noto Sans", 10, 1920, 1080, "KDE Plasma"},
+    {"DejaVu Sans", 10, 1920, 1080, "Xfce"},
+    {"Adwaita Sans", 14, 1920, 1080, "GNOME Large Text"},
+    {"Adwaita Sans", 11, 1093, 614, "GNOME, 1366x768 laptop at 125%"},
 };
 
 int g_cuts = 0;
@@ -220,7 +230,14 @@ int runOne(int argc, char **argv)
     QFont font(QString::fromUtf8(argv[2]));
     font.setPointSize(atoi(argv[3]));
     app.setFont(font);
-    g_where = QString("%1, %2 %3 pt").arg(language, QString::fromUtf8(argv[2]), QString::fromUtf8(argv[3]));
+    g_where = QString("%1, %2 %3 pt, %4x%5").arg(language, QString::fromUtf8(argv[2]), QString::fromUtf8(argv[3]),
+                                                QString::fromUtf8(argv[4]), QString::fromUtf8(argv[5]));
+
+    const QSize screen = QGuiApplication::primaryScreen()->size();
+    if (screen != QSize(atoi(argv[4]), atoi(argv[5]))) {
+        std::printf("  FAIL %s | the screen is %dx%d, not %sx%s\n", qPrintable(g_where), screen.width(), screen.height(), argv[4], argv[5]);
+        return 1;
+    }
 
     Settings::load();
     KfxVersion::loadCurrentVersion();
@@ -289,19 +306,29 @@ int main(int argc, char **argv)
     }
 
     int failedRuns = 0;
-    for (const Font &font : FONTS) {
+    for (const Run &r : RUNS) {
+        // Qt's offscreen platform takes its screen from a file
+        const QString screenFile = dir.filePath(QString("screen-%1x%2.json").arg(r.screenWidth).arg(r.screenHeight));
+        QFile json(screenFile);
+        json.open(QIODevice::WriteOnly);
+        json.write(QString("{\"screens\": [{\"name\": \"screen\", \"x\": 0, \"y\": 0, \"width\": %1, \"height\": %2, "
+                           "\"logicalDpi\": 96, \"logicalBaseDpi\": 96, \"dpr\": 1}]}")
+                       .arg(r.screenWidth).arg(r.screenHeight).toUtf8());
+        json.close();
         for (const char *language : LANGUAGES) {
             QProcess run;
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
             env.insert("SETTINGSFIT_RUN", "1");
-            env.insert("QT_QPA_PLATFORM", "offscreen");
+            env.insert("QT_QPA_PLATFORM", "offscreen:configfile=" + screenFile);
             env.remove("QT_SCALE_FACTOR");
             run.setProcessEnvironment(env);
             run.setProcessChannelMode(QProcess::ForwardedOutputChannel);
-            run.start(copy, {language, font.family, QString::number(font.pointSize)});
+            run.start(copy, {language, r.family, QString::number(r.pointSize), QString::number(r.screenWidth),
+                             QString::number(r.screenHeight)});
             run.waitForFinished(120000);
             const bool ok = run.exitStatus() == QProcess::NormalExit && run.exitCode() == 0;
-            std::printf("  %s %s, %s %d pt (%s)\n", ok ? "ok  " : "FAIL", language, font.family, font.pointSize, font.who);
+            std::printf("  %s %s, %s %d pt, %dx%d (%s)\n", ok ? "ok  " : "FAIL", language, r.family, r.pointSize,
+                        r.screenWidth, r.screenHeight, r.who);
             std::fflush(stdout);
             if (!ok) {
                 ++failedRuns;
@@ -309,7 +336,7 @@ int main(int argc, char **argv)
         }
     }
     if (failedRuns) {
-        std::printf("%d of %d runs cut something off\n", failedRuns, int(std::size(FONTS) * std::size(LANGUAGES)));
+        std::printf("%d of %d runs cut something off\n", failedRuns, int(std::size(RUNS) * std::size(LANGUAGES)));
         return 1;
     }
     std::printf("all settings-fit runs passed\n");
