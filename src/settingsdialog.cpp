@@ -1977,6 +1977,14 @@ void SettingsDialog::showEvent(QShowEvent *event)
     if (QScreen *screen = this->screen()) {
         wanted = wanted.boundedTo(screen->availableGeometry().size() - frame);
     }
+    // Tabs that still do not fit (a long translation on a small screen or at a large size) get less
+    // padding around their titles before they would need scroll arrows
+    const int tabRoom = wanted.width() - (width() - ui->tabWidget->width());
+    if (ui->tabWidget->tabBar()->sizeHint().width() > tabRoom) {
+        ui->tabWidget->setStyleSheet(ui->tabWidget->styleSheet()
+            + QStringLiteral("\nQTabBar::tab { padding-left: 6px; padding-right: 6px; }"));
+        ui->tabWidget->tabBar()->ensurePolished();
+    }
     if (wanted != size()) {
         resize(wanted);
     }

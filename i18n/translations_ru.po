@@ -1924,7 +1924,7 @@ msgstr "Включить относительный режим мыши"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Multiplayer"
-msgstr "Многопользовательский режим"
+msgstr "Сетевая игра"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Matchmaking server"

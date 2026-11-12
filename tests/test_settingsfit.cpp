@@ -21,6 +21,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFile>
+#include <QFontInfo>
 #include <QGroupBox>
 #include <QScreen>
 #include <QLabel>
@@ -52,6 +53,7 @@ struct Run {
     int screenWidth;
     int screenHeight;
     const char *who;
+    const char *engine = "1.4.0.6206 alpha"; // a current engine shows every setting gated on the version
 };
 // The screen sizes are what the window sees: a 1080p monitor, and a 1366x768 laptop at 125%.
 const Run RUNS[] = {
@@ -60,6 +62,9 @@ const Run RUNS[] = {
     {"DejaVu Sans", 10, 1920, 1080, "Xfce"},
     {"Adwaita Sans", 14, 1920, 1080, "GNOME Large Text"},
     {"Adwaita Sans", 11, 1093, 614, "GNOME, 1366x768 laptop at 125%"},
+    {"Adwaita Sans", 11, 960, 540, "GNOME, 1080p monitor at the launcher's 200%"},
+    {"Adwaita Sans", 14, 1024, 576, "GNOME Large Text, 1280x720 at 125%"},
+    {"Adwaita Sans", 11, 1920, 1080, "GNOME, the 1.4.0.6103 engine (other rows shown and hidden)", "1.4.0.6103"},
 };
 
 int g_cuts = 0;
@@ -230,6 +235,11 @@ int runOne(int argc, char **argv)
     QFont font(QString::fromUtf8(argv[2]));
     font.setPointSize(atoi(argv[3]));
     app.setFont(font);
+    // Without the font, Qt silently draws another and the run would describe that one
+    if (QFontInfo(font).family() != font.family()) {
+        std::printf("  FAIL %s: font %s is not installed (Qt chose %s)\n", argv[1], argv[2], qPrintable(QFontInfo(font).family()));
+        return 1;
+    }
     g_where = QString("%1, %2 %3 pt, %4x%5").arg(language, QString::fromUtf8(argv[2]), QString::fromUtf8(argv[3]),
                                                 QString::fromUtf8(argv[4]), QString::fromUtf8(argv[5]));
 
@@ -266,6 +276,24 @@ int runOne(int argc, char **argv)
         app.processEvents();
         checkTab(tabs->tabText(i), tabs->widget(i));
     }
+    // The window can be resized: narrowed, its tabs must still show everything (one column, labels
+    // above fields, scrolling down)
+    dialog.resize(qMin(dialog.width(), 820), dialog.height());
+    app.processEvents();
+    app.processEvents();
+    // (no narrower than its own minimum: the buttons along the bottom do not shrink)
+    if (dialog.width() > qMax(820, dialog.minimumSizeHint().width())) {
+        cut("(window)", "dialog", "", QString("cannot be narrowed to 820 px or its minimum %1, stays %2")
+            .arg(dialog.minimumSizeHint().width()).arg(dialog.width()));
+    }
+    g_where += ", narrowed to 820";
+    for (int i = 0; i < tabs->count(); ++i) {
+        tabs->setCurrentIndex(i);
+        app.processEvents();
+        app.processEvents();
+        checkTab(tabs->tabText(i), tabs->widget(i));
+    }
+
     for (QAbstractButton *button : dialog.findChildren<QAbstractButton *>()) {
         if (button->isVisible() && !tabs->isAncestorOf(button) && !button->text().isEmpty()) {
             const QSize hint = button->sizeHint();
@@ -295,11 +323,6 @@ int main(int argc, char **argv)
         return 1;
     }
     QFile::setPermissions(copy, QFile::permissions(copy) | QFile::ExeOwner);
-    // A current engine, so every setting gated on the engine version is shown.
-    QFile version(dir.filePath("version.txt"));
-    version.open(QIODevice::WriteOnly);
-    version.write("1.4.0.6206 alpha\n");
-    version.close();
     for (const char *cfg : {"keeperfx.cfg", "keeperfx-launcher-qt.cfg"}) {
         QFile f(dir.filePath(cfg));
         f.open(QIODevice::WriteOnly);
@@ -315,6 +338,10 @@ int main(int argc, char **argv)
                            "\"logicalDpi\": 96, \"logicalBaseDpi\": 96, \"dpr\": 1}]}")
                        .arg(r.screenWidth).arg(r.screenHeight).toUtf8());
         json.close();
+        QFile version(dir.filePath("version.txt"));
+        version.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        version.write(QByteArray(r.engine) + "\n");
+        version.close();
         for (const char *language : LANGUAGES) {
             QProcess run;
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
