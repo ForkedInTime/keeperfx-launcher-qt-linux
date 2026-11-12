@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 145 commits on top of the team's `master`, 126 of them this
+The fork has grown well past the porting patches: 152 commits on top of the team's `master`, 133 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -88,6 +88,13 @@ Everything below is ours, not upstream's:
 - **About tab** (`settingsdialog.ui`, `aboutcredits.h`) — the tab is laid out, so its lines wrap instead of
   being cut off at the edge (at the window's fixed size the Discord and GitHub links were cut short from a
   10 pt font up), and a line under the translators credits this edition's contributors.
+- **A Settings window that fits its text** (`settingsdialog.ui`, `settingsdialog.cpp`) — on the team's
+  flexible layout (below), finished so nothing is cut off in any language: every dropdown as wide as its
+  longest entry, number fields as wide as their numbers, two columns on a tab where both fit and one under
+  the other where they do not, labels above their fields where a row is still too wide, and the window
+  opening wide and tall enough for every tab where the screen allows. `tests/test_settingsfit.cpp` opens
+  the real window in all 14 languages at GNOME's, KDE's and Xfce's fonts and at GNOME Large Text, and finds
+  nothing cut off.
 - **Single-instance lock** (`main.cpp`) — one launcher at a time; `--allow-multiple` overrides it.
 - **UI scale** — scale the whole launcher from 100% up to 200% (110 / 125 / 150 / 200) for readability.
 - **Camera settings that survive Save** (`settingsdialog.cpp`) — *Zoom to cursor* and *Rotate around cursor*
@@ -134,7 +141,7 @@ Everything below is ours, not upstream's:
 The team's own launcher work is taken in batches. On the settings dialog that has brought, most
 recently, **VSync**, **Relative mouse mode**, the **Multiplayer** tab with the matchmaking server and the multiplayer port (refused when it clashes with the API port), the
 cursor-capture switch written to the game config instead of a command-line flag on engines that
-understand it, the **Renderer** dropdown (software or OpenGL) and the **Fade when opening the map**
+understand it, the **Rendering Backend** dropdown (software or OpenGL) and the **map fade animation**
 checkbox on the Graphics tab, the **Viewport mode** dropdown, the **Max. zoom distance** slider, the
 replay controls (**Max. replay size** and **Keep replays** per campaign, free play and multiplayer,
 written under whichever key names the running engine uses), the retired *Command character* field
@@ -150,6 +157,14 @@ saves under `replays/` — here the list comes from our own tested `replayfiles.
 that *Enable Packetsave* records instead, and says so when it is empty, and Copy to Clipboard pastes in
 the GTK file managers too; the hover highlight drawn above an item's thumbnail; the contributor list; and their translations,
 merged string by string into a translation template that now also holds this edition's own strings. Left
-out on purpose: their release-type mismatch pop-up (wrong where a package manager picks the version), a
-settings-dialog layout fix (our settings dialog has its own layout), and the restyled main-window scroll
-area.
+out on purpose: their release-type mismatch pop-up (wrong where a package manager picks the version) and
+the restyled main-window scroll area.
+Their September **Settings layout** (every tab a form in a scroll area, two columns or one, a window that
+can be resized) is taken whole, with this edition's controls in its rows and its wording wherever that is
+the one translated in more languages; on its own it still cut dropdowns and long lines, which the entry
+above finishes. Where our `settingsdialog.ui` differs from theirs, on purpose: our replay rows (largest replay,
+*Enable Packetsave* and its file name, how many replays to keep, written under whichever keys the running
+engine uses) in place of their spin boxes and *Automatically save replays*; *Variable refresh* and
+*Launcher size* rows; our About tab; our tooltips where theirs have none; and the labels *Creature flower
+size (px)*, *Hand size %*, *Select box line size %* and *Max. FPS (0 = unlimited)*, translated in more
+languages than their split labels and units. The layout code of our own is in `settingsfit.cpp`.
