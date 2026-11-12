@@ -785,6 +785,19 @@ Note: This is not a percentage</string>
                     <item>
                      <widget class="QLineEdit" name="lineEditCreatureFlowerSize"/>
                     </item>
+                    <item>
+                     <spacer name="horizontalSpacerCreatureFlowerSize">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
                    </layout>
                   </widget>
                  </item>
@@ -813,6 +826,19 @@ Note: This is not a percentage</string>
                     <item>
                      <widget class="QLineEdit" name="lineEditHandSize"/>
                     </item>
+                    <item>
+                     <spacer name="horizontalSpacerHandSize">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
                    </layout>
                   </widget>
                  </item>
@@ -840,6 +866,19 @@ Note: This is not a percentage</string>
                     </property>
                     <item>
                      <widget class="QLineEdit" name="lineEditLineBoxSize"/>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacerBoxSize">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                     </spacer>
                     </item>
                    </layout>
                   </widget>

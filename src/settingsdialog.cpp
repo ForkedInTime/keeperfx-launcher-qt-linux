@@ -19,6 +19,7 @@
 #include <QFormLayout>
 #include <QIntValidator>
 #include <QLineEdit>
+#include <QMargins>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPlainTextEdit>
@@ -1867,6 +1868,10 @@ void SettingsDialog::switchContainerLayout(QWidget *container, bool useHorizonta
     QLayoutItem *child;
     QLayout *oldLayout = container->layout();
 
+    // Keep the margins and spacing the layout was given
+    const QMargins margins = oldLayout ? oldLayout->contentsMargins() : QMargins();
+    const int spacing = oldLayout ? oldLayout->spacing() : -1;
+
     // Store widgets and delete the old layout
     if (oldLayout) {
         while ((child = oldLayout->takeAt(0)) != nullptr) {
@@ -1888,6 +1893,10 @@ void SettingsDialog::switchContainerLayout(QWidget *container, bool useHorizonta
 
     // Keep margins clean so it doesn't look bloated when wrapped
     // newLayout->setContentsMargins(0, 0, 0, 0);
+    if (oldLayout) {
+        newLayout->setContentsMargins(margins);
+        newLayout->setSpacing(spacing);
+    }
 
     // Add widgets back
     for (QWidget *widget : widgets) {
@@ -1934,6 +1943,14 @@ void SettingsDialog::showEvent(QShowEvent *event)
         return;
     }
     initialSizeFitted = true;
+    // Tabs not opened yet are not styled yet, and an unstyled control reports a smaller size; their
+    // layouts may still hold sizes from before their controls were filled
+    for (QWidget *w : findChildren<QWidget *>()) {
+        w->ensurePolished();
+    }
+    for (QLayout *layout : findChildren<QLayout *>()) {
+        layout->invalidate();
+    }
     QSize wanted = size();
     wanted.rwidth() += qMax(0, ui->tabWidget->tabBar()->sizeHint().width() - ui->tabWidget->width());
 
@@ -1966,15 +1983,24 @@ void SettingsDialog::showEvent(QShowEvent *event)
     // The open tab is laid out at the window's size only now
     updateResponsiveLayouts();
 
-    // Tall enough for the tallest tab, where the screen allows; a taller tab scrolls
+    // Tall enough for the tallest tab, where the screen allows; a taller tab scrolls. A page is as tall
+    // as it is at the width it gets (a wrapping label takes more lines when narrow).
     QScrollArea *openScroll = nullptr;
-    int tallest = 0;
     for (int i = 0; i < ui->tabWidget->count(); ++i) {
         for (QScrollArea *scroll : ui->tabWidget->widget(i)->findChildren<QScrollArea *>(Qt::FindDirectChildrenOnly)) {
-            if (QWidget *page = scroll->widget()) {
-                tallest = qMax(tallest, page->sizeHint().height());
-                if (scroll->isVisibleTo(this)) {
-                    openScroll = scroll;
+            if (scroll->widget() && scroll->isVisibleTo(this)) {
+                openScroll = scroll;
+            }
+        }
+    }
+    int tallest = 0;
+    if (openScroll) {
+        const int pageWidth = openScroll->maximumViewportSize().width();
+        for (int i = 0; i < ui->tabWidget->count(); ++i) {
+            for (QScrollArea *scroll : ui->tabWidget->widget(i)->findChildren<QScrollArea *>(Qt::FindDirectChildrenOnly)) {
+                if (QWidget *page = scroll->widget()) {
+                    const int pageHeight = page->hasHeightForWidth() ? page->heightForWidth(pageWidth) : page->sizeHint().height();
+                    tallest = qMax(tallest, qMax(pageHeight, page->minimumSizeHint().height()));
                 }
             }
         }
@@ -2062,21 +2088,32 @@ int SettingsDialog::marginsAround(QWidget *container)
 }
 
 // Two columns side by side where they fit, one under the other where they do not: every
-// 'responsive_' container decides for itself, from what its columns ask for and the width its scroll
-// area has. A form still too wide for its column (a long translation at a large font) puts each label
+// 'responsive_' container decides for itself, from what its columns ask for and the width a tab's
+// scroll area has. A form still too wide for its column (a long translation at a large font) puts each label
 // above its field.
 void SettingsDialog::updateResponsiveLayouts()
 {
     const QList<QWidget *> containers = findChildren<QWidget *>(QRegularExpression("^responsive_.*"));
+
+    // Every tab's page is as wide as the open one's (a tab not open has not been laid out at the
+    // window's size yet), so all tabs are decided from the open tab's scroll area.
+    int pageWidth = -1;
     for (QWidget *container : containers) {
-        // A tab that is not open has not been laid out at the window's size yet; it is decided when opened
+        if (QScrollArea *scroll = responsiveScrollArea(container); scroll && container->isVisibleTo(this)) {
+            pageWidth = usablePageWidth(scroll);
+            break;
+        }
+    }
+
+    for (QWidget *container : containers) {
         QBoxLayout *layout = qobject_cast<QBoxLayout *>(container->layout());
-        if (!layout || !container->isVisibleTo(this)) {
+        if (!layout || (pageWidth < 0 && !container->isVisibleTo(this))) {
             continue;
         }
         const QList<QWidget *> columns = responsiveColumns(container);
         QScrollArea *scroll = responsiveScrollArea(container);
-        const int room = scroll ? usablePageWidth(scroll) - marginsAround(container) : container->width();
+        const int room = (pageWidth >= 0 ? pageWidth : scroll ? usablePageWidth(scroll) : container->width())
+            - (scroll ? marginsAround(container) : 0);
         const bool useHorizontal = sideBySideWidth(container, columns) <= room;
 
         const QVariant current = container->property("responsiveHorizontal");
