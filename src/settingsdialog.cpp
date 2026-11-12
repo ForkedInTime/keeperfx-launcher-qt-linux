@@ -3,6 +3,7 @@
 
 #include "version.h"
 #include "aboutcredits.h"
+#include "settingsfit.h"
 #include "kfxversion.h"
 #include "popupsignalcombobox.h"
 #include "settings.h"
@@ -17,8 +18,6 @@
 #include <QEvent>
 #include <QFontDatabase>
 #include <QFormLayout>
-#include <QIntValidator>
-#include <QLineEdit>
 #include <QMargins>
 #include <QMessageBox>
 #include <QMouseEvent>
@@ -26,10 +25,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QResizeEvent>
-#include <QScrollArea>
-#include <QScrollBar>
 #include <QShowEvent>
-#include <QTabBar>
 #include <QScreen>
 
 // Selects the ZOOM_TO_MOUSE / ROTATE_AROUND_MOUSE entry that keeperfx.cfg's value means to the
@@ -188,7 +184,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
     // Smoothen edges (-vidsmooth): newer engines ignore it. Hide its row there; the setting itself is kept.
     if (KfxVersion::hasFunctionality("vidsmooth_ignored") == true) {
-        hideSettingRow(ui->checkBoxSmoothenVideo);
+        SettingsFit::hideRow(ui->checkBoxSmoothenVideo);
     }
 
     // Parchment map fade
@@ -207,7 +203,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: On", "Variable Refresh Dropdown"), "ON");
         ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: Off", "Variable Refresh Dropdown"), "OFF");
     } else {
-        hideSettingRow(ui->comboBoxVariableRefresh);
+        SettingsFit::hideRow(ui->comboBoxVariableRefresh);
     }
 
     // Relative mouse mode
@@ -343,7 +339,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 #ifndef Q_OS_WINDOWS
     // The Tux Edition downloads from our GitHub releases (served by GitHub's own
     // worldwide CDN), so the keeperfx.net/Cloudflare picker does nothing here — hide it.
-    hideSettingRow(ui->comboBoxCDN);
+    SettingsFit::hideRow(ui->comboBoxCDN);
 #endif
 
     // Screenshot type dropdown
@@ -532,21 +528,9 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     // This should be executed at the end when the widgets and their contents are final
     addSettingsChangedHandler();
 
-    // Every dropdown as wide as its longest entry. Which tabs show two columns, and which forms put
-    // their labels above their fields, is decided when the window is laid out (resizeEvent) and when
-    // another tab is opened (updateResponsiveLayouts).
-    for (QComboBox *comboBox : findChildren<QComboBox *>()) {
-        fitComboBoxToEntries(comboBox);
-    }
-    // A number field as wide as its largest number, not a text field's width: the columns can then
-    // stand side by side in a window of a sensible width
-    for (QLineEdit *edit : findChildren<QLineEdit *>()) {
-        if (auto *validator = qobject_cast<const QIntValidator *>(edit->validator())) {
-            const int digits = int(QString::number(validator->top()).size()) + 1;
-            const int frame = 2 * edit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, edit);
-            edit->setMaximumWidth(edit->fontMetrics().horizontalAdvance(QString(digits, QLatin1Char('0'))) + frame + 12);
-        }
-    }
+    // Nothing cut off in any language (settingsfit.cpp): dropdowns and number fields sized to their
+    // text; which tabs show two columns is decided when the window is laid out and a tab is opened
+    SettingsFit::fitControls(this);
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &SettingsDialog::updateResponsiveLayouts);
 
     // Map: Libraries for about page
@@ -1835,29 +1819,6 @@ void SettingsDialog::addCustomResolution(int width, int height, QComboBox *sourc
     }
 }
 
-// A dropdown as wide as its longest entry, now and whenever its entries change. Qt sizes a dropdown's
-// minimum once, while it is still empty, so a form short of room would squeeze it below its text.
-void SettingsDialog::fitComboBoxToEntries(QComboBox *comboBox)
-{
-    comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    auto fit = [comboBox]() { comboBox->setMinimumWidth(comboBox->sizeHint().width()); };
-    fit();
-    connect(comboBox->model(), &QAbstractItemModel::rowsInserted, comboBox, fit);
-    connect(comboBox->model(), &QAbstractItemModel::rowsRemoved, comboBox, fit);
-    connect(comboBox->model(), &QAbstractItemModel::dataChanged, comboBox, fit);
-}
-
-// Hide a setting's row: the control and the label in front of it, with no gap left in the form.
-void SettingsDialog::hideSettingRow(QWidget *field)
-{
-    auto *form = qobject_cast<QFormLayout *>(field->parentWidget() ? field->parentWidget()->layout() : nullptr);
-    if (form && form->indexOf(field) >= 0) {
-        form->setRowVisible(field, false);
-    } else {
-        field->setVisible(false);
-    }
-}
-
 void SettingsDialog::switchContainerLayout(QWidget *container, bool useHorizontal) {
 
     // Make sure container exists
@@ -1933,215 +1894,20 @@ void SettingsDialog::resizeEvent(QResizeEvent *event) {
     updateResponsiveLayouts();
 }
 
-// Open wide enough for the tab bar, so no tab hides behind scroll arrows (a long translation's tabs
-// need more than the default width), and for every tab's two columns side by side, where the screen
-// allows; never larger than the screen. Below that a tab shows one column and scrolls.
 void SettingsDialog::showEvent(QShowEvent *event)
 {
     QDialog::showEvent(event);
-    if (initialSizeFitted) {
-        return;
-    }
-    initialSizeFitted = true;
-    // Tabs not opened yet are not styled yet, and an unstyled control reports a smaller size; their
-    // layouts may still hold sizes from before their controls were filled
-    for (QWidget *w : findChildren<QWidget *>()) {
-        w->ensurePolished();
-    }
-    for (QLayout *layout : findChildren<QLayout *>()) {
-        layout->invalidate();
-    }
-    QSize wanted = size();
-    wanted.rwidth() += qMax(0, ui->tabWidget->tabBar()->sizeHint().width() - ui->tabWidget->width());
-
-    // What the window takes around a tab's page (margins, frames, a scroll bar), from the open tab
-    const QList<QWidget *> containers = findChildren<QWidget *>(QRegularExpression("^responsive_.*"));
-    int chrome = -1;
-    for (QWidget *container : containers) {
-        if (QScrollArea *scroll = responsiveScrollArea(container); scroll && container->isVisibleTo(this)) {
-            chrome = width() - usablePageWidth(scroll);
-            break;
-        }
-    }
-    if (chrome >= 0) {
-        for (QWidget *container : containers) {
-            if (container->layout()) {
-                const int need = sideBySideWidth(container, responsiveColumns(container)) + marginsAround(container);
-                wanted.setWidth(qMax(wanted.width(), need + chrome));
-            }
-        }
-    }
-
-    // The window frame is not known before the window is on screen: leave room for a title bar
-    const QSize frame(qMax(frameGeometry().width() - width(), 16), qMax(frameGeometry().height() - height(), 48));
-    if (QScreen *screen = this->screen()) {
-        wanted = wanted.boundedTo(screen->availableGeometry().size() - frame);
-    }
-    // Tabs that still do not fit (a long translation on a small screen or at a large size) get less
-    // padding around their titles before they would need scroll arrows
-    const int tabRoom = wanted.width() - (width() - ui->tabWidget->width());
-    if (ui->tabWidget->tabBar()->sizeHint().width() > tabRoom) {
-        ui->tabWidget->setStyleSheet(ui->tabWidget->styleSheet()
-            + QStringLiteral("\nQTabBar::tab { padding-left: 6px; padding-right: 6px; }"));
-        ui->tabWidget->tabBar()->ensurePolished();
-    }
-    if (wanted != size()) {
-        resize(wanted);
-    }
-    // The open tab is laid out at the window's size only now
-    updateResponsiveLayouts();
-
-    // Tall enough for the tallest tab, where the screen allows; a taller tab scrolls. A page is as tall
-    // as it is at the width it gets (a wrapping label takes more lines when narrow).
-    QScrollArea *openScroll = nullptr;
-    for (int i = 0; i < ui->tabWidget->count(); ++i) {
-        for (QScrollArea *scroll : ui->tabWidget->widget(i)->findChildren<QScrollArea *>(Qt::FindDirectChildrenOnly)) {
-            if (scroll->widget() && scroll->isVisibleTo(this)) {
-                openScroll = scroll;
-            }
-        }
-    }
-    int tallest = 0;
-    if (openScroll) {
-        const int pageWidth = openScroll->maximumViewportSize().width();
-        for (int i = 0; i < ui->tabWidget->count(); ++i) {
-            for (QScrollArea *scroll : ui->tabWidget->widget(i)->findChildren<QScrollArea *>(Qt::FindDirectChildrenOnly)) {
-                if (QWidget *page = scroll->widget()) {
-                    const int pageHeight = page->hasHeightForWidth() ? page->heightForWidth(pageWidth) : page->sizeHint().height();
-                    tallest = qMax(tallest, qMax(pageHeight, page->minimumSizeHint().height()));
-                }
-            }
-        }
-    }
-    if (openScroll) {
-        int wantedHeight = qMax(height(), tallest + height() - openScroll->maximumViewportSize().height());
-        if (QScreen *screen = this->screen()) {
-            wantedHeight = qMin(wantedHeight, screen->availableGeometry().height() - frame.height());
-        }
-        if (wantedHeight != height()) {
-            resize(width(), wantedHeight);
-        }
-    }
-
-    // Grown after it was placed: centre it again over the launcher, inside the screen
-    if (QScreen *screen = this->screen()) {
-        const QRect available = screen->availableGeometry();
-        QRect placed(pos(), size() + frame);
-        placed.moveCenter(parentWidget() ? parentWidget()->window()->frameGeometry().center() : available.center());
-        placed.moveLeft(qBound(available.left(), placed.left(), qMax(available.left(), available.right() + 1 - placed.width())));
-        placed.moveTop(qBound(available.top(), placed.top(), qMax(available.top(), available.bottom() + 1 - placed.height())));
-        move(placed.topLeft());
+    if (!initialSizeFitted) {
+        initialSizeFitted = true;
+        SettingsFit::fitWindow(this, ui->tabWidget, [this](QWidget *container, bool useHorizontal) {
+            switchContainerLayout(container, useHorizontal);
+        });
     }
 }
 
-// The columns of a 'responsive_' container (the frames its layout holds), each form with its labels and
-// fields side by side, as they are measured.
-QList<QWidget *> SettingsDialog::responsiveColumns(QWidget *container)
-{
-    QList<QWidget *> columns;
-    if (QLayout *layout = container->layout()) {
-        for (int i = 0; i < layout->count(); ++i) {
-            if (QWidget *column = layout->itemAt(i)->widget()) {
-                if (auto *form = qobject_cast<QFormLayout *>(column->layout())) {
-                    form->setRowWrapPolicy(QFormLayout::DontWrapRows);
-                }
-                columns.append(column);
-            }
-        }
-    }
-    return columns;
-}
-
-// The width a container needs for its columns side by side. They share it evenly (the team's
-// layout), so every column gets as much as the widest asks for.
-int SettingsDialog::sideBySideWidth(QWidget *container, const QList<QWidget *> &columns)
-{
-    QLayout *layout = container->layout();
-    int widest = 0;
-    for (QWidget *column : columns) {
-        widest = qMax(widest, column->sizeHint().width());
-    }
-    const int count = int(columns.size());
-    return layout->contentsMargins().left() + layout->contentsMargins().right() + count * widest
-        + qMax(0, count - 1) * qMax(0, layout->spacing());
-}
-
-QScrollArea *SettingsDialog::responsiveScrollArea(QWidget *container)
-{
-    QWidget *w = container->parentWidget();
-    while (w && !qobject_cast<QScrollArea *>(w)) {
-        w = w->parentWidget();
-    }
-    return qobject_cast<QScrollArea *>(w);
-}
-
-// The width of a scroll area's page with a vertical scroll bar showing
-int SettingsDialog::usablePageWidth(QScrollArea *scroll)
-{
-    return scroll->maximumViewportSize().width() - scroll->verticalScrollBar()->sizeHint().width();
-}
-
-// The layout margins between a scroll area's page and a container inside it
-int SettingsDialog::marginsAround(QWidget *container)
-{
-    QScrollArea *scroll = responsiveScrollArea(container);
-    int margins = 0;
-    for (QWidget *w = container; scroll && w && w != scroll->widget(); w = w->parentWidget()) {
-        QWidget *parent = w->parentWidget();
-        if (parent && parent->layout()) {
-            margins += parent->layout()->contentsMargins().left() + parent->layout()->contentsMargins().right();
-        }
-    }
-    return margins;
-}
-
-// Two columns side by side where they fit, one under the other where they do not: every
-// 'responsive_' container decides for itself, from what its columns ask for and the width a tab's
-// scroll area has. A form still too wide for its column (a long translation at a large font) puts each label
-// above its field.
 void SettingsDialog::updateResponsiveLayouts()
 {
-    const QList<QWidget *> containers = findChildren<QWidget *>(QRegularExpression("^responsive_.*"));
-
-    // Every tab's page is as wide as the open one's (a tab not open has not been laid out at the
-    // window's size yet), so all tabs are decided from the open tab's scroll area.
-    int pageWidth = -1;
-    for (QWidget *container : containers) {
-        if (QScrollArea *scroll = responsiveScrollArea(container); scroll && container->isVisibleTo(this)) {
-            pageWidth = usablePageWidth(scroll);
-            break;
-        }
-    }
-
-    for (QWidget *container : containers) {
-        QBoxLayout *layout = qobject_cast<QBoxLayout *>(container->layout());
-        if (!layout || (pageWidth < 0 && !container->isVisibleTo(this))) {
-            continue;
-        }
-        const QList<QWidget *> columns = responsiveColumns(container);
-        QScrollArea *scroll = responsiveScrollArea(container);
-        const int room = (pageWidth >= 0 ? pageWidth : scroll ? usablePageWidth(scroll) : container->width())
-            - (scroll ? marginsAround(container) : 0);
-        const bool useHorizontal = sideBySideWidth(container, columns) <= room;
-
-        const QVariant current = container->property("responsiveHorizontal");
-        if (!current.isValid() || current.toBool() != useHorizontal) {
-            switchContainerLayout(container, useHorizontal);
-            container->setProperty("responsiveHorizontal", useHorizontal);
-        }
-
-        QLayout *now = container->layout();
-        const int margins = now->contentsMargins().left() + now->contentsMargins().right();
-        const int count = int(columns.size());
-        const int gaps = qMax(0, count - 1) * qMax(0, now->spacing());
-        const int columnWidth = useHorizontal ? (room - margins - gaps) / qMax(1, count) : room - margins;
-        for (QWidget *column : columns) {
-            if (auto *form = qobject_cast<QFormLayout *>(column->layout())) {
-                form->setRowWrapPolicy(column->sizeHint().width() > columnWidth ? QFormLayout::WrapAllRows : QFormLayout::DontWrapRows);
-            }
-            // Never narrower than its content allows: the team's columns ignore their size hints, so
-            // a tight layout would otherwise cut them
-            column->setMinimumWidth(column->minimumSizeHint().width());
-        }
-    }
+    SettingsFit::updateColumns(this, [this](QWidget *container, bool useHorizontal) {
+        switchContainerLayout(container, useHorizontal);
+    });
 }
