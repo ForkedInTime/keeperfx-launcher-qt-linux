@@ -16,6 +16,10 @@ public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
 
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+    void showEvent(QShowEvent *event) override;
+
 private slots:
     void onOpenConfigButtonClicked();
     void onResolutionChanged(int index);
@@ -46,4 +50,8 @@ private:
 
     void showCustomResolutionDialog(QComboBox *sourceCombo);
     void addCustomResolution(int width, int height, QComboBox *sourceCombo);
+
+    void switchContainerLayout(QWidget *container, bool useHorizontal);
+    void updateResponsiveLayouts();
+    bool initialSizeFitted = false;
 };

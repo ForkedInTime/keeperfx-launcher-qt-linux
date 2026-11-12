@@ -95,7 +95,7 @@ static void checkAt(int pointSize)
 	QDialog dialog;
 	Ui::SettingsDialog ui;
 	ui.setupUi(&dialog);
-	dialog.setFixedSize(dialog.size());   // as SettingsDialog does
+	dialog.setFixedSize(dialog.size());   // the size in the .ui; the real window opens at least this big
 	ui.labelAboutImage->setPixmap(QPixmap(480, 341));   // launchermn.jpg's size (no resources here)
 
 	ui.labelAbout->setTextFormat(Qt::RichText);

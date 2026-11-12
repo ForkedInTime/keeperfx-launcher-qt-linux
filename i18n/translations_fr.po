@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 15:14-0800\n"
+"POT-Creation-Date: 2026-11-11 15:57-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: VOSA Thomas <thomas.vosa@proton.me>\n"
 "Language-Team: \n"
@@ -1592,6 +1592,10 @@ msgid "Display Intro"
 msgstr "Afficher l'introduction"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Display splash screens"
+msgstr "Afficher les écrans d'accueil"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable Cheats"
 msgstr "Activer les codes de triche"
 
@@ -1603,6 +1607,31 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Screenshot type"
 msgstr "Type de capture d'écran"
 
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable flee"
+msgstr "Activer le mode \"fuite\" automatiquement"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable imprison"
+msgstr "Activer le mode \"emprisonnement\" automatiquement"
+
+msgctxt "SettingsDialog|Max. Zoom Distance Tooltip"
+msgid ""
+"The maximum distance you can zoom out the camera [0 - 100].\n"
+"\n"
+"0 = original Dungeon Keeper maximum distance\n"
+"60 = KeeperFX default distance\n"
+"100 = KeeperFX maximum distance\n"
+"\n"
+"Note: This is not a percentage"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"Max. zoom distance\n"
+"(default = 60)"
+msgstr ""
+
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
 "Gameturns per second\n"
@@ -1611,9 +1640,9 @@ msgstr ""
 "Tours de jeu par seconde\n"
 "(par défaut = 20)"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Display splash screens"
-msgstr "Afficher les écrans d'accueil"
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Game launch options"
+msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable delta time"
@@ -1624,20 +1653,20 @@ msgid "Freeze game when not focused"
 msgstr "Figer le jeu lorsqu'une autre fenêtre est active"
 
 msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Packetsave filename"
-msgstr "Nom du fichier de sauvegarde des paquets"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable Packetsave"
-msgstr "Activer la sauvegarde des paquets"
-
-msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Max. replay size (kB)"
 msgstr ""
 
 msgctxt "SettingsDialog|"
 msgid "Largest replay file the game will write, in kB. 0 means no limit."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable Packetsave"
+msgstr "Activer la sauvegarde des paquets"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Packetsave filename"
+msgstr "Nom du fichier de sauvegarde des paquets"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1655,42 +1684,9 @@ msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Exit on LUA error"
 msgstr "Fermer en cas d'erreur LUA"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable flee"
-msgstr "Activer le mode \"fuite\" automatiquement"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable imprison"
-msgstr "Activer le mode \"emprisonnement\" automatiquement"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Game launch options"
-msgstr ""
-
 msgctxt "SettingsDialog|Tab Title"
 msgid "Graphics"
 msgstr "Graphismes"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Smoothen edges"
-msgstr "Lisser les bordures"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Resolution"
-msgstr "Résolution"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display mode"
-msgstr "Mode d'affichage"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display monitor"
-msgstr "Écran d'affichage"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "View 1"
-msgstr "Vue 1"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
@@ -1699,8 +1695,36 @@ msgstr "Vue 2"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "View 1"
+msgstr "Vue 1"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display mode"
+msgstr "Mode d'affichage"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "View 3"
 msgstr "Vue 3"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Resolution"
+msgstr "Résolution"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Menu"
+msgstr "Menu"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Movies"
+msgstr "Vidéos"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Failsafe"
+msgstr "Failsafe"
 
 #. This is shown under the views configuration
 msgctxt "SettingsDialog|Information Label"
@@ -1711,15 +1735,34 @@ msgstr ""
 "strong></i>"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display monitor"
+msgstr "Écran d'affichage"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Max. FPS (0 = unlimited)"
+msgstr "FPS max (0 = illimitées)"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Resize Movies"
 msgstr "Re-dimensionner les vidéos"
 
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Renderer"
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
+"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
+"it)."
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Fade when opening the map"
+msgid "Smoothen edges"
+msgstr "Lisser les bordures"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically determine max. FPS"
+msgstr "Déterminer automatiquement les FPS. max"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Rendering Backend"
 msgstr ""
 
 msgctxt "SettingsDialog|Tooltip"
@@ -1730,23 +1773,6 @@ msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable VSync"
-msgstr ""
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
-"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
-"it)."
-msgstr ""
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Viewport mode"
-msgstr ""
-
-msgctxt "SettingsDialog|"
-msgid ""
-"How the 3D view fills the window. Original keeps the classic frame; Full "
-"uses the whole window; Full (Letterbox) keeps the aspect ratio with bars."
 msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
@@ -1760,25 +1786,6 @@ msgstr "Taille de la main %"
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Select box line size %"
 msgstr "Épaisseur de sélection des blocs %"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Menu"
-msgstr "Menu"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Failsafe"
-msgstr "Failsafe"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Movies"
-msgstr "Vidéos"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Max. FPS (0 = unlimited)"
-msgstr "FPS max (0 = illimitées)"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1797,28 +1804,41 @@ msgstr ""
 "(défaut = 1)"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically determine max. FPS"
-msgstr "Déterminer automatiquement les FPS. max"
+msgid "Enable map fade animation"
+msgstr ""
+
+msgctxt "SettingsDialog|Viewport Mode Tooltip"
+msgid ""
+"How the in-game view shares the screen with the sidebar, in every view.\n"
+"\n"
+"Original = the view stops at the sidebar\n"
+"Full = the view spans the screen and the sidebar is drawn over it\n"
+"Full (Letterbox) = same as 'Full' but with black under the sidebar"
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Viewport mode"
+msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Sound"
 msgstr "Audio"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable sound"
-msgstr "Activer le son"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Use CD music instead of local files"
-msgstr "Utiliser la musique du CD au lieu des fichiers locaux"
+msgid "Mute audio when game is not focused"
+msgstr "Couper le son lorsqu'une autre fenêtre est active"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Pause music when game is paused"
 msgstr "Mettre en pause la musique lorsque le jeu est en pause"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable atmospheric sounds"
-msgstr "Activer les sons d'ambiance"
+msgid "Use CD music instead of local files"
+msgstr "Utiliser la musique du CD au lieu des fichiers locaux"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable sound"
+msgstr "Activer le son"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Frequency"
@@ -1829,55 +1849,16 @@ msgid "Volume"
 msgstr "Volume"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Mute audio when game is not focused"
-msgstr "Couper le son lorsqu'une autre fenêtre est active"
+msgid "Enable atmospheric sounds"
+msgstr "Activer les sons d'ambiance"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Input"
 msgstr "Entrée"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Lock cursor in possession"
-msgstr "Verrouiller le curseur en possession"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor when game is paused"
-msgstr "Déverrouiller le curseur lorsque le jeu est en pause"
-
-#. "Alternative Input"
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor from game window"
-msgstr "Déverrouiller le curseur de la fenêtre de jeu"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Screen edge camera panning"
-msgstr "Mouvement de l'écran quand la souris est au bord"
-
 msgctxt "SettingsDialog|Slider Title Label"
 msgid "Mouse sensitivity"
 msgstr "Sensibilité de la souris"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Raw mouse input"
-msgstr "Entrée brute de la souris"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Default tag mode"
-msgstr "Mode de marquage par défaut"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable tag mode toggle (Right-click)"
-msgstr "Activer le changement de mode de marquage (clic droit)"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"How the game locks the mouse. Relative mode reads movement instead of moving "
-"the cursor; try it if the cursor jumps or escapes the window."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Relative mouse mode"
-msgstr ""
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Zoom towards cursor"
@@ -1887,33 +1868,53 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Rotate around cursor"
 msgstr ""
 
-msgctxt "SettingsDialog|Slider Title Label"
-msgid "Max. zoom distance"
-msgstr ""
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Raw mouse input"
+msgstr "Entrée brute de la souris"
 
-msgctxt "SettingsDialog|"
+#. "Capture Cursor"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor from game window"
+msgstr "Déverrouiller le curseur de la fenêtre de jeu"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor when game is paused"
+msgstr "Déverrouiller le curseur lorsque le jeu est en pause"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Lock cursor in possession"
+msgstr "Verrouiller le curseur en possession"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Screen edge camera panning"
+msgstr "Mouvement de l'écran quand la souris est au bord"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Default tag mode"
+msgstr "Mode de marquage par défaut"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable tag mode toggle (Right-click)"
+msgstr "Activer le changement de mode de marquage (clic droit)"
+
+msgctxt "SettingsDialog|Relative Mouse Mode Tooltip"
 msgid ""
-"How far the camera can zoom out [0 - 100]. 0 is the original Dungeon Keeper "
-"limit, 100 the KeeperFX limit."
+"Mouse locking method.\n"
+"\n"
+"- Enabled: Use SDL relative (\"raw\") mode for 1:1 deltas\n"
+"- Disabled: Use older grab-and-warp scheme (confines and re-centers the "
+"cursor)\n"
+"\n"
+"Disable this if the mouse feels off."
 msgstr ""
 
-msgctxt "SettingsDialog|Slider Value Label"
-msgid "0"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable relative mouse mode"
 msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Multiplayer"
 msgstr "Multijoueur"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"Advertise and find games through the matchmaking server. Off keeps "
-"multiplayer to direct connections."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable matchmaking"
-msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Matchmaking server"
@@ -1929,70 +1930,27 @@ msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Multiplayer port"
 msgstr ""
 
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Advertise and find games through the matchmaking server. Off keeps "
+"multiplayer to direct connections."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable matchmaking"
+msgstr ""
+
 msgctxt "SettingsDialog|Tab Title"
 msgid "Launcher"
 msgstr "Lanceur"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically check for KeeperFX updates"
-msgstr "Vérifier les mises à jour KeeperFX automatiquement"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable crash reporting"
-msgstr "Activer le rapport de plantage"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "KeeperFX Release Channel"
-msgstr "Canal de diffusion de KeeperFX"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable website integration"
-msgstr "Activer l'intégration Web"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Open on same screen as game"
-msgstr "Ouvrir sur le même écran que le jeu"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher language"
 msgstr "Langue du lanceur"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Update automatically"
-msgstr "Mettre à jour automatiquement"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Backup savefiles during update"
-msgstr "Conserver les sauvegardes durant la mise à jour"
-
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Play button theme"
 msgstr "Apparence du bouton Jouer"
-
-msgctxt "SettingsDialog|Button"
-msgid "Show launcher command line options"
-msgstr "Montrer les options en ligne de commande du lanceur"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid ""
-"Update check interval in days\n"
-"(0 = always check)"
-msgstr ""
-"Intervalle, en jours, de vérification des mises à jour\n"
-"(0 = vérifier à chaque fois)"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Show directory name in window title"
-msgstr "Montrer le nom du dossier comme titre de la fenêtre"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically remove leftover files"
-msgstr "Automatiquement supprimer les fichiers résiduels"
-
-#, fuzzy
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Download Server"
-msgstr "Télécharger"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher size"
@@ -2003,6 +1961,59 @@ msgid ""
 "Make the whole launcher bigger or smaller. Takes effect next time you open "
 "the launcher."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable website integration"
+msgstr "Activer l'intégration Web"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable crash reporting"
+msgstr "Activer le rapport de plantage"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Open on same screen as game"
+msgstr "Ouvrir sur le même écran que le jeu"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Show directory name in window title"
+msgstr "Montrer le nom du dossier comme titre de la fenêtre"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "KeeperFX Release Channel"
+msgstr "Canal de diffusion de KeeperFX"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid ""
+"Update check interval in days\n"
+"(0 = always check)"
+msgstr ""
+"Intervalle, en jours, de vérification des mises à jour\n"
+"(0 = vérifier à chaque fois)"
+
+#, fuzzy
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Download Server"
+msgstr "Télécharger"
+
+msgctxt "SettingsDialog|Button"
+msgid "Show launcher command line options"
+msgstr "Montrer les options en ligne de commande du lanceur"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically check for KeeperFX updates"
+msgstr "Vérifier les mises à jour KeeperFX automatiquement"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Update automatically"
+msgstr "Mettre à jour automatiquement"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Backup savefiles during update"
+msgstr "Conserver les sauvegardes durant la mise à jour"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically remove leftover files"
+msgstr "Automatiquement supprimer les fichiers résiduels"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "API"

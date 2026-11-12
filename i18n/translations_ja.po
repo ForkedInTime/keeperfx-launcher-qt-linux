@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 15:14-0800\n"
+"POT-Creation-Date: 2026-11-11 15:57-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1574,6 +1574,10 @@ msgid "Display Intro"
 msgstr "イントロを表示"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Display splash screens"
+msgstr "スプラッシュスクリーン"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable Cheats"
 msgstr "チート有効化"
 
@@ -1585,6 +1589,31 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Screenshot type"
 msgstr "スクリーンショット形式"
 
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable flee"
+msgstr "既定で逃走を有効"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable imprison"
+msgstr "既定で生け捕りを有効"
+
+msgctxt "SettingsDialog|Max. Zoom Distance Tooltip"
+msgid ""
+"The maximum distance you can zoom out the camera [0 - 100].\n"
+"\n"
+"0 = original Dungeon Keeper maximum distance\n"
+"60 = KeeperFX default distance\n"
+"100 = KeeperFX maximum distance\n"
+"\n"
+"Note: This is not a percentage"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"Max. zoom distance\n"
+"(default = 60)"
+msgstr ""
+
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
 "Gameturns per second\n"
@@ -1593,9 +1622,9 @@ msgstr ""
 "毎秒ターン数\n"
 "(既定値: 20)"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Display splash screens"
-msgstr "スプラッシュスクリーン"
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Game launch options"
+msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable delta time"
@@ -1606,20 +1635,20 @@ msgid "Freeze game when not focused"
 msgstr "非アクティブ時に一時停止"
 
 msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Packetsave filename"
-msgstr "パケットセーブのファイル名"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable Packetsave"
-msgstr "パケットセーブ"
-
-msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Max. replay size (kB)"
 msgstr ""
 
 msgctxt "SettingsDialog|"
 msgid "Largest replay file the game will write, in kB. 0 means no limit."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable Packetsave"
+msgstr "パケットセーブ"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Packetsave filename"
+msgstr "パケットセーブのファイル名"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1637,42 +1666,9 @@ msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Exit on LUA error"
 msgstr "LUAエラーでアプリ終了"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable flee"
-msgstr "既定で逃走を有効"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable imprison"
-msgstr "既定で生け捕りを有効"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Game launch options"
-msgstr ""
-
 msgctxt "SettingsDialog|Tab Title"
 msgid "Graphics"
 msgstr "グラフィックス"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Smoothen edges"
-msgstr "画面スムージング"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Resolution"
-msgstr "解像度"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display mode"
-msgstr "表示モード"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display monitor"
-msgstr "表示モニター"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "View 1"
-msgstr "第１モード"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
@@ -1681,8 +1677,36 @@ msgstr "第２モード"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "View 1"
+msgstr "第１モード"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display mode"
+msgstr "表示モード"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "View 3"
 msgstr "第３モード"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Resolution"
+msgstr "解像度"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Menu"
+msgstr "メニュー"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Movies"
+msgstr "動画"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Failsafe"
+msgstr "駄目場合"
 
 #. This is shown under the views configuration
 msgctxt "SettingsDialog|Information Label"
@@ -1692,15 +1716,34 @@ msgstr ""
 "（ゲーム内モードを切り替えるには、<strong>Alt + R</strong> を押します）"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display monitor"
+msgstr "表示モニター"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Max. FPS (0 = unlimited)"
+msgstr "最大FPS（0 = 無制限）"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Resize Movies"
 msgstr "動画の調整"
 
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Renderer"
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
+"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
+"it)."
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Fade when opening the map"
+msgid "Smoothen edges"
+msgstr "画面スムージング"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically determine max. FPS"
+msgstr "最大FPSを自動的に設定"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Rendering Backend"
 msgstr ""
 
 msgctxt "SettingsDialog|Tooltip"
@@ -1711,23 +1754,6 @@ msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable VSync"
-msgstr ""
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
-"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
-"it)."
-msgstr ""
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Viewport mode"
-msgstr ""
-
-msgctxt "SettingsDialog|"
-msgid ""
-"How the 3D view fills the window. Original keeps the classic frame; Full "
-"uses the whole window; Full (Letterbox) keeps the aspect ratio with bars."
 msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
@@ -1741,25 +1767,6 @@ msgstr "手の寸法　%"
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Select box line size %"
 msgstr "選択枠の太さ　%"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Menu"
-msgstr "メニュー"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Failsafe"
-msgstr "駄目場合"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Movies"
-msgstr "動画"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Max. FPS (0 = unlimited)"
-msgstr "最大FPS（0 = 無制限）"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1778,28 +1785,41 @@ msgstr ""
 "（既定値: 1）"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically determine max. FPS"
-msgstr "最大FPSを自動的に設定"
+msgid "Enable map fade animation"
+msgstr ""
+
+msgctxt "SettingsDialog|Viewport Mode Tooltip"
+msgid ""
+"How the in-game view shares the screen with the sidebar, in every view.\n"
+"\n"
+"Original = the view stops at the sidebar\n"
+"Full = the view spans the screen and the sidebar is drawn over it\n"
+"Full (Letterbox) = same as 'Full' but with black under the sidebar"
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Viewport mode"
+msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Sound"
 msgstr "サウンド"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable sound"
-msgstr "サウンド"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Use CD music instead of local files"
-msgstr "音楽をCDから再生"
+msgid "Mute audio when game is not focused"
+msgstr "バックグラウンドでオーディオをミュート"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Pause music when game is paused"
 msgstr "ポーズ時に音楽も一時停止"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable atmospheric sounds"
-msgstr "背景音"
+msgid "Use CD music instead of local files"
+msgstr "音楽をCDから再生"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable sound"
+msgstr "サウンド"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Frequency"
@@ -1810,55 +1830,16 @@ msgid "Volume"
 msgstr "音量"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Mute audio when game is not focused"
-msgstr "バックグラウンドでオーディオをミュート"
+msgid "Enable atmospheric sounds"
+msgstr "背景音"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Input"
 msgstr "入力"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Lock cursor in possession"
-msgstr "「支配」中はカーソルをロック"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor when game is paused"
-msgstr "ポーズ中はカーソルをアンロック"
-
-#. "Alternative Input"
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor from game window"
-msgstr "カーソルをウィンドウに固定しない"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Screen edge camera panning"
-msgstr "画面端カメラ移動"
-
 msgctxt "SettingsDialog|Slider Title Label"
 msgid "Mouse sensitivity"
 msgstr "マウスの感性"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Raw mouse input"
-msgstr "マウス生入力"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Default tag mode"
-msgstr "既定のマークモード"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable tag mode toggle (Right-click)"
-msgstr "右クリックでマークモード間の切り替え"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"How the game locks the mouse. Relative mode reads movement instead of moving "
-"the cursor; try it if the cursor jumps or escapes the window."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Relative mouse mode"
-msgstr ""
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Zoom towards cursor"
@@ -1868,33 +1849,53 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Rotate around cursor"
 msgstr ""
 
-msgctxt "SettingsDialog|Slider Title Label"
-msgid "Max. zoom distance"
-msgstr ""
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Raw mouse input"
+msgstr "マウス生入力"
 
-msgctxt "SettingsDialog|"
+#. "Capture Cursor"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor from game window"
+msgstr "カーソルをウィンドウに固定しない"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor when game is paused"
+msgstr "ポーズ中はカーソルをアンロック"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Lock cursor in possession"
+msgstr "「支配」中はカーソルをロック"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Screen edge camera panning"
+msgstr "画面端カメラ移動"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Default tag mode"
+msgstr "既定のマークモード"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable tag mode toggle (Right-click)"
+msgstr "右クリックでマークモード間の切り替え"
+
+msgctxt "SettingsDialog|Relative Mouse Mode Tooltip"
 msgid ""
-"How far the camera can zoom out [0 - 100]. 0 is the original Dungeon Keeper "
-"limit, 100 the KeeperFX limit."
+"Mouse locking method.\n"
+"\n"
+"- Enabled: Use SDL relative (\"raw\") mode for 1:1 deltas\n"
+"- Disabled: Use older grab-and-warp scheme (confines and re-centers the "
+"cursor)\n"
+"\n"
+"Disable this if the mouse feels off."
 msgstr ""
 
-msgctxt "SettingsDialog|Slider Value Label"
-msgid "0"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable relative mouse mode"
 msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Multiplayer"
 msgstr "マルチプレイヤ"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"Advertise and find games through the matchmaking server. Off keeps "
-"multiplayer to direct connections."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable matchmaking"
-msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Matchmaking server"
@@ -1910,70 +1911,27 @@ msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Multiplayer port"
 msgstr ""
 
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Advertise and find games through the matchmaking server. Off keeps "
+"multiplayer to direct connections."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable matchmaking"
+msgstr ""
+
 msgctxt "SettingsDialog|Tab Title"
 msgid "Launcher"
 msgstr "ランチャー"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically check for KeeperFX updates"
-msgstr "KeeperFXアップデートを自動で確認"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable crash reporting"
-msgstr "クラッシュ報告"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "KeeperFX Release Channel"
-msgstr "KeeperFXのリリースチャンネル"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable website integration"
-msgstr "ウェブサイト統合"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Open on same screen as game"
-msgstr "ゲームと同じ画面で開く"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher language"
 msgstr "ランチャーの言語"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Update automatically"
-msgstr "自動アップデート"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Backup savefiles during update"
-msgstr "アップデート時にセーブデータをバックアップ"
-
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Play button theme"
 msgstr "プレイボタンのテーマ"
-
-msgctxt "SettingsDialog|Button"
-msgid "Show launcher command line options"
-msgstr "ランチャーのコマンドラインオプションを表示"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid ""
-"Update check interval in days\n"
-"(0 = always check)"
-msgstr ""
-"アップデートの確認間隔（日）\n"
-"（0 = 常に確認）"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Show directory name in window title"
-msgstr "ウィンドウのタイトルにフォルダー名を表示"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically remove leftover files"
-msgstr "残留ファイルを自動削除"
-
-#, fuzzy
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Download Server"
-msgstr "ダウンロード"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher size"
@@ -1984,6 +1942,59 @@ msgid ""
 "Make the whole launcher bigger or smaller. Takes effect next time you open "
 "the launcher."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable website integration"
+msgstr "ウェブサイト統合"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable crash reporting"
+msgstr "クラッシュ報告"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Open on same screen as game"
+msgstr "ゲームと同じ画面で開く"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Show directory name in window title"
+msgstr "ウィンドウのタイトルにフォルダー名を表示"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "KeeperFX Release Channel"
+msgstr "KeeperFXのリリースチャンネル"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid ""
+"Update check interval in days\n"
+"(0 = always check)"
+msgstr ""
+"アップデートの確認間隔（日）\n"
+"（0 = 常に確認）"
+
+#, fuzzy
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Download Server"
+msgstr "ダウンロード"
+
+msgctxt "SettingsDialog|Button"
+msgid "Show launcher command line options"
+msgstr "ランチャーのコマンドラインオプションを表示"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically check for KeeperFX updates"
+msgstr "KeeperFXアップデートを自動で確認"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Update automatically"
+msgstr "自動アップデート"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Backup savefiles during update"
+msgstr "アップデート時にセーブデータをバックアップ"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically remove leftover files"
+msgstr "残留ファイルを自動削除"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "API"

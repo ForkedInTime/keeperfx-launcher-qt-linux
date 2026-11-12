@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 15:14-0800\n"
+"POT-Creation-Date: 2026-11-11 15:57-0800\n"
 "PO-Revision-Date: 2026-03-21 11:28+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1582,6 +1582,10 @@ msgid "Display Intro"
 msgstr "인트로 표시"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Display splash screens"
+msgstr "스플래시 화면 표시"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable Cheats"
 msgstr "치트 활성화"
 
@@ -1593,6 +1597,31 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Screenshot type"
 msgstr "스크린샷 유형"
 
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable flee"
+msgstr "자동 피신 활성화"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable imprison"
+msgstr "자동 투옥 활성화"
+
+msgctxt "SettingsDialog|Max. Zoom Distance Tooltip"
+msgid ""
+"The maximum distance you can zoom out the camera [0 - 100].\n"
+"\n"
+"0 = original Dungeon Keeper maximum distance\n"
+"60 = KeeperFX default distance\n"
+"100 = KeeperFX maximum distance\n"
+"\n"
+"Note: This is not a percentage"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"Max. zoom distance\n"
+"(default = 60)"
+msgstr ""
+
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
 "Gameturns per second\n"
@@ -1601,9 +1630,9 @@ msgstr ""
 "초당 게임 턴 수\n"
 "(기본값 = 20)"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Display splash screens"
-msgstr "스플래시 화면 표시"
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Game launch options"
+msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable delta time"
@@ -1614,20 +1643,20 @@ msgid "Freeze game when not focused"
 msgstr "창이 비활성화되면 게임 일시정지"
 
 msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Packetsave filename"
-msgstr "패킷 저장 파일 이름"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable Packetsave"
-msgstr "패킷 저장 활성화"
-
-msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Max. replay size (kB)"
 msgstr ""
 
 msgctxt "SettingsDialog|"
 msgid "Largest replay file the game will write, in kB. 0 means no limit."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable Packetsave"
+msgstr "패킷 저장 활성화"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Packetsave filename"
+msgstr "패킷 저장 파일 이름"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1645,42 +1674,9 @@ msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Exit on LUA error"
 msgstr "LUA 오류 발생 시 종료"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable flee"
-msgstr "자동 피신 활성화"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable imprison"
-msgstr "자동 투옥 활성화"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Game launch options"
-msgstr ""
-
 msgctxt "SettingsDialog|Tab Title"
 msgid "Graphics"
 msgstr "그래픽"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Smoothen edges"
-msgstr "모서리 부드럽게 처리"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Resolution"
-msgstr "해상도"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display mode"
-msgstr "디스플레이 모드"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display monitor"
-msgstr "디스플레이 모니터"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "View 1"
-msgstr "뷰 1"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
@@ -1689,8 +1685,36 @@ msgstr "뷰 2"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "View 1"
+msgstr "뷰 1"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display mode"
+msgstr "디스플레이 모드"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "View 3"
 msgstr "뷰 3"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Resolution"
+msgstr "해상도"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Menu"
+msgstr "메뉴"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Movies"
+msgstr "영상"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Failsafe"
+msgstr "안전장치"
 
 #. This is shown under the views configuration
 msgctxt "SettingsDialog|Information Label"
@@ -1699,15 +1723,34 @@ msgid ""
 msgstr "<i><strong>Alt + R</strong> 키를 눌러 게임 내 뷰를 전환하세요</i>"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display monitor"
+msgstr "디스플레이 모니터"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Max. FPS (0 = unlimited)"
+msgstr "최대 FPS (0 = 제한 없음)"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Resize Movies"
 msgstr "영상 크기 조정"
 
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Renderer"
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
+"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
+"it)."
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Fade when opening the map"
+msgid "Smoothen edges"
+msgstr "모서리 부드럽게 처리"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically determine max. FPS"
+msgstr "최대 FPS 자동 감지"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Rendering Backend"
 msgstr ""
 
 msgctxt "SettingsDialog|Tooltip"
@@ -1718,23 +1761,6 @@ msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable VSync"
-msgstr ""
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
-"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
-"it)."
-msgstr ""
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Viewport mode"
-msgstr ""
-
-msgctxt "SettingsDialog|"
-msgid ""
-"How the 3D view fills the window. Original keeps the classic frame; Full "
-"uses the whole window; Full (Letterbox) keeps the aspect ratio with bars."
 msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
@@ -1748,25 +1774,6 @@ msgstr "손 크기 (%)"
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Select box line size %"
 msgstr "선택 상자 선 굵기 %"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Menu"
-msgstr "메뉴"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Failsafe"
-msgstr "안전장치"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Movies"
-msgstr "영상"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Max. FPS (0 = unlimited)"
-msgstr "최대 FPS (0 = 제한 없음)"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1785,28 +1792,41 @@ msgstr ""
 "(기본값 = 1)"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically determine max. FPS"
-msgstr "최대 FPS 자동 감지"
+msgid "Enable map fade animation"
+msgstr ""
+
+msgctxt "SettingsDialog|Viewport Mode Tooltip"
+msgid ""
+"How the in-game view shares the screen with the sidebar, in every view.\n"
+"\n"
+"Original = the view stops at the sidebar\n"
+"Full = the view spans the screen and the sidebar is drawn over it\n"
+"Full (Letterbox) = same as 'Full' but with black under the sidebar"
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Viewport mode"
+msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Sound"
 msgstr "사운드"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable sound"
-msgstr "사운드 켜기"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Use CD music instead of local files"
-msgstr "로컬 파일 대신 CD 음악 사용"
+msgid "Mute audio when game is not focused"
+msgstr "게임이 비활성화될 때 음소거"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Pause music when game is paused"
 msgstr "게임 일시정지 시 음악 일시정지"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable atmospheric sounds"
-msgstr "환경음 켜기"
+msgid "Use CD music instead of local files"
+msgstr "로컬 파일 대신 CD 음악 사용"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable sound"
+msgstr "사운드 켜기"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Frequency"
@@ -1817,55 +1837,16 @@ msgid "Volume"
 msgstr "볼륨"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Mute audio when game is not focused"
-msgstr "게임이 비활성화될 때 음소거"
+msgid "Enable atmospheric sounds"
+msgstr "환경음 켜기"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Input"
 msgstr "입력"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Lock cursor in possession"
-msgstr "포제션 시 커서 고정"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor when game is paused"
-msgstr "게임 일시정지 시 커서 잠금 해제"
-
-#. "Alternative Input"
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor from game window"
-msgstr "게임 창에서 커서 잠금 해제"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Screen edge camera panning"
-msgstr "화면 가장자리에서 카메라 이동"
-
 msgctxt "SettingsDialog|Slider Title Label"
 msgid "Mouse sensitivity"
 msgstr "마우스 감도"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Raw mouse input"
-msgstr "직접 마우스 입력"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Default tag mode"
-msgstr "기본 태그 모드"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable tag mode toggle (Right-click)"
-msgstr "태그 모드 전환 활성화 (오른쪽 클릭)"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"How the game locks the mouse. Relative mode reads movement instead of moving "
-"the cursor; try it if the cursor jumps or escapes the window."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Relative mouse mode"
-msgstr ""
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Zoom towards cursor"
@@ -1875,33 +1856,53 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Rotate around cursor"
 msgstr ""
 
-msgctxt "SettingsDialog|Slider Title Label"
-msgid "Max. zoom distance"
-msgstr ""
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Raw mouse input"
+msgstr "직접 마우스 입력"
 
-msgctxt "SettingsDialog|"
+#. "Capture Cursor"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor from game window"
+msgstr "게임 창에서 커서 잠금 해제"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor when game is paused"
+msgstr "게임 일시정지 시 커서 잠금 해제"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Lock cursor in possession"
+msgstr "포제션 시 커서 고정"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Screen edge camera panning"
+msgstr "화면 가장자리에서 카메라 이동"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Default tag mode"
+msgstr "기본 태그 모드"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable tag mode toggle (Right-click)"
+msgstr "태그 모드 전환 활성화 (오른쪽 클릭)"
+
+msgctxt "SettingsDialog|Relative Mouse Mode Tooltip"
 msgid ""
-"How far the camera can zoom out [0 - 100]. 0 is the original Dungeon Keeper "
-"limit, 100 the KeeperFX limit."
+"Mouse locking method.\n"
+"\n"
+"- Enabled: Use SDL relative (\"raw\") mode for 1:1 deltas\n"
+"- Disabled: Use older grab-and-warp scheme (confines and re-centers the "
+"cursor)\n"
+"\n"
+"Disable this if the mouse feels off."
 msgstr ""
 
-msgctxt "SettingsDialog|Slider Value Label"
-msgid "0"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable relative mouse mode"
 msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Multiplayer"
 msgstr "멀티플레이어"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"Advertise and find games through the matchmaking server. Off keeps "
-"multiplayer to direct connections."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable matchmaking"
-msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Matchmaking server"
@@ -1917,73 +1918,27 @@ msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Multiplayer port"
 msgstr ""
 
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Advertise and find games through the matchmaking server. Off keeps "
+"multiplayer to direct connections."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable matchmaking"
+msgstr ""
+
 msgctxt "SettingsDialog|Tab Title"
 msgid "Launcher"
 msgstr "런처"
-
-#, fuzzy
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically check for KeeperFX updates"
-msgstr "KeeperFX 업데이트 확인"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable crash reporting"
-msgstr "크래시 보고 활성화"
-
-#, fuzzy
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "KeeperFX Release Channel"
-msgstr "KeeperFX가 충돌했습니다"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable website integration"
-msgstr "웹사이트 연동 사용"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Open on same screen as game"
-msgstr "게임과 같은 화면에서 열기"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher language"
 msgstr "런처 언어"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Update automatically"
-msgstr "자동 업데이트"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Backup savefiles during update"
-msgstr "업데이트 중 저장 파일 백업"
-
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Play button theme"
 msgstr "재생 버튼 테마"
-
-msgctxt "SettingsDialog|Button"
-msgid "Show launcher command line options"
-msgstr "런처 명령줄 옵션 표시"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid ""
-"Update check interval in days\n"
-"(0 = always check)"
-msgstr ""
-"업데이트 확인 주기(일 단위)\n"
-"(0 = 항상 확인)"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Show directory name in window title"
-msgstr ""
-
-#, fuzzy
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically remove leftover files"
-msgstr "잔여 파일 제거"
-
-#, fuzzy
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Download Server"
-msgstr "다운로드"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher size"
@@ -1994,6 +1949,62 @@ msgid ""
 "Make the whole launcher bigger or smaller. Takes effect next time you open "
 "the launcher."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable website integration"
+msgstr "웹사이트 연동 사용"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable crash reporting"
+msgstr "크래시 보고 활성화"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Open on same screen as game"
+msgstr "게임과 같은 화면에서 열기"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Show directory name in window title"
+msgstr ""
+
+#, fuzzy
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "KeeperFX Release Channel"
+msgstr "KeeperFX가 충돌했습니다"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid ""
+"Update check interval in days\n"
+"(0 = always check)"
+msgstr ""
+"업데이트 확인 주기(일 단위)\n"
+"(0 = 항상 확인)"
+
+#, fuzzy
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Download Server"
+msgstr "다운로드"
+
+msgctxt "SettingsDialog|Button"
+msgid "Show launcher command line options"
+msgstr "런처 명령줄 옵션 표시"
+
+#, fuzzy
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically check for KeeperFX updates"
+msgstr "KeeperFX 업데이트 확인"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Update automatically"
+msgstr "자동 업데이트"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Backup savefiles during update"
+msgstr "업데이트 중 저장 파일 백업"
+
+#, fuzzy
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically remove leftover files"
+msgstr "잔여 파일 제거"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "API"

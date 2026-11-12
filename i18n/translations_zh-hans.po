@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 15:14-0800\n"
+"POT-Creation-Date: 2026-11-11 15:57-0800\n"
 "PO-Revision-Date: 2026-09-26 22:54+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -1552,6 +1552,10 @@ msgid "Display Intro"
 msgstr "显示开场动画"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Display splash screens"
+msgstr "显示启动屏幕"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable Cheats"
 msgstr "启用作弊"
 
@@ -1563,6 +1567,31 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Screenshot type"
 msgstr "截图类型"
 
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable flee"
+msgstr "自动开启逃跑模式"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically enable imprison"
+msgstr "自动开启囚禁模式"
+
+msgctxt "SettingsDialog|Max. Zoom Distance Tooltip"
+msgid ""
+"The maximum distance you can zoom out the camera [0 - 100].\n"
+"\n"
+"0 = original Dungeon Keeper maximum distance\n"
+"60 = KeeperFX default distance\n"
+"100 = KeeperFX maximum distance\n"
+"\n"
+"Note: This is not a percentage"
+msgstr ""
+
+msgctxt "SettingsDialog|"
+msgid ""
+"Max. zoom distance\n"
+"(default = 60)"
+msgstr ""
+
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
 "Gameturns per second\n"
@@ -1571,9 +1600,9 @@ msgstr ""
 "游戏每秒帧率\n"
 "(默认为20)"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Display splash screens"
-msgstr "显示启动屏幕"
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Game launch options"
+msgstr "游戏启动选项"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable delta time"
@@ -1584,20 +1613,20 @@ msgid "Freeze game when not focused"
 msgstr "脱离游戏窗口时自动暂停游戏"
 
 msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Packetsave filename"
-msgstr "存档包文件名"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable Packetsave"
-msgstr "启用存档包"
-
-msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Max. replay size (kB)"
 msgstr ""
 
 msgctxt "SettingsDialog|"
 msgid "Largest replay file the game will write, in kB. 0 means no limit."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable Packetsave"
+msgstr "启用存档包"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Packetsave filename"
+msgstr "存档包文件名"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1615,42 +1644,9 @@ msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Exit on LUA error"
 msgstr "退出LUA错误"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable flee"
-msgstr "自动开启逃跑模式"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically enable imprison"
-msgstr "自动开启囚禁模式"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Game launch options"
-msgstr "游戏启动选项"
-
 msgctxt "SettingsDialog|Tab Title"
 msgid "Graphics"
 msgstr "图像"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Smoothen edges"
-msgstr "边缘平滑"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Resolution"
-msgstr "分辨率"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display mode"
-msgstr "显示模式"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Display monitor"
-msgstr "显示监控"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "View 1"
-msgstr "视图 1"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
@@ -1659,8 +1655,36 @@ msgstr "视图 2"
 
 #. Should be kept very short
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "View 1"
+msgstr "视图 1"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display mode"
+msgstr "显示模式"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "View 3"
 msgstr "视图 3"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Resolution"
+msgstr "分辨率"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Menu"
+msgstr "菜单"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Movies"
+msgstr "影片"
+
+#. Should be kept very short
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Failsafe"
+msgstr "故障安全"
 
 #. This is shown under the views configuration
 msgctxt "SettingsDialog|Information Label"
@@ -1669,15 +1693,34 @@ msgid ""
 msgstr "<i>切换游戏视图请按 <strong>Alt + R</strong></i>"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Display monitor"
+msgstr "显示监控"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid "Max. FPS (0 = unlimited)"
+msgstr "FPS最大值（0为无限制）"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Resize Movies"
 msgstr "调整影片尺寸"
 
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Renderer"
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
+"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
+"it)."
 msgstr ""
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Fade when opening the map"
+msgid "Smoothen edges"
+msgstr "边缘平滑"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically determine max. FPS"
+msgstr "自动决定FPS最大值"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Rendering Backend"
 msgstr ""
 
 msgctxt "SettingsDialog|Tooltip"
@@ -1690,23 +1733,6 @@ msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Enable VSync"
 msgstr "启用垂直同步"
 
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"For FreeSync / G-Sync monitors: each frame is shown as soon as it is ready. "
-"Auto asks the desktop (GNOME tells; elsewhere choose On if your monitor runs "
-"it)."
-msgstr ""
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Viewport mode"
-msgstr ""
-
-msgctxt "SettingsDialog|"
-msgid ""
-"How the 3D view fills the window. Original keeps the classic frame; Full "
-"uses the whole window; Full (Letterbox) keeps the aspect ratio with bars."
-msgstr ""
-
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Creature flower size (px)"
 msgstr "怪物头上的生命花大小(px)"
@@ -1718,25 +1744,6 @@ msgstr "手的大小 %"
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Select box line size %"
 msgstr "选择框线尺寸 %"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Menu"
-msgstr "菜单"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Failsafe"
-msgstr "故障安全"
-
-#. Should be kept very short
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Movies"
-msgstr "影片"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid "Max. FPS (0 = unlimited)"
-msgstr "FPS最大值（0为无限制）"
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid ""
@@ -1755,28 +1762,41 @@ msgstr ""
 "(默认为1)"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically determine max. FPS"
-msgstr "自动决定FPS最大值"
+msgid "Enable map fade animation"
+msgstr "启用地图淡出动画"
+
+msgctxt "SettingsDialog|Viewport Mode Tooltip"
+msgid ""
+"How the in-game view shares the screen with the sidebar, in every view.\n"
+"\n"
+"Original = the view stops at the sidebar\n"
+"Full = the view spans the screen and the sidebar is drawn over it\n"
+"Full (Letterbox) = same as 'Full' but with black under the sidebar"
+msgstr ""
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Viewport mode"
+msgstr ""
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Sound"
 msgstr "声音"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable sound"
-msgstr "启用声音"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Use CD music instead of local files"
-msgstr "使用 CD 音乐代替本地文件"
+msgid "Mute audio when game is not focused"
+msgstr "脱离游戏窗口时自动静音"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
 msgid "Pause music when game is paused"
 msgstr "游戏暂停时暂停音乐"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable atmospheric sounds"
-msgstr "启用背景音效"
+msgid "Use CD music instead of local files"
+msgstr "使用 CD 音乐代替本地文件"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable sound"
+msgstr "启用声音"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Frequency"
@@ -1787,55 +1807,16 @@ msgid "Volume"
 msgstr "音量"
 
 msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Mute audio when game is not focused"
-msgstr "脱离游戏窗口时自动静音"
+msgid "Enable atmospheric sounds"
+msgstr "启用背景音效"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Input"
 msgstr "输入"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Lock cursor in possession"
-msgstr "锁定控制怪物模式光标"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor when game is paused"
-msgstr "游戏暂停时解除锁定光标"
-
-#. "Alternative Input"
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Unlock cursor from game window"
-msgstr "从游戏界面解锁光标"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Screen edge camera panning"
-msgstr "屏幕边缘相机摇摄"
-
 msgctxt "SettingsDialog|Slider Title Label"
 msgid "Mouse sensitivity"
 msgstr "鼠标灵敏度"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Raw mouse input"
-msgstr "原始鼠标输入"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Default tag mode"
-msgstr "默认标签模式"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable tag mode toggle (Right-click)"
-msgstr "启用标签模式切换（右键单击）"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"How the game locks the mouse. Relative mode reads movement instead of moving "
-"the cursor; try it if the cursor jumps or escapes the window."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Relative mouse mode"
-msgstr ""
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Zoom towards cursor"
@@ -1845,33 +1826,59 @@ msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Rotate around cursor"
 msgstr "围绕光标旋转"
 
-msgctxt "SettingsDialog|Slider Title Label"
-msgid "Max. zoom distance"
-msgstr ""
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Raw mouse input"
+msgstr "原始鼠标输入"
 
-msgctxt "SettingsDialog|"
+#. "Capture Cursor"
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor from game window"
+msgstr "从游戏界面解锁光标"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Unlock cursor when game is paused"
+msgstr "游戏暂停时解除锁定光标"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Lock cursor in possession"
+msgstr "锁定控制怪物模式光标"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Screen edge camera panning"
+msgstr "屏幕边缘相机摇摄"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Default tag mode"
+msgstr "默认标签模式"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable tag mode toggle (Right-click)"
+msgstr "启用标签模式切换（右键单击）"
+
+msgctxt "SettingsDialog|Relative Mouse Mode Tooltip"
 msgid ""
-"How far the camera can zoom out [0 - 100]. 0 is the original Dungeon Keeper "
-"limit, 100 the KeeperFX limit."
+"Mouse locking method.\n"
+"\n"
+"- Enabled: Use SDL relative (\"raw\") mode for 1:1 deltas\n"
+"- Disabled: Use older grab-and-warp scheme (confines and re-centers the "
+"cursor)\n"
+"\n"
+"Disable this if the mouse feels off."
 msgstr ""
+"鼠标锁定方式。\n"
+"\n"
+"- 启用：使用 SDL 相对（“原始”）模式，实现 1:1 的位移。\n"
+"- 禁用：使用旧版“捕获并重置”方案（即限制光标移动范围并将其重置回中心）。\n"
+"\n"
+"如果感觉鼠标操作不顺畅，请禁用此选项。"
 
-msgctxt "SettingsDialog|Slider Value Label"
-msgid "0"
-msgstr ""
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable relative mouse mode"
+msgstr "开启鼠标相对模式"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "Multiplayer"
 msgstr "多人游戏"
-
-msgctxt "SettingsDialog|Tooltip"
-msgid ""
-"Advertise and find games through the matchmaking server. Off keeps "
-"multiplayer to direct connections."
-msgstr ""
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable matchmaking"
-msgstr ""
 
 msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Matchmaking server"
@@ -1887,70 +1894,27 @@ msgctxt "SettingsDialog|Textinput Title Label"
 msgid "Multiplayer port"
 msgstr ""
 
+msgctxt "SettingsDialog|Tooltip"
+msgid ""
+"Advertise and find games through the matchmaking server. Off keeps "
+"multiplayer to direct connections."
+msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable matchmaking"
+msgstr ""
+
 msgctxt "SettingsDialog|Tab Title"
 msgid "Launcher"
 msgstr "启动器"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically check for KeeperFX updates"
-msgstr "检查FX版游戏更新"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable crash reporting"
-msgstr "启用游戏崩溃报告"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "KeeperFX Release Channel"
-msgstr "FX版游戏版本发布频道"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Enable website integration"
-msgstr "启用网站集成"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Open on same screen as game"
-msgstr "与游戏在同一屏幕上打开"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher language"
 msgstr "启动器语言"
 
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Update automatically"
-msgstr "自动更新"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Backup savefiles during update"
-msgstr "更新时备份存档文件"
-
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Play button theme"
 msgstr "播放按钮主题"
-
-msgctxt "SettingsDialog|Button"
-msgid "Show launcher command line options"
-msgstr "显示启动器命令行选项"
-
-msgctxt "SettingsDialog|Textinput Title Label"
-msgid ""
-"Update check interval in days\n"
-"(0 = always check)"
-msgstr ""
-"更新检查间隔（天）\n"
-"\n"
-"（0代表始终检查）"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Show directory name in window title"
-msgstr "在窗口标题中显示目录名称"
-
-msgctxt "SettingsDialog|Checkbox Toggle"
-msgid "Automatically remove leftover files"
-msgstr "自动删除残留文件"
-
-msgctxt "SettingsDialog|Dropdown Title Label"
-msgid "Download Server"
-msgstr "下载服务器"
 
 msgctxt "SettingsDialog|Dropdown Title Label"
 msgid "Launcher size"
@@ -1961,6 +1925,59 @@ msgid ""
 "Make the whole launcher bigger or smaller. Takes effect next time you open "
 "the launcher."
 msgstr ""
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable website integration"
+msgstr "启用网站集成"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Enable crash reporting"
+msgstr "启用游戏崩溃报告"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Open on same screen as game"
+msgstr "与游戏在同一屏幕上打开"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Show directory name in window title"
+msgstr "在窗口标题中显示目录名称"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "KeeperFX Release Channel"
+msgstr "FX版游戏版本发布频道"
+
+msgctxt "SettingsDialog|Textinput Title Label"
+msgid ""
+"Update check interval in days\n"
+"(0 = always check)"
+msgstr ""
+"更新检查间隔（天）\n"
+"\n"
+"（0代表始终检查）"
+
+msgctxt "SettingsDialog|Dropdown Title Label"
+msgid "Download Server"
+msgstr "下载服务器"
+
+msgctxt "SettingsDialog|Button"
+msgid "Show launcher command line options"
+msgstr "显示启动器命令行选项"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically check for KeeperFX updates"
+msgstr "检查FX版游戏更新"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Update automatically"
+msgstr "自动更新"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Backup savefiles during update"
+msgstr "更新时备份存档文件"
+
+msgctxt "SettingsDialog|Checkbox Toggle"
+msgid "Automatically remove leftover files"
+msgstr "自动删除残留文件"
 
 msgctxt "SettingsDialog|Tab Title"
 msgid "API"
@@ -2900,31 +2917,6 @@ msgstr ""
 #~ msgctxt "SettingsDialog|"
 #~ msgid "Rendering Backend"
 #~ msgstr "渲染后端"
-
-#~ msgctxt "SettingsDialog|Checkbox Toggle"
-#~ msgid "Enable map fade animation"
-#~ msgstr "启用地图淡出动画"
-
-#~ msgctxt "SettingsDialog|Relative Mouse Mode Tooltip"
-#~ msgid ""
-#~ "Mouse locking method.\n"
-#~ "\n"
-#~ "- Enabled: Use SDL relative (\"raw\") mode for 1:1 deltas\n"
-#~ "- Disabled: Use older grab-and-warp scheme (confines and re-centers the "
-#~ "cursor)\n"
-#~ "\n"
-#~ "Disable this if the mouse feels off."
-#~ msgstr ""
-#~ "鼠标锁定方式。\n"
-#~ "\n"
-#~ "- 启用：使用 SDL 相对（“原始”）模式，实现 1:1 的位移。\n"
-#~ "- 禁用：使用旧版“捕获并重置”方案（即限制光标移动范围并将其重置回中心）。\n"
-#~ "\n"
-#~ "如果感觉鼠标操作不顺畅，请禁用此选项。"
-
-#~ msgctxt "SettingsDialog|Checkbox Toggle"
-#~ msgid "Enable relative mouse mode"
-#~ msgstr "开启鼠标相对模式"
 
 #~ msgctxt "SettingsDialog|Textinput Title Label"
 #~ msgid "Masterserver"

@@ -3,6 +3,7 @@
 
 #include "version.h"
 #include "aboutcredits.h"
+#include "settingsfit.h"
 #include "kfxversion.h"
 #include "popupsignalcombobox.h"
 #include "settings.h"
@@ -16,10 +17,15 @@
 #include <QDesktopServices>
 #include <QEvent>
 #include <QFontDatabase>
+#include <QFormLayout>
+#include <QMargins>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QResizeEvent>
+#include <QShowEvent>
 #include <QScreen>
 
 // Selects the ZOOM_TO_MOUSE / ROTATE_AROUND_MOUSE entry that keeperfx.cfg's value means to the
@@ -51,11 +57,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     , ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
-
-    // Disable resizing and remove maximize button
-    setFixedSize(size());
-    setWindowFlag(Qt::WindowMaximizeButtonHint, false);
-    setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
 
     // Reset setting has changed variable
     settingHasChanged = false;
@@ -181,19 +182,9 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->labelRenderer->setDisabled(true);
     }
 
-    // Smoothen edges (-vidsmooth): newer engines ignore it. Hide it there and move the rest of
-    // the left column up a row, so the Graphics tab has no hole. The setting itself is kept.
+    // Smoothen edges (-vidsmooth): newer engines ignore it. Hide its row there; the setting itself is kept.
     if (KfxVersion::hasFunctionality("vidsmooth_ignored") == true) {
-        QWidget *gfxTab = ui->checkBoxSmoothenVideo->parentWidget();
-        const int hiddenY = ui->checkBoxSmoothenVideo->y();
-        const int rowStep = ui->comboBoxRenderer->y() - hiddenY;
-        const int rightColumnX = ui->labelNeutralFlashRate->x();
-        ui->checkBoxSmoothenVideo->setVisible(false);
-        for (QWidget *w : gfxTab->findChildren<QWidget *>(Qt::FindDirectChildrenOnly)) {
-            if (w->x() < rightColumnX && w->y() > hiddenY) {
-                w->move(w->x(), w->y() - rowStep);
-            }
-        }
+        SettingsFit::hideRow(ui->checkBoxSmoothenVideo);
     }
 
     // Parchment map fade
@@ -212,7 +203,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: On", "Variable Refresh Dropdown"), "ON");
         ui->comboBoxVariableRefresh->addItem(tr("Variable refresh: Off", "Variable Refresh Dropdown"), "OFF");
     } else {
-        ui->comboBoxVariableRefresh->setVisible(false);
+        SettingsFit::hideRow(ui->comboBoxVariableRefresh);
     }
 
     // Relative mouse mode
@@ -348,8 +339,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 #ifndef Q_OS_WINDOWS
     // The Tux Edition downloads from our GitHub releases (served by GitHub's own
     // worldwide CDN), so the keeperfx.net/Cloudflare picker does nothing here — hide it.
-    ui->comboBoxCDN->setVisible(false);
-    ui->labelCDN->setVisible(false);
+    SettingsFit::hideRow(ui->comboBoxCDN);
 #endif
 
     // Screenshot type dropdown
@@ -537,6 +527,11 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     // Add handler to remember when a setting has changed
     // This should be executed at the end when the widgets and their contents are final
     addSettingsChangedHandler();
+
+    // Nothing cut off in any language (settingsfit.cpp): dropdowns and number fields sized to their
+    // text; which tabs show two columns is decided when the window is laid out and a tab is opened
+    SettingsFit::fitControls(this);
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &SettingsDialog::updateResponsiveLayouts);
 
     // Map: Libraries for about page
     // We use QStringLiterals here so we can determine the order we want (Qt6 first)
@@ -1542,16 +1537,14 @@ void SettingsDialog::cancel()
 
 void SettingsDialog::setupDisplayMonitorDropdown()
 {
-    // Get some details of the placeholder combo box and delete it
-    QComboBox *oldComboBox = ui->comboBoxDisplayMonitor;
-    QRect geometry = oldComboBox->geometry();
-    QWidget *parentWidget = oldComboBox->parentWidget();
-    delete ui->comboBoxDisplayMonitor;
-
-    // Create the combobox that handles the popup signal
+    // Create the combobox that handles the popup signal, in the placeholder's place in its form
     // This signal is used to show and hide monitor display numers
+    QWidget *parentWidget = ui->comboBoxDisplayMonitor->parentWidget();
     popupComboBoxMonitorDisplay = new PopupSignalComboBox(parentWidget);
-    popupComboBoxMonitorDisplay->setGeometry(geometry);
+    if (QLayout *layout = parentWidget->layout()) {
+        layout->replaceWidget(ui->comboBoxDisplayMonitor, popupComboBoxMonitorDisplay);
+    }
+    delete ui->comboBoxDisplayMonitor;
 
     // Get the list of available screens
     QList<QScreen *> screens = QGuiApplication::screens();
@@ -1824,4 +1817,97 @@ void SettingsDialog::addCustomResolution(int width, int height, QComboBox *sourc
             sourceCombo->setProperty("previousIndex", index);
         }
     }
+}
+
+void SettingsDialog::switchContainerLayout(QWidget *container, bool useHorizontal) {
+
+    // Make sure container exists
+    if (!container) return;
+
+    // Variables
+    QList<QWidget*> widgets;
+    QLayoutItem *child;
+    QLayout *oldLayout = container->layout();
+
+    // Keep the margins and spacing the layout was given
+    const QMargins margins = oldLayout ? oldLayout->contentsMargins() : QMargins();
+    const int spacing = oldLayout ? oldLayout->spacing() : -1;
+
+    // Store widgets and delete the old layout
+    if (oldLayout) {
+        while ((child = oldLayout->takeAt(0)) != nullptr) {
+            if (child->widget()) {
+                widgets.append(child->widget());
+            }
+            delete child;
+        }
+        delete oldLayout;
+    }
+
+    // Create the new layout
+    QBoxLayout *newLayout;
+    if (useHorizontal) {
+        newLayout = new QHBoxLayout(container);
+    } else {
+        newLayout = new QVBoxLayout(container);
+    }
+
+    // Keep margins clean so it doesn't look bloated when wrapped
+    // newLayout->setContentsMargins(0, 0, 0, 0);
+    if (oldLayout) {
+        newLayout->setContentsMargins(margins);
+        newLayout->setSpacing(spacing);
+    }
+
+    // Add widgets back
+    for (QWidget *widget : widgets) {
+
+        newLayout->addWidget(widget);
+
+        if (useHorizontal) {
+            widget->setVisible(true);
+        } else {
+            bool hasRealContent = false;
+            QLayout *wLayout = widget->layout();
+
+            if (wLayout) {
+                for (int i = 0; i < wLayout->count(); ++i) {
+                    QLayoutItem *item = wLayout->itemAt(i);
+                    if (item->widget() || item->layout()) {
+                        hasRealContent = true;
+                        break;
+                    }
+                }
+            } else {
+                hasRealContent = true;
+            }
+            widget->setVisible(hasRealContent);
+        }
+    }
+}
+
+void SettingsDialog::resizeEvent(QResizeEvent *event) {
+
+    // Original dialog resize event
+    QDialog::resizeEvent(event);
+
+    updateResponsiveLayouts();
+}
+
+void SettingsDialog::showEvent(QShowEvent *event)
+{
+    QDialog::showEvent(event);
+    if (!initialSizeFitted) {
+        initialSizeFitted = true;
+        SettingsFit::fitWindow(this, ui->tabWidget, [this](QWidget *container, bool useHorizontal) {
+            switchContainerLayout(container, useHorizontal);
+        });
+    }
+}
+
+void SettingsDialog::updateResponsiveLayouts()
+{
+    SettingsFit::updateColumns(this, [this](QWidget *container, bool useHorizontal) {
+        switchContainerLayout(container, useHorizontal);
+    });
 }

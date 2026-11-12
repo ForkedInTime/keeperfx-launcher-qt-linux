@@ -92,3 +92,12 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" -I"$ROOT_DIR/bin" \
 	-o "$ROOT_DIR/bin/test_aboutlayout" "$ROOT_DIR/tests/test_aboutlayout.cpp" \
 	$(pkg-config --libs Qt6Widgets)
 QT_QPA_PLATFORM=offscreen "$ROOT_DIR/bin/test_aboutlayout"
+
+# The real Settings window in every language: nothing cut off (needs a CMake build folder, as it is
+# built from the whole launcher). LAUNCHER_BUILD_DIR=build tests/run.sh
+if [ -n "$LAUNCHER_BUILD_DIR" ]; then
+	cmake --build "$LAUNCHER_BUILD_DIR" --target test_settingsfit
+	"$LAUNCHER_BUILD_DIR/test_settingsfit"
+else
+	echo "test_settingsfit skipped (set LAUNCHER_BUILD_DIR to a CMake build folder to run it)"
+fi

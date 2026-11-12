@@ -195,3 +195,27 @@ foreach(LIB ${COMPILED_LIBS})
         VERBATIM
     )
 endforeach()
+
+# The Settings window test: the whole launcher but main.cpp, with the test's own main(). It opens the
+# real Settings window in every language and checks that nothing is cut off. Not built by default:
+#   cmake --build build --target test_settingsfit && build/test_settingsfit
+set(SETTINGS_FIT_SOURCES ${PROJECT_SOURCES})
+list(FILTER SETTINGS_FIT_SOURCES EXCLUDE REGEX "/src/main\\.cpp$")
+qt_add_executable(test_settingsfit
+    tests/test_settingsfit.cpp
+    ${SETTINGS_FIT_SOURCES}
+    ${UI_FILES}
+    resources.qrc
+)
+set_target_properties(test_settingsfit PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_include_directories(test_settingsfit PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(test_settingsfit PRIVATE
+    Qt6::Core
+    Qt6::Widgets
+    Qt6::Network
+    Qt6::Gui
+    Qt6::Concurrent
+    ZLIB::ZLIB
+    LIEF::LIEF
+    bit7z
+)
