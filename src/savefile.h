@@ -16,11 +16,14 @@ public:
     QString fileName;
     QString saveName;
     QString campaignName;
+    bool kfxs = false; // the KFXS format (KeeperFX 1.4 and later)
 
     bool isValid();
     QString toString();
 
-    static QList<SaveFile *> getAll();
+    /** The saves in the game's save folder whose title can be read; with
+     *  includeUnreadable, every fx1g*.sav there (what a backup must hold). */
+    static QList<SaveFile *> getAll(bool includeUnreadable = false);
     static bool checkFileHeader(QFile& file);
 
     static bool backupAll();
