@@ -117,4 +117,18 @@ namespace CrashContext {
      */
     std::optional<LoggedReplay> replayFromLog(const QString &logText);
 
+    /**
+     * Whether a file lies inside a folder. Both paths must be canonical
+     * (symbolic links resolved), so "../" and links cannot step out; a sibling
+     * whose name starts the same ("/game2" next to "/game") is not inside.
+     *
+     * The log line that names the replay is text in keeperfx.log, which also
+     * holds text from maps, scripts and other players. Only a file in the game
+     * folder may be offered for a public report.
+     */
+    bool isInsideFolder(const QString &canonicalFile, const QString &canonicalFolder);
+
+    /** Whether the first bytes of a file are a KeeperFX replay's: the KFXS header of kind REPL. */
+    bool isReplayHeader(const QByteArray &start);
+
 }

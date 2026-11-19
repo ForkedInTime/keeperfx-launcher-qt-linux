@@ -227,6 +227,23 @@ static void testReplayFromLog()
 		"no replay when the handler logged no path (none was open)");
 	expect(!CrashContext::replayFromLog(QStringLiteral("Error: something else\n")).has_value(),
 		"no replay when the log names none");
+
+	// Text in the log can come from maps, scripts and other players: a "replay" outside the game folder,
+	// or a file that is not a replay, is never offered.
+	const QString game = QStringLiteral("/home/al/.local/share/keeperfx");
+	expect(CrashContext::isInsideFolder(game + "/replays/campaign/a.fxpkt", game), "a replay in the game folder is inside it");
+	expect(!CrashContext::isInsideFolder(QStringLiteral("/home/al/.ssh/id_ed25519"), game), "a key elsewhere is not");
+	expect(!CrashContext::isInsideFolder(game + "2/replays/a.fxpkt", game), "a sibling folder that starts the same is not");
+	expect(!CrashContext::isInsideFolder(game, game), "the folder itself is not a file inside it");
+	expect(!CrashContext::isInsideFolder(QString(), game), "a path that did not resolve is not");
+
+	QByteArray replayHead("KFXS\x00\xFF\x1A\x0A\x01\x00\x01\x00REPL", 16);
+	expect(CrashContext::isReplayHeader(replayHead), "a KFXS file of kind REPL is a replay");
+	QByteArray saveHead = replayHead;
+	saveHead.replace(12, 4, "SAVE");
+	expect(!CrashContext::isReplayHeader(saveHead), "a saved game is not a replay");
+	expect(!CrashContext::isReplayHeader(QByteArray("-----BEGIN OPENSSH PRIVATE KEY-----")), "a key file is not a replay");
+	expect(!CrashContext::isReplayHeader(replayHead.left(12)), "a file shorter than the header is not a replay");
 }
 
 int main(int argc, char *argv[])

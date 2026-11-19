@@ -13,10 +13,12 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QFontMetrics>
 #include <QLayout>
 #include <QMessageBox>
 #include <QScreen>
 #include <QStandardPaths>
+#include <QStyle>
 #include <QSysInfo>
 #include <QTemporaryDir>
 
@@ -41,6 +43,26 @@ static const int ISSUE_BODY_MAX_CHARS = 3000;
 static const qint64 REPLAY_MAX_BYTES = 32 * 1024 * 1024;
 
 static QString readTail(const QString &path, qint64 maxBytes);
+
+// The replay file a logged path names, resolved, if it may go into a report:
+// a real replay (KFXS, kind REPL) inside the game folder and at most
+// REPLAY_MAX_BYTES; empty otherwise. Run when the dialog opens and again just
+// before the copy.
+static QString offerableReplay(const QString &loggedPath)
+{
+    const QString gameDir = QCoreApplication::applicationDirPath();
+    const QString canonical = QFileInfo(QDir(gameDir).absoluteFilePath(loggedPath)).canonicalFilePath();
+    const QFileInfo replay(canonical);
+    if (canonical.isEmpty() || replay.isFile() == false || replay.size() > REPLAY_MAX_BYTES
+        || CrashContext::isInsideFolder(canonical, QFileInfo(gameDir).canonicalFilePath()) == false) {
+        return QString();
+    }
+    QFile file(canonical);
+    if (file.open(QIODevice::ReadOnly) == false || CrashContext::isReplayHeader(file.read(16)) == false) {
+        return QString();
+    }
+    return canonical;
+}
 
 CrashDialog::CrashDialog(QWidget *parent)
     : QDialog(parent)
@@ -118,6 +140,7 @@ void CrashDialog::findReplay()
     this->replayPlayback = false;
     ui->replayCheckBox->setChecked(false);
     ui->replayCheckBox->setEnabled(false);
+    ui->replayCheckBox->setToolTip(QString());
     ui->replayCheckBox->setText(tr("No replay was being recorded", "Checkbox"));
 
     const QString gameDir = QCoreApplication::applicationDirPath();
@@ -130,15 +153,34 @@ void CrashDialog::findReplay()
     if (logged.has_value() == false) {
         return;
     }
-    const QFileInfo replay(QDir(gameDir).absoluteFilePath(logged->path));
-    if (replay.isFile() == false || replay.size() > REPLAY_MAX_BYTES) {
-        qWarning() << "Crash report: the logged replay is missing or too large:" << replay.absoluteFilePath() << replay.size();
+    // The line is text in the log, which also holds text from maps, scripts and
+    // other players: offer only a real replay file inside the game folder.
+    const QString canonical = offerableReplay(logged->path);
+    const QFileInfo replay(canonical);
+    if (canonical.isEmpty()) {
+        qWarning() << "Crash report: not offering the logged replay" << logged->path
+                   << "(missing, outside the game folder, too large or not a replay)";
+        ui->replayCheckBox->setText(tr("The replay could not be included", "Checkbox"));
         return;
     }
-    this->replayPath = replay.absoluteFilePath();
+    this->replayPath = canonical;
     this->replayTurn = logged->turn;
     this->replayPlayback = logged->playback;
-    ui->replayCheckBox->setText(tr("Include a replay of the game up to the crash", "Checkbox"));
+    // Name the file, so the player sees what goes into the zip; a long name is
+    // shortened in the middle to fit the dialog, and the tooltip has it whole.
+    const QString label = tr("Include a replay of the game up to the crash", "Checkbox");
+    const QFontMetrics metrics(ui->replayCheckBox->font());
+    const QMargins outer = layout()->contentsMargins();
+    const QMargins inner = ui->replayWidget->layout()->contentsMargins();
+    const int indicator = style()->pixelMetric(QStyle::PM_IndicatorWidth)
+                          + style()->pixelMetric(QStyle::PM_CheckBoxLabelSpacing);
+    const int room = width() - outer.left() - outer.right() - inner.left() - inner.right() - indicator
+                     - metrics.horizontalAdvance(label + QStringLiteral(" ()")) - 8;
+    const QString name = metrics.elidedText(replay.fileName(), Qt::ElideMiddle, qMax(room, 60));
+    ui->replayCheckBox->setText(label + QStringLiteral(" (%1)").arg(name));
+    ui->replayCheckBox->setToolTip(replay.fileName() + QStringLiteral("\n")
+                                   + tr("A replay holds the players' input, their names and their chat in this game, "
+                                        "and nothing else from your computer.", "Tooltip"));
     ui->replayCheckBox->setEnabled(true);
     ui->replayCheckBox->setChecked(true);
 }
@@ -293,7 +335,9 @@ void CrashDialog::on_reportButton_clicked()
         }
 
         // The replay of the game up to the crash, unless the player unticked it
-        if (ui->replayCheckBox->isChecked() && this->replayPath.isEmpty() == false) {
+        // (checked again: the file is copied now, not when the dialog opened)
+        if (ui->replayCheckBox->isChecked() && this->replayPath.isEmpty() == false
+            && offerableReplay(this->replayPath) == this->replayPath) {
             const QString replayName = QFileInfo(this->replayPath).fileName();
             if (stageFile(staging, this->replayPath, replayName, staged)) {
                 replayNote = QStringLiteral("The replay %1 (%2 at the crash%3) is in this zip.")
