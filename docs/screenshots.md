@@ -4,7 +4,8 @@
 
 Every screen of the launcher as of **1.4.0.6103** (November 2026). These pictures are replaced whenever the
 launcher changes. Only the buttons that leave the launcher are not shown: **Workshop** (opens the
-keeperfx.net workshop in your browser), the folder, website and Discord icons, and **Open config file**.
+keeperfx.net workshop in your browser), the log file, folder, website and Discord icons, and **Open config
+file**.
 
 - [Main window](#main-window)
 - [Workshop browser](#workshop-browser) — browse & install, installed add-ons
@@ -24,7 +25,7 @@ click away: Settings, Mods, the Workshop browser and the map editor.
 ## Workshop browser
 
 The whole [keeperfx.net](https://keeperfx.net) workshop inside the launcher: filter by category, sort by
-rating or downloads, search by name, and install with one click. What you already have is marked.
+rating, downloads or newest, search by name, and install with one click. What you already have is marked.
 
 ![Workshop — browse & install: maps sorted by rating, with Details and Install buttons](img/launcher-1.4.0.6103-workshop.png)
 
@@ -48,15 +49,16 @@ the changes.
 
 ### Game
 
-Language, the intro and splash screens, cheats, censorship, screenshot format, replays (size limit and
-how many to keep per campaign, free play and multiplayer), turns per second, and launch options.
+Language, the intro and splash screens, cheats, censorship, screenshot format, the maximum zoom distance,
+replays (size limit and how many to keep per campaign, free play and multiplayer), turns per second, and
+launch options.
 
 ![Settings, Game tab](img/screens/settings-game-6103.png)
 
 ### Graphics
 
 Resolution and window mode for each of the three in-game views, the menu, movies and failsafe; display
-monitor, frame-rate cap, movie scaling, smoothing, the renderer (OpenGL, or software), VSync and **Variable
+monitor, frame-rate cap, movie scaling, the renderer (OpenGL, or software), VSync and **Variable
 refresh** (Auto, On or Off) beside it, creature flower, hand and selection sizes, blink and flash rates, the map fade and the viewport mode.
 
 ![Settings, Graphics tab](img/screens/settings-graphics-6103.png)
@@ -71,7 +73,7 @@ is not focused, and how often and how loud the atmospheric sounds are.
 ### Input
 
 Raw mouse input and sensitivity, relative mouse mode, when the cursor is released from the window, edge
-panning, zooming and rotating around the cursor, the maximum zoom distance, and how the tag mode works.
+panning, zooming and rotating around the cursor, and how the tag mode works.
 
 ![Settings, Input tab](img/screens/settings-input-6103.png)
 
@@ -105,13 +107,14 @@ The game's local API, for tools that talk to a running game, and its port.
 
 ### About
 
-The versions of the game, the launcher and its libraries, and the KeeperFX contributors and translators.
+The versions of the game, the launcher and its libraries, where to report a problem with this edition, the
+KeeperFX contributors and translators, and this edition's contributors.
 
 ![Settings, About tab: versions, libraries and the KeeperFX contributors](img/screens/settings-about-6103.png)
 
 ## Play menu
 
-The arrow beside **Play**: connect to a multiplayer game directly, watch a replay file, start without
+The arrow beside **Play**: connect to a multiplayer game directly, watch one of your replays, start without
 mods, read the logs, or fetch the soundtrack.
 
 ![The Play menu: Direct connect, Run packetfile, Start without mods, View logs, Download music](img/screens/play-menu-6103.png)
@@ -120,7 +123,7 @@ mods, read the logs, or fetch the soundtrack.
 
 ![Direct Connect: IP address and port, Cancel and Connect](img/screens/direct-connect-6103.png)
 
-**View logs** shows the launcher's log and the game's side by side, following live, with Copy, Open folder
+**View logs** shows the launcher's log and the game's on two tabs, following live, with Copy, Open folder
 and Refresh (part of the log is blurred here: it showed folder paths on the machine it was taken on):
 
 ![The log viewer: Launcher and Game tabs, the launcher log, Copy, Open folder, Refresh and Close](img/screens/log-viewer-6103.png)
@@ -129,8 +132,8 @@ and Refresh (part of the log is blurred here: it showed folder paths on the mach
 
 ![Download Music Files: why the music is missing, Cancel and Download](img/screens/download-music-6103.png)
 
-**Run packetfile** opens a file picker for a replay, and **Start without mods** starts the game with every
-mod switched off.
+**Replays…** lists your replays, newest first: **Start** plays one, and **Copy to Clipboard** copies the
+file to share it. **Start without mods** starts the game with every mod switched off.
 
 ## Update check
 

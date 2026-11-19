@@ -6,8 +6,8 @@
 
 You need a C++17 toolchain, CMake 3.24+, Ninja, and **Qt 6.7+** (the launcher uses
 `QNetworkRequestFactory`). Ubuntu 24.04 ships Qt 6.4, so install a newer Qt (e.g. via
-[aqtinstall](https://github.com/miurahr/aqtinstall)) — the CI workflow shows the exact steps, and pins
-**6.8.3**. CPM fetches zlib/bit7z/LIEF automatically.
+[aqtinstall](https://github.com/miurahr/aqtinstall)) — the game repo's AppImage workflow ([CI](#ci)) shows
+the exact steps, and pins **6.8.3**. CPM fetches zlib/bit7z/LIEF automatically.
 
 ```bash
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -29,8 +29,12 @@ built from this repo alone will refuse RAR Workshop items — with a message say
 ## Tests
 
 `tests/run.sh` builds and runs the standalone logic tests (version parsing and channel classification,
-archive-shape detection, tree copying, workshop URL handling, crash-report context) straight from source — no
-launcher build required. It exits non-zero on failure.
+archive-shape detection, tree copying, workshop URL handling, crash-report context, KFXS save titles, the
+install record, the lobby server choice, keeping comments in a saved `.cfg`, the replay list, Copy to
+Clipboard, and the About tab's layout) straight from source — no launcher build required. It exits non-zero
+on failure. The Settings window test (`tests/test_settingsfit.cpp`, every language, nothing cut off) is built
+from the whole launcher, so it runs only when `LAUNCHER_BUILD_DIR` names a CMake build folder:
+`LAUNCHER_BUILD_DIR=build tests/run.sh`.
 
 ## CI
 
