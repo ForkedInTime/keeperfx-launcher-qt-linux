@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include <QDialog>
 
+#include <optional>
+
 namespace Ui {
 class CrashDialog;
 }
@@ -25,6 +27,9 @@ public:
      */
     void setGameStartTime(QDateTime gameStartTime);
 
+    /** How the game process ended, for the report. */
+    void setExitCode(int exitCode);
+
 private slots:
     void on_closeButton_clicked();
     void on_reportButton_clicked();
@@ -34,4 +39,11 @@ private:
     QList<SaveFile *> saveFileList;
     QString stdErrorString;
     QDateTime gameStartTime;
+    std::optional<int> exitCode;
+
+    // The replay the game was recording or playing when it crashed, from this run's log
+    QString replayPath;
+    int replayTurn = -1;
+    bool replayPlayback = false;
+    void findReplay();
 };

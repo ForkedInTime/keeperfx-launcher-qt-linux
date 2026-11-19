@@ -48,6 +48,14 @@ g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	$(pkg-config --libs Qt6Core)
 "$ROOT_DIR/bin/test_crashcontext"
 
+# The title of a KFXS save (pure, QtCore and zlib): every read bounds-checked.
+g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
+	$(pkg-config --cflags Qt6Core) \
+	-o "$ROOT_DIR/bin/test_kfxssave" "$ROOT_DIR/tests/test_kfxssave.cpp" \
+	"$ROOT_DIR/src/kfxssave.cpp" \
+	$(pkg-config --libs Qt6Core) -lz
+"$ROOT_DIR/bin/test_kfxssave"
+
 # The install record: what each add-on install created (pure, QtCore only).
 g++ -std=c++17 -fPIC -Wall -Wextra -I"$ROOT_DIR/src" \
 	$(pkg-config --cflags Qt6Core) \

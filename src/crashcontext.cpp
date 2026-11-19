@@ -1,5 +1,7 @@
 #include "crashcontext.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QRegularExpression>
 #include <QStringList>
 
@@ -149,6 +151,64 @@ namespace CrashContext {
         const QByteArray encoded = QByteArray(ISSUE_TRACKER_URL) + "/new?title=" + QUrl::toPercentEncoding(title)
                                    + "&body=" + QUrl::toPercentEncoding(body);
         return QUrl::fromEncoded(encoded, QUrl::StrictMode);
+    }
+
+    std::optional<LoggedReplay> replayFromLog(const QString &logText)
+    {
+        static const QString marker = QStringLiteral("packetfile:");
+        const qsizetype at = logText.lastIndexOf(marker);
+        if (at < 0) {
+            return std::nullopt;
+        }
+        qsizetype end = logText.indexOf(QLatin1Char('\n'), at);
+        if (end < 0) {
+            end = logText.size();
+        }
+        const QString json = logText.mid(at + marker.size(), end - at - marker.size()).trimmed();
+
+        LoggedReplay replay;
+        const QJsonDocument document = QJsonDocument::fromJson(json.toUtf8());
+        if (document.isObject()) {
+            const QJsonObject info = document.object();
+            replay.path = info.value(QStringLiteral("path")).toString();
+            replay.turn = info.value(QStringLiteral("turn")).toInt(-1);
+            replay.playback = info.value(QStringLiteral("playback")).toBool(false);
+        } else {
+            // A quote or backslash in the path makes the line invalid JSON: take the
+            // path from between its own quotes, and the turn and playback by name.
+            static const QRegularExpression pathPattern(QStringLiteral("\"path\":\"(.*)\"\\s*\\}\\s*$"));
+            static const QRegularExpression turnPattern(QStringLiteral("\"turn\":\\s*(\\d+)"));
+            const QRegularExpressionMatch path = pathPattern.match(json);
+            if (path.hasMatch()) {
+                replay.path = path.captured(1);
+            }
+            const QRegularExpressionMatch turn = turnPattern.match(json);
+            if (turn.hasMatch()) {
+                replay.turn = turn.captured(1).toInt();
+            }
+            replay.playback = json.contains(QStringLiteral("\"playback\":true"));
+        }
+        if (replay.path.isEmpty()) {
+            return std::nullopt;
+        }
+        return replay;
+    }
+
+    bool isInsideFolder(const QString &canonicalFile, const QString &canonicalFolder)
+    {
+        if (canonicalFile.isEmpty() || canonicalFolder.isEmpty()) {
+            return false;
+        }
+        const QString folder = canonicalFolder.endsWith(QLatin1Char('/')) ? canonicalFolder
+                                                                         : canonicalFolder + QLatin1Char('/');
+        return canonicalFile.startsWith(folder) && canonicalFile.size() > folder.size();
+    }
+
+    bool isReplayHeader(const QByteArray &start)
+    {
+        // FORMAT.txt in the engine: magic "KFXS" 00 FF 1A 0A, major, minor, then the kind at offset 12
+        return start.size() >= 16 && start.startsWith(QByteArray("KFXS\x00\xFF\x1A\x0A", 8))
+               && start.mid(12, 4) == QByteArray("REPL");
     }
 
 }

@@ -197,6 +197,55 @@ static void testNewIssueUrl()
 		"the tracker is this edition's own");
 }
 
+static void testReplayFromLog()
+{
+	std::printf("CrashContext::replayFromLog\n");
+
+	// The engine's crash handler (bflib_crash.c), as it writes the line.
+	const QString log = QStringLiteral(
+		"Error: Failure signal: Segmentation fault (ANSI) (11).\n"
+		"packetfile:{\"turn\":1234, \"playback\":false, \"path\":\"./replays/freeplay/map00001-20261119.pck\"}\n"
+		"[#0 ] ./keeperfx : process_things\n");
+	const auto replay = CrashContext::replayFromLog(log);
+	expect(replay.has_value(), "the replay the crash handler logged is found");
+	expect(replay && replay->path == QStringLiteral("./replays/freeplay/map00001-20261119.pck"), "its path is read as logged");
+	expect(replay && replay->turn == 1234, "the turn of the crash is read");
+	expect(replay && replay->playback == false, "recording, not playing back");
+
+	const auto played = CrashContext::replayFromLog(QStringLiteral(
+		"packetfile:{\"turn\":5, \"playback\":false, \"path\":\"/old.pck\"}\n"
+		"packetfile:{\"turn\":77, \"playback\":true, \"path\":\"/home/al/game/replays/b.pck\"}\n"));
+	expect(played && played->path == QStringLiteral("/home/al/game/replays/b.pck") && played->turn == 77 && played->playback,
+		"the last line wins, and playing back is read");
+
+	const auto quoted = CrashContext::replayFromLog(QStringLiteral(
+		"packetfile:{\"turn\":9, \"playback\":false, \"path\":\"/games/my \"best\" keeper/x.pck\"}"));
+	expect(quoted && quoted->path == QStringLiteral("/games/my \"best\" keeper/x.pck") && quoted->turn == 9,
+		"a path with quotes, which is not valid JSON, is still read");
+
+	expect(!CrashContext::replayFromLog(QStringLiteral("packetfile:{\"turn\":12, \"playback\":false}\n")).has_value(),
+		"no replay when the handler logged no path (none was open)");
+	expect(!CrashContext::replayFromLog(QStringLiteral("Error: something else\n")).has_value(),
+		"no replay when the log names none");
+
+	// Text in the log can come from maps, scripts and other players: a "replay" outside the game folder,
+	// or a file that is not a replay, is never offered.
+	const QString game = QStringLiteral("/home/al/.local/share/keeperfx");
+	expect(CrashContext::isInsideFolder(game + "/replays/campaign/a.fxpkt", game), "a replay in the game folder is inside it");
+	expect(!CrashContext::isInsideFolder(QStringLiteral("/home/al/.ssh/id_ed25519"), game), "a key elsewhere is not");
+	expect(!CrashContext::isInsideFolder(game + "2/replays/a.fxpkt", game), "a sibling folder that starts the same is not");
+	expect(!CrashContext::isInsideFolder(game, game), "the folder itself is not a file inside it");
+	expect(!CrashContext::isInsideFolder(QString(), game), "a path that did not resolve is not");
+
+	QByteArray replayHead("KFXS\x00\xFF\x1A\x0A\x01\x00\x01\x00REPL", 16);
+	expect(CrashContext::isReplayHeader(replayHead), "a KFXS file of kind REPL is a replay");
+	QByteArray saveHead = replayHead;
+	saveHead.replace(12, 4, "SAVE");
+	expect(!CrashContext::isReplayHeader(saveHead), "a saved game is not a replay");
+	expect(!CrashContext::isReplayHeader(QByteArray("-----BEGIN OPENSSH PRIVATE KEY-----")), "a key file is not a replay");
+	expect(!CrashContext::isReplayHeader(replayHead.left(12)), "a file shorter than the header is not a replay");
+}
+
 int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
@@ -208,6 +257,7 @@ int main(int argc, char *argv[])
 	testTailLines();
 	testIssueBody();
 	testNewIssueUrl();
+	testReplayFromLog();
 
 	if (g_failures > 0) {
 		std::printf("%d failure(s)\n", g_failures);

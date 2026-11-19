@@ -213,7 +213,8 @@ void UpdateDialog::on_updateButton_clicked()
 
     // Backup saves if enabled
     if (Settings::getLauncherSetting("BACKUP_SAVES") == true) {
-        QList<SaveFile *> saveFiles = SaveFile::getAll();
+        // Every save file, whether or not its title can be read
+        QList<SaveFile *> saveFiles = SaveFile::getAll(true);
         if (saveFiles.length() > 0) {
             backupSaves(saveFiles);
         }

@@ -1,6 +1,7 @@
 #include "savefile.h"
 
 #include "archiver.h"
+#include "kfxssave.h"
 #include "kfxversion.h"
 
 #include <QApplication>
@@ -20,6 +21,22 @@ SaveFile::SaveFile(const QString &filePath)
 
     // Get the filename of the file
     fileName = QFileInfo(file).fileName();
+
+    // KFXS saves (KeeperFX 1.4 and later, the team's #5424): the title is read
+    // with the layout the file itself describes. Every save since 2026-10-19 is
+    // one; the fixed offsets below are for the older format, whose header says
+    // INFO at 0x4, and found nothing in these -- so the saves were left out of
+    // every list, the update's save backup included.
+    if (KfxsSave::isKfxs(file.peek(8))) {
+        kfxs = true;
+        if (const std::optional<KfxsSave::Title> title = KfxsSave::readTitle(file)) {
+            saveName = title->saveName;
+            campaignName = title->campaignName;
+        }
+        file.close();
+        qDebug() << "Savefile object created:" << toString();
+        return;
+    }
 
     try {
 
@@ -89,15 +106,19 @@ SaveFile::SaveFile(const QString &filePath)
 }
 
 bool SaveFile::isValid() {
-    return !saveName.isEmpty() && !campaignName.isEmpty();
+    // A KFXS save of a level outside a campaign has no campaign name.
+    return !saveName.isEmpty() && (kfxs || !campaignName.isEmpty());
 }
 
 QString SaveFile::toString() {
     // return fileName + ": " + saveName + " (" + campaignName + ")";
+    if (campaignName.isEmpty()) {
+        return saveName;
+    }
     return saveName + " (" + campaignName + ")";
 }
 
-QList<SaveFile *> SaveFile::getAll()
+QList<SaveFile *> SaveFile::getAll(bool includeUnreadable)
 {
     QList<SaveFile *> list;
 
@@ -122,8 +143,10 @@ QList<SaveFile *> SaveFile::getAll()
         // Try to load this file as a SaveFile
         SaveFile *saveFile = new SaveFile(saveFileDir.absoluteFilePath(saveFileFilename));
 
-        if (saveFile->isValid()) {
+        if (saveFile->isValid() || includeUnreadable) {
             list << saveFile;
+        } else {
+            delete saveFile;
         }
     }
 
@@ -138,7 +161,7 @@ bool SaveFile::checkFileHeader(QFile& file) {
 
 bool SaveFile::backupAll()
 {
-    return SaveFile::backupAll(SaveFile::getAll());
+    return SaveFile::backupAll(SaveFile::getAll(true));
 }
 
 bool SaveFile::backupAll(QList<SaveFile *> saveFiles)
@@ -174,7 +197,7 @@ bool SaveFile::backupAll(QList<SaveFile *> saveFiles)
     // same archive kept only the first (see Archiver::compressFiles)
     QStringList paths;
     for (SaveFile *saveFile : saveFiles) {
-        qDebug() << "Archiving:" << saveFile->saveName;
+        qDebug() << "Archiving:" << saveFile->fileName << saveFile->saveName;
         paths << saveFile->file.fileName();
     }
 
