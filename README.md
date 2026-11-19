@@ -40,9 +40,10 @@ everything in it, or the Arch package or Flatpak
 - 🌐 **Our own online lobby** — the Multiplayer tab points at KeeperFX: Tux Edition's lobby server, and a
   config that still names the KeeperFX team's is moved over by itself.
 - 🧰 **And** a log viewer, the Unearth map editor, music recovery, crash reports that come to our own
-  issue tracker (the launcher sends nothing anywhere), a single-instance lock and UI scaling.
+  issue tracker as a zip you attach, with a save and the crashed game's replay if you want them (the launcher
+  sends nothing anywhere), a single-instance lock and UI scaling.
 
-152 commits on top of the team's `master`, 133 of them this fork's.
+157 commits on top of the team's `master`, 138 of them this fork's.
 **[Everything this fork changes »](docs/changes.md)**
 
 ## 🛠️ Build from source

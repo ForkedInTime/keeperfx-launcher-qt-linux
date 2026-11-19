@@ -31,7 +31,7 @@ into a conflict. A cherry-pick that touches one of the removed files conflicts o
 
 ## Features added on top
 
-The fork has grown well past the porting patches: 152 commits on top of the team's `master`, 133 of them this
+The fork has grown well past the porting patches: 157 commits on top of the team's `master`, 138 of them this
 fork's and 19 the team's own work taken early by cherry-pick, authors kept (count them with
 `git log --oneline --no-merges upstream/master..master`, `upstream` being dkfans/keeperfx-launcher-qt).
 Everything below is ours, not upstream's:
@@ -74,12 +74,24 @@ Everything below is ours, not upstream's:
   the newest alpha is behind it, and the team's rule (offer the other channel's release whenever the channel
   differs) offered 1.4.0.6013-alpha to 1.4.0.6062. Switching back to stable is still offered either way.
 - **Crash reports come to us, and nothing is sent anywhere** (`crashdialog.cpp`, `crashcontext.cpp`) — the
-  team's dialog uploaded the report (description, contact details, `keeperfx.cfg`, `keeperfx.log`, a save) to
-  keeperfx.net. This one saves it as a zip on the player's computer and opens a new issue on this edition's
-  tracker with the versions, the description and the end of the log filled in, the home folder shown as `~`;
-  the player attaches the zip and submits the issue. `ApiClient` only does GET now, so nothing in the launcher
-  can upload to keeperfx.net. The log goes in only if the failing run wrote it, never a stale one from an
-  earlier session.
+  team's dialog uploads the report (description, contact details, `keeperfx.cfg`, `keeperfx.log`, a save, and
+  since their #69 the game's exit code, the replay of the crashed game and a crash dump) to keeperfx.net. This
+  one saves it as a zip on the player's computer and opens a new issue on this edition's tracker with the
+  versions, the description and the end of the log filled in, the home folder shown as `~`; the player
+  attaches the zip and submits the issue. `ApiClient` only does GET now, so nothing in the launcher can upload
+  to keeperfx.net. The log goes in only if the failing run wrote it, never a stale one from an earlier
+  session. The replay the game was recording or playing when it crashed, which that log names, can go into
+  the zip as well: it is offered only if it is a replay file inside the game folder (the log also holds text
+  from maps, scripts and other players, so a path in it is not taken on trust), the checkbox names the file,
+  and the player can untick it. `crash-report.txt` in the zip gives the game's exit code and which replay is
+  included.
+- **Saves from KeeperFX 1.4 on are listed and backed up again** (`kfxssave.cpp`, `savefile.cpp`) — since the
+  team's engine change #5424 (in this edition since 2026-10-19) every save is a KFXS file, and the launcher
+  still looked for the older format's header, found no title and left each such save out: the crash report
+  could not offer one, and *Backup savefiles during update* left them all out of the backup. A KFXS save's
+  title (its name and campaign, or its name alone for a level outside a campaign) is now read from the layout
+  the file itself describes, and a damaged or cut-off file gives no title instead of a read past its end. The
+  backup takes every `fx1g*.sav` in the save folder, whether or not its title can be read.
 - **Where to ask** (`launchermainwindow.cpp`, `settingsdialog.cpp`) — before the Discord button opens the
   invite, it says that Keeper Klan is the official KeeperFX's community (a Windows game): a good place to talk
   about the game, while problems with this edition go to our GitHub page. "Don't show this again" turns the
@@ -151,6 +163,10 @@ setting, and sliders that enable Save when moved. Every control is greyed out on
 predates its setting, and only settings the running engine understands are written back. The launcher binary
 also carries its version in an ELF section, so a crash report or a package script can read it
 without running it.
+From their November work: Mozilla's certificate bundle of 2026-11-05, which the launcher checks its secure
+connections against. Left out: their #69, which sends a crashed game's replay, a crash dump and the exit code
+to their server; here the replay and the exit code go into the crash report's zip on the player's computer,
+and the save titles it also reads come from our own reader (both above).
 From their October work: the **Replays** window (Play ▾ → *Replays…*) in place of *Run packetfile*,
 which looked for `*.pck` files in the game folder and so found none of the `.fxpkt` replays the engine
 saves under `replays/` — here the list comes from our own tested `replayfiles.h`, also holds the `.pck`
