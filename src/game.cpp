@@ -215,6 +215,7 @@ void Game::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
                 // The dialog attaches keeperfx.log, and only the launch time
                 // can tell it whether that log is this run's or a leftover.
                 crashDialog.setGameStartTime(this->processStartedAt);
+                crashDialog.setExitCode(exitCode);
 
                 // Check if there is process output and add it to the dialog object
                 if (stdErrorString.isEmpty() == false) {

@@ -36,6 +36,12 @@ static const qint64 LOG_TAIL_BYTES = 64 * 1024;
 // and GitHub accept once percent-encoded.
 static const int ISSUE_BODY_MAX_CHARS = 3000;
 
+// A replay larger than this is not offered (a replay is the players' input
+// only; hours of a big multiplayer game stay well below it).
+static const qint64 REPLAY_MAX_BYTES = 32 * 1024 * 1024;
+
+static QString readTail(const QString &path, qint64 maxBytes);
+
 CrashDialog::CrashDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::CrashDialog)
@@ -76,6 +82,8 @@ CrashDialog::CrashDialog(QWidget *parent)
     }
     dialogHeight = qMax(dialogHeight, minimumSizeHint().height());
     setFixedSize(dialogWidth, dialogHeight);
+
+    findReplay();
 }
 
 CrashDialog::~CrashDialog()
@@ -91,6 +99,48 @@ void CrashDialog::setStdErrorString(QString stdError)
 void CrashDialog::setGameStartTime(QDateTime startTime)
 {
     this->gameStartTime = startTime;
+    // Whether the log is this run's decides whether its replay is offered
+    findReplay();
+}
+
+void CrashDialog::setExitCode(int code)
+{
+    this->exitCode = code;
+}
+
+// The replay the game logged at the crash (the same idea as the team's #69,
+// which uploads it; here it only goes into the zip on the player's computer).
+// Offered, ticked, only when this run wrote the log that names it.
+void CrashDialog::findReplay()
+{
+    this->replayPath.clear();
+    this->replayTurn = -1;
+    this->replayPlayback = false;
+    ui->replayCheckBox->setChecked(false);
+    ui->replayCheckBox->setEnabled(false);
+    ui->replayCheckBox->setText(tr("No replay was being recorded", "Checkbox"));
+
+    const QString gameDir = QCoreApplication::applicationDirPath();
+    const QString kfxLogPath = gameDir + "/keeperfx.log";
+    const QFileInfo kfxLog(kfxLogPath);
+    if (kfxLog.isFile() == false || CrashContext::shouldAttachLog(kfxLog.lastModified(), this->gameStartTime) == false) {
+        return;
+    }
+    const std::optional<CrashContext::LoggedReplay> logged = CrashContext::replayFromLog(readTail(kfxLogPath, LOG_TAIL_BYTES));
+    if (logged.has_value() == false) {
+        return;
+    }
+    const QFileInfo replay(QDir(gameDir).absoluteFilePath(logged->path));
+    if (replay.isFile() == false || replay.size() > REPLAY_MAX_BYTES) {
+        qWarning() << "Crash report: the logged replay is missing or too large:" << replay.absoluteFilePath() << replay.size();
+        return;
+    }
+    this->replayPath = replay.absoluteFilePath();
+    this->replayTurn = logged->turn;
+    this->replayPlayback = logged->playback;
+    ui->replayCheckBox->setText(tr("Include a replay of the game up to the crash", "Checkbox"));
+    ui->replayCheckBox->setEnabled(true);
+    ui->replayCheckBox->setChecked(true);
 }
 
 void CrashDialog::on_closeButton_clicked()
@@ -193,6 +243,7 @@ void CrashDialog::on_reportButton_clicked()
     QTemporaryDir staging;
     QStringList staged;
     QString logNote;
+    QString replayNote;
 
     // keeperfx.log -- but only if this run wrote it. The engine truncates the
     // log as it starts, so a log older than the launch is a leftover from an
@@ -241,13 +292,30 @@ void CrashDialog::on_reportButton_clicked()
             }
         }
 
+        // The replay of the game up to the crash, unless the player unticked it
+        if (ui->replayCheckBox->isChecked() && this->replayPath.isEmpty() == false) {
+            const QString replayName = QFileInfo(this->replayPath).fileName();
+            if (stageFile(staging, this->replayPath, replayName, staged)) {
+                replayNote = QStringLiteral("The replay %1 (%2 at the crash%3) is in this zip.")
+                                 .arg(replayName, this->replayPlayback ? QStringLiteral("playing back") : QStringLiteral("recording"),
+                                      this->replayTurn >= 0 ? QStringLiteral(", turn %1").arg(this->replayTurn) : QString());
+            }
+        }
+
         // The report itself, in full: the issue text is cut to fit a URL.
         QFile reportText(staging.filePath("crash-report.txt"));
         if (reportText.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QString text;
             text += QStringLiteral("KeeperFX crash report, %1\n\n").arg(now.toString(Qt::ISODate));
-            text += QStringLiteral("Game: %1\nLauncher: %2\nSystem: %3\n%4\n\n")
+            text += QStringLiteral("Game: %1\nLauncher: %2\nSystem: %3\n%4\n")
                         .arg(facts.gameVersion, facts.launcherVersion, facts.system, logNote);
+            if (this->exitCode.has_value()) {
+                text += QStringLiteral("The game exited with code %1.\n").arg(this->exitCode.value());
+            }
+            if (replayNote.isEmpty() == false) {
+                text += replayNote + QStringLiteral("\n");
+            }
+            text += QStringLiteral("\n");
             text += QStringLiteral("What happened:\n%1\n\n")
                         .arg(facts.description.isEmpty() ? QStringLiteral("(not described)") : facts.description);
             text += QStringLiteral("Game output:\n%1\n")

@@ -4,6 +4,8 @@
 #include <QString>
 #include <QUrl>
 
+#include <optional>
+
 /**
  * Decisions about what a finished game process actually tells us.
  *
@@ -98,5 +100,21 @@ namespace CrashContext {
 
     /** A link that opens a new issue on ISSUE_TRACKER_URL with this title and body. */
     QUrl newIssueUrl(const QString &title, const QString &body);
+
+    /** The replay the game was recording (or playing) when it crashed. */
+    struct LoggedReplay {
+        QString path;         // as logged: absolute, or relative to the game folder
+        int turn = -1;        // the game turn of the crash, -1 when not logged
+        bool playback = false;
+    };
+
+    /**
+     * The replay named by the last "packetfile:" line of keeperfx.log. The
+     * engine's crash handler (bflib_crash.c) writes
+     *     packetfile:{"turn":1234, "playback":false, "path":"./replays/..."}
+     * when a replay was open at the crash. The path is printed as it is, not
+     * escaped, so a path JSON can't read is taken from between its quotes.
+     */
+    std::optional<LoggedReplay> replayFromLog(const QString &logText);
 
 }
