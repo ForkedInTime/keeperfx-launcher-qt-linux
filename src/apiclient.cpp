@@ -214,7 +214,7 @@ QImage ApiClient::downloadImage(QUrl url)
 
     QNetworkAccessManager manager;
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
 
     QNetworkReply *reply = manager.get(req);
     QEventLoop loop;
@@ -443,7 +443,7 @@ QString ApiClient::getLatestMapEditorVersion()
 {
     QNetworkAccessManager manager;
     QNetworkRequest req(QUrl("https://api.github.com/repos/rainlizard/Unearth/releases/latest"));
-    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
     req.setRawHeader("Accept", "application/vnd.github+json");
 
     QNetworkReply *reply = manager.get(req);
@@ -470,7 +470,7 @@ QUrl ApiClient::getDownloadUrlMapEditor()
     // Query the latest release directly via the raw GitHub API.
     QNetworkAccessManager manager;
     QNetworkRequest req(QUrl("https://api.github.com/repos/rainlizard/Unearth/releases/latest"));
-    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt");
+    req.setHeader(QNetworkRequest::UserAgentHeader, "keeperfx-launcher-qt-linux");
     req.setRawHeader("Accept", "application/vnd.github+json");
 
     QNetworkReply *reply = manager.get(req);
